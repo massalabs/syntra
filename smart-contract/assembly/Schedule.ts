@@ -9,8 +9,8 @@ export class Schedule implements Serializable {
     public recipient: string = '',
     public amount: u256 = u256.Zero,
     public interval: u64 = 0,
-    public times: u64,
-    public tolerance: u64,
+    public times: u64 = 0,
+    public tolerance: u64 = 0,
   ) {}
 
   serialize(): StaticArray<u8> {

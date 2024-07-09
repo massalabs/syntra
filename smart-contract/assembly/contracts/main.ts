@@ -54,7 +54,7 @@ export function startScheduleSendFT(binaryArgs: StaticArray<u8>): void {
     tolerance = 10;
   }
 
-  checkAllowance(tokenAddress, spender, amount * u256(times));
+  checkAllowance(tokenAddress, spender, amount * u256.fromU64(times));
 
   const schedule = new Schedule(
     0,
