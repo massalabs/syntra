@@ -1,6 +1,6 @@
 // The entry file of your WebAssembly module.
-import { Address, Context } from '@massalabs/massa-as-sdk';
-import { Args } from '@massalabs/as-types';
+import { Address, Context, Storage } from '@massalabs/massa-as-sdk';
+import { Args, u64ToBytes } from '@massalabs/as-types';
 import { u256 } from 'as-bignum/assembly';
 import { Schedule } from '../Schedule';
 import {
@@ -9,6 +9,7 @@ import {
   pushSchedule,
   readSchedulesBySpender,
   removeSchedule,
+  counterKey,
 } from '../internal';
 
 export { nextSendFT } from '../internal';
@@ -18,13 +19,16 @@ export { nextSendFT } from '../internal';
  *
  * @param binaryArgs - Arguments serialized with Args
  */
-export function constructor(binaryArgs: StaticArray<u8>): StaticArray<u8> {
+export function constructor(_: StaticArray<u8>): StaticArray<u8> {
   // This line is important. It ensures that this function can't be called in the future.
   // If you remove this check, someone could call your constructor function and reset your smart contract.
   if (!Context.isDeployingContract()) {
     return [];
   }
+
   // TODO: initialize ownership
+
+  Storage.set(counterKey, u64ToBytes(0));
   return [];
 }
 

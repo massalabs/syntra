@@ -7,7 +7,12 @@ import {
 import { TokenWrapper } from '@massalabs/sc-standards/assembly/contracts/FT';
 import { u256 } from 'as-bignum/assembly';
 import { Schedule } from './Schedule';
-import { Args } from '@massalabs/as-types';
+import {
+  Args,
+  bytesToU64,
+  stringToBytes,
+  u64ToBytes,
+} from '@massalabs/as-types';
 
 // Token helpers
 export function checkAllowance(
@@ -58,67 +63,53 @@ export function scheduleSendFT(schedule: Schedule): void {
 
 // Storage
 
-const schedulesPrefix = 'S';
+const schedulesPrefix = 'SCHEDULE';
 
-function getKey(spender: string): StaticArray<u8> {
-  return new Args().add(schedulesPrefix + spender).serialize();
+export const counterKey = stringToBytes('C');
+
+function getCounter(): u64 {
+  return bytesToU64(Storage.get(counterKey));
+}
+
+function incrementCounter(): void {
+  const counter = getCounter();
+  Storage.set(counterKey, u64ToBytes(counter + 1));
+}
+
+function getSchedulePrefix(spender: string): StaticArray<u8> {
+  return stringToBytes(schedulesPrefix + spender);
+}
+
+function getScheduleKey(spender: string, id: u64): StaticArray<u8> {
+  return getSchedulePrefix(spender).concat(u64ToBytes(id));
 }
 
 export function pushSchedule(schedule: Schedule): void {
-  const key = getKey(schedule.spender);
-  let schedules: Schedule[] = [];
-  if (Storage.has(key)) {
-    const schedulesData = Storage.get(key);
-    schedules = new Args(schedulesData)
-      .nextSerializableObjectArray<Schedule>()
-      .unwrap();
-    const lastSchedule = schedules[schedules.length - 1];
-    const newId = lastSchedule.id + 1;
-    schedule.id = newId;
-    schedules.push(schedule);
-  } else {
-    schedule.id = 1;
-    schedules = [schedule];
-  }
-  Storage.set(
-    key,
-    new Args().addSerializableObjectArray(schedules).serialize(),
-  );
+  incrementCounter();
+  const id = getCounter();
+  const key = getScheduleKey(schedule.spender, id);
+  schedule.id = id;
+  Storage.set(key, new Args().add(schedule).serialize());
 }
 
 export function updateSchedule(schedule: Schedule): void {
-  const key = getKey(schedule.spender);
-  const schedulesData = Storage.get(key);
-  const schedules = new Args(schedulesData)
-    .nextSerializableObjectArray<Schedule>()
-    .unwrap();
-  const index = schedules.findIndex((s) => s.id === schedule.id);
-  schedules[index] = schedule;
-  Storage.set(
-    key,
-    new Args().addSerializableObjectArray(schedules).serialize(),
-  );
+  const key = getScheduleKey(schedule.spender, schedule.id);
+  Storage.set(key, new Args().add(schedule).serialize());
 }
 
 export function removeSchedule(spender: string, id: u64): void {
-  const key = getKey(spender);
-  const schedules = new Args(Storage.get(key))
-    .nextSerializableObjectArray<Schedule>()
-    .unwrap();
-  const index = schedules.findIndex((s) => s.id === id);
-  assert(index !== -1, 'Schedule not found');
-  schedules.splice(index, 1);
-  Storage.set(
-    key,
-    new Args().addSerializableObjectArray(schedules).serialize(),
-  );
+  const key = getScheduleKey(spender, id);
+  Storage.del(key);
 }
 
 export function readSchedulesBySpender(spender: string): StaticArray<u8> {
-  const key = getKey(spender);
-  if (!Storage.has(key)) {
-    return [];
+  const keyPrefix = getSchedulePrefix(spender);
+  const keys = Storage.getKeys(keyPrefix);
+  const schedules = new Array<Schedule>(keys.length);
+  for (let i = 0; i < keys.length; i++) {
+    const data = Storage.get(keys[i]);
+    schedules[i] = new Args(data).nextSerializable<Schedule>().unwrap();
   }
 
-  return Storage.get(key);
+  return new Args().addSerializableObjectArray(schedules).serialize();
 }
