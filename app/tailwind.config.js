@@ -5,5 +5,5 @@ export default {
     './src/**/*.{js,ts,jsx,tsx}',
     './node_modules/@massalabs/react-ui-kit/src/**/*.{js,ts,jsx,tsx}',
   ],
-  presets: [require('./src/themes/coin-vester-preset.js')],
+  presets: [require('./src/themes/default.js')],
 };
