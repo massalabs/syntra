@@ -9,7 +9,8 @@ import {
   pushSchedule,
   readSchedulesBySpender,
   removeSchedule,
-  counterKey,
+  idCounterKey,
+  readSchedule,
 } from '../internal';
 
 export { nextSendFT } from '../internal';
@@ -28,7 +29,7 @@ export function constructor(_: StaticArray<u8>): StaticArray<u8> {
 
   // TODO: initialize ownership
 
-  Storage.set(counterKey, u64ToBytes(0));
+  Storage.set(idCounterKey, u64ToBytes(0));
   return [];
 }
 
@@ -47,7 +48,7 @@ export function startScheduleSendFT(binaryArgs: StaticArray<u8>): void {
     .expect('Recipient address is missing or invalid');
   const amount = args.nextU256().expect('Amount is missing or invalid');
   const interval = args.nextU64().expect('Interval is missing or invalid');
-  const times = args.nextU64().expect('Times is missing or invalid');
+  const occurrences = args.nextU64().expect('Times is missing or invalid');
   // tolerance is the number of periods to define the range of the schedule execution
   let tolerance = args.nextU32().unwrapOrDefault();
   if (tolerance === 0) {
@@ -55,7 +56,7 @@ export function startScheduleSendFT(binaryArgs: StaticArray<u8>): void {
   }
   // @ts-ignore
   // TODO: check overflow ? (or use safeMath)
-  checkAllowance(tokenAddress, spender, amount * u256.fromU64(times));
+  checkAllowance(tokenAddress, spender, amount * u256.fromU64(occurrences));
 
   const schedule = new Schedule(
     0,
@@ -64,7 +65,8 @@ export function startScheduleSendFT(binaryArgs: StaticArray<u8>): void {
     recipient,
     amount,
     interval,
-    times,
+    occurrences,
+    occurrences,
     tolerance,
   );
 
@@ -95,4 +97,14 @@ export function getSchedulesBySpender(
     .expect('Spender address is missing or invalid');
 
   return readSchedulesBySpender(spender);
+}
+
+export function getSchedule(binaryArgs: StaticArray<u8>): StaticArray<u8> {
+  const args = new Args(binaryArgs);
+  const spender = args
+    .nextString()
+    .expect('Spender address is missing or invalid');
+  const id = args.nextU64().expect('Id is missing or invalid');
+
+  return readSchedule(spender, id);
 }

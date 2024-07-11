@@ -12,7 +12,7 @@ describe('Scheduler app test', () => {
     const recipient = 'AU12W92UyGW4Bd94BPniTq4Ra5yhiv6RvjazV2G9Q9GyekYkgqbme';
     const amount = u256.fromU64(12345678910);
     const interval: u64 = 60;
-    const times: u64 = 10;
+    const occurrences: u64 = 10;
     const tolerance: u32 = 5;
 
     // mock allowance
@@ -24,7 +24,7 @@ describe('Scheduler app test', () => {
       .add(recipient)
       .add(amount)
       .add(interval)
-      .add(times)
+      .add(occurrences)
       .add(tolerance);
 
     startScheduleSendFT(params.serialize());
@@ -42,7 +42,8 @@ describe('Scheduler app test', () => {
     expect(schedules[0].recipient).toBe(recipient);
     expect(schedules[0].amount).toBe(amount);
     expect(schedules[0].interval).toBe(interval);
-    expect(schedules[0].times).toBe(times);
+    expect(schedules[0].occurrences).toBe(occurrences);
+    expect(schedules[0].remaining).toBe(occurrences);
     expect(schedules[0].tolerance).toBe(tolerance);
   });
 });

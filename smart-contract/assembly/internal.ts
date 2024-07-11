@@ -1,12 +1,13 @@
 import {
   Address,
   Context,
+  generateEvent,
   sendMessage,
   Storage,
 } from '@massalabs/massa-as-sdk';
 import { TokenWrapper } from '@massalabs/sc-standards/assembly/contracts/FT';
 import { u256 } from 'as-bignum/assembly';
-import { Schedule } from './Schedule';
+import { Schedule, Transfer } from './Schedule';
 import {
   Args,
   bytesToU64,
@@ -39,9 +40,13 @@ export function sendFT(schedule: Schedule): void {
 // The function nextSendFT will be trigger by autonomous smart contract feature.
 export function nextSendFT(schedule: Schedule): void {
   sendFT(schedule);
-  schedule.times -= 1;
+  schedule.remaining -= 1;
+  const period = Context.currentPeriod();
+  const thread = Context.currentThread();
+  schedule.history.push(new Transfer(period));
+  generateEvent(schedule.createTransferEvent(period, thread));
   updateSchedule(schedule);
-  if (schedule.times > 0) {
+  if (schedule.remaining > 0) {
     scheduleSendFT(schedule);
   }
 }
@@ -51,11 +56,11 @@ export function scheduleSendFT(schedule: Schedule): void {
     Context.callee(),
     'nextSendFT',
     Context.currentPeriod() +
-      schedule.interval * schedule.times -
+      schedule.interval * schedule.remaining -
       schedule.tolerance,
     Context.currentThread(),
     Context.currentPeriod() +
-      schedule.interval * schedule.times +
+      schedule.interval * schedule.remaining +
       schedule.tolerance,
     Context.currentThread(),
     40000000, // TODO: calibrate max gas
@@ -69,20 +74,20 @@ export function scheduleSendFT(schedule: Schedule): void {
 
 const schedulesPrefix = 'SCHEDULE';
 
-export const counterKey = stringToBytes('C');
+export const idCounterKey = stringToBytes('C');
 
-function getCounter(): u64 {
-  if(!Storage.has(counterKey)) {
+function getIdCounter(): u64 {
+  if (!Storage.has(idCounterKey)) {
     return 0;
   }
-  return bytesToU64(Storage.get(counterKey));
+  return bytesToU64(Storage.get(idCounterKey));
 }
 
-function incrementCounter(): u64 {
-  const counter = getCounter();
-  const inc = counter + 1
-  Storage.set(counterKey, u64ToBytes(counter + 1));
-  return inc
+function incrementIdCounter(): u64 {
+  const counter = getIdCounter();
+  const inc = counter + 1;
+  Storage.set(idCounterKey, u64ToBytes(counter + 1));
+  return inc;
 }
 
 function getSchedulePrefix(spender: string): StaticArray<u8> {
@@ -94,7 +99,7 @@ function getScheduleKey(spender: string, id: u64): StaticArray<u8> {
 }
 
 export function pushSchedule(schedule: Schedule): void {
-  const id = incrementCounter();
+  const id = incrementIdCounter();
   const key = getScheduleKey(schedule.spender, id);
   schedule.id = id;
 
@@ -121,4 +126,9 @@ export function readSchedulesBySpender(spender: string): StaticArray<u8> {
   }
 
   return new Args().addSerializableObjectArray(schedules).serialize();
+}
+
+export function readSchedule(spender: string, id: u64): StaticArray<u8> {
+  const key = getScheduleKey(spender, id);
+  return Storage.get(key);
 }
