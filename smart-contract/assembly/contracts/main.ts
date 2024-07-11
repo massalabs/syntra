@@ -53,7 +53,8 @@ export function startScheduleSendFT(binaryArgs: StaticArray<u8>): void {
   if (tolerance === 0) {
     tolerance = 10;
   }
-
+  // @ts-ignore
+  // TODO: check overflow ? (or use safeMath)
   checkAllowance(tokenAddress, spender, amount * u256.fromU64(times));
 
   const schedule = new Schedule(

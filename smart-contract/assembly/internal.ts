@@ -50,9 +50,13 @@ export function scheduleSendFT(schedule: Schedule): void {
   sendMessage(
     Context.callee(),
     'nextSendFT',
-    Context.currentPeriod() + schedule.interval - schedule.tolerance,
+    Context.currentPeriod() +
+      schedule.interval * schedule.times -
+      schedule.tolerance,
     Context.currentThread(),
-    Context.currentPeriod() + schedule.interval + schedule.tolerance,
+    Context.currentPeriod() +
+      schedule.interval * schedule.times +
+      schedule.tolerance,
     Context.currentThread(),
     40000000, // TODO: calibrate max gas
     0,
@@ -68,12 +72,17 @@ const schedulesPrefix = 'SCHEDULE';
 export const counterKey = stringToBytes('C');
 
 function getCounter(): u64 {
+  if(!Storage.has(counterKey)) {
+    return 0;
+  }
   return bytesToU64(Storage.get(counterKey));
 }
 
-function incrementCounter(): void {
+function incrementCounter(): u64 {
   const counter = getCounter();
+  const inc = counter + 1
   Storage.set(counterKey, u64ToBytes(counter + 1));
+  return inc
 }
 
 function getSchedulePrefix(spender: string): StaticArray<u8> {
@@ -85,10 +94,10 @@ function getScheduleKey(spender: string, id: u64): StaticArray<u8> {
 }
 
 export function pushSchedule(schedule: Schedule): void {
-  incrementCounter();
-  const id = getCounter();
+  const id = incrementCounter();
   const key = getScheduleKey(schedule.spender, id);
   schedule.id = id;
+
   Storage.set(key, new Args().add(schedule).serialize());
 }
 

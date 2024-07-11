@@ -11,9 +11,5 @@
             "converge": true,
             "noAssert": false
         }
-    },
-    "options": {
-        "exportRuntime": true,
-        "bindings": "esm"
     }
 }

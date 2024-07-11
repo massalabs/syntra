@@ -10,7 +10,7 @@ export class Schedule implements Serializable {
     public amount: u256 = u256.Zero,
     public interval: u64 = 0,
     public times: u64 = 0,
-    public tolerance: u64 = 0,
+    public tolerance: u32 = 0,
   ) {}
 
   serialize(): StaticArray<u8> {
@@ -56,15 +56,9 @@ export class Schedule implements Serializable {
     if (resultTimes.isErr()) {
       return new Result(0, "Can't deserialize times.");
     }
-    const resultTolerance = args.nextU64();
+    const resultTolerance = args.nextU32();
     if (resultTolerance.isErr()) {
       return new Result(0, "Can't deserialize tolerance.");
-    }
-
-    const resultStartTimestamp = args.nextU64();
-
-    if (resultStartTimestamp.isErr()) {
-      return new Result(0, "Can't deserialize startTimestamp.");
     }
 
     this.id = resultId.unwrap();
