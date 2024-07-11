@@ -5,7 +5,7 @@ import { u256 } from 'as-bignum/assembly';
 import { Schedule } from '../Schedule';
 import {
   checkAllowance,
-  scheduleSendFT,
+  scheduleAllSendFT,
   pushSchedule,
   readSchedulesBySpender,
   removeSchedule,
@@ -13,7 +13,7 @@ import {
   readSchedule,
 } from '../internal';
 
-export { nextSendFT } from '../internal';
+export { asyncSendFT } from '../internal';
 
 /**
  * This function is meant to be called only one time: when the contract is deployed.
@@ -70,7 +70,7 @@ export function startScheduleSendFT(binaryArgs: StaticArray<u8>): void {
     tolerance,
   );
 
-  scheduleSendFT(schedule);
+  scheduleAllSendFT(schedule);
 
   pushSchedule(schedule);
 }

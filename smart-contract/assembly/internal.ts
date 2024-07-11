@@ -37,37 +37,37 @@ export function sendFT(schedule: Schedule): void {
 
 // Autonomous smart contract feature
 
-// The function nextSendFT will be trigger by autonomous smart contract feature.
-export function nextSendFT(schedule: Schedule): void {
+// The function asyncSendFT will be trigger by autonomous smart contract feature.
+export function asyncSendFT(schedule: Schedule): void {
+  // send token
   sendFT(schedule);
+
+  // update schedule
   schedule.remaining -= 1;
   const period = Context.currentPeriod();
   const thread = Context.currentThread();
   schedule.history.push(new Transfer(period));
-  generateEvent(schedule.createTransferEvent(period, thread));
   updateSchedule(schedule);
-  if (schedule.remaining > 0) {
-    scheduleSendFT(schedule);
-  }
+
+  // event
+  generateEvent(schedule.createTransferEvent(period, thread));
 }
 
-export function scheduleSendFT(schedule: Schedule): void {
-  sendMessage(
-    Context.callee(),
-    'nextSendFT',
-    Context.currentPeriod() +
-      schedule.interval * schedule.remaining -
-      schedule.tolerance,
-    Context.currentThread(),
-    Context.currentPeriod() +
-      schedule.interval * schedule.remaining +
-      schedule.tolerance,
-    Context.currentThread(),
-    40000000, // TODO: calibrate max gas
-    0,
-    0, // TODO: calibrate coins depending on the presence of the recipient balance in the token storage
-    new Args().add(schedule).serialize(),
-  );
+export function scheduleAllSendFT(schedule: Schedule): void {
+  for (let n: u64 = 1; n <= schedule.occurrences; n++) {
+    sendMessage(
+      Context.callee(),
+      'asyncSendFT',
+      Context.currentPeriod() + schedule.interval * n - schedule.tolerance,
+      Context.currentThread(),
+      Context.currentPeriod() + schedule.interval * n + schedule.tolerance,
+      Context.currentThread(),
+      40000000, // TODO: calibrate max gas
+      0,
+      0, // TODO: calibrate coins depending on the presence of the recipient balance in the token storage
+      new Args().add(schedule).serialize(),
+    );
+  }
 }
 
 // Storage
