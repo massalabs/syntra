@@ -1,13 +1,23 @@
+import {
+  NumericInput,
+  RecipientAddressInput,
+  RecurrenceDropdown,
+} from '@/components';
 import { Card } from '../components/Card';
 import {
   ConnectMassaWallet,
   useAccountStore,
 } from '@massalabs/react-ui-kit/src/lib/ConnectMassaWallets';
 
+import { useState } from 'react';
+
 export default function HomePage() {
   const { connectedAccount, currentProvider } = useAccountStore();
-
   const connected = !!connectedAccount && !!currentProvider;
+
+  const [amount, setAmount] = useState<string>('');
+  const [recurrence, setRecurrence] = useState<string>('');
+  const [recipientAddress, setRecipientAddress] = useState<string>('');
 
   return (
     <div className="sm:w-full md:max-w-4xl mx-auto">
@@ -49,8 +59,29 @@ export default function HomePage() {
         {connected && (
           <section className="mb-10">
             <Card>
-              <h3 className="mas-h3">Your are connected</h3>
-              <p className="mas-body">Get more tips</p>
+              <div className="flex gap-2">
+                <NumericInput
+                  value="0"
+                  placeholder="Enter your amount"
+                  onChange={() => {}}
+                />
+                <RecurrenceDropdown
+                  value={{
+                    item: 'Daily',
+                    itemPreview: 'Every day',
+                  }}
+                  onChange={function (value: string): void {
+                    console.log(value);
+                  }}
+                />
+
+                <RecipientAddressInput
+                  value={recipientAddress}
+                  onAddressChange={(address) => {
+                    setRecipientAddress(address);
+                  }}
+                />
+              </div>
             </Card>
           </section>
         )}

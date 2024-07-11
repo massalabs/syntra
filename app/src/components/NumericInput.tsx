@@ -11,20 +11,16 @@ export function NumericInput(props: NumericInputProps) {
   const { value, placeholder, onChange, error } = props;
 
   return (
-    <div className="flex-row">
-      <div className="grid-cols-2">
-        <div className="inline h-12">
-          <NumericFormat
-            className={`w-full default-input h-12 pl-3 pr-10 mb-1`}
-            decimalScale={0}
-            allowNegative={false}
-            placeholder={placeholder}
-            value={value}
-            onChange={onChange}
-          />
-          <InputMessage error={error} />
-        </div>
-      </div>
+    <div>
+      <NumericFormat
+        className={`default-input w-full h-full pl-3 pr-10 border-none focus:ring-2`}
+        decimalScale={0}
+        allowNegative={false}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+      />
+      <InputMessage error={error} />
     </div>
   );
 }

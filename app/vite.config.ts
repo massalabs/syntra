@@ -19,5 +19,11 @@ export default ({ mode }) => {
     optimizeDeps: {
       include: ['react-dom', 'dot-object', 'copy-to-clipboard'],
     },
+
+    resolve: {
+      alias: {
+        '@': `${__dirname}/src`,
+      },
+    },
   });
 };
