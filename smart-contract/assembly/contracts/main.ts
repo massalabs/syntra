@@ -37,41 +37,15 @@ export function constructor(_: StaticArray<u8>): StaticArray<u8> {
 
 export function startScheduleSendFT(binaryArgs: StaticArray<u8>): void {
   const args = new Args(binaryArgs);
-  const tokenAddress = args
-    .nextString()
-    .expect('Token address is missing or invalid');
-  const spender = args
-    .nextString()
-    .expect('Spender address is missing or invalid');
-  const recipient = args
-    .nextString()
-    .expect('Recipient address is missing or invalid');
-  const amount = args.nextU256().expect('Amount is missing or invalid');
-  const interval = args.nextU64().expect('Interval is missing or invalid');
-  const occurrences = args.nextU64().expect('Times is missing or invalid');
-  // tolerance is the number of periods to define the range of the schedule execution
-  let tolerance = args.nextU32().unwrapOrDefault();
-  if (tolerance === 0) {
-    tolerance = 10;
-  }
-  // @ts-ignore
-  // TODO: check overflow ? (or use safeMath)
-  checkAllowance(tokenAddress, spender, amount * u256.fromU64(occurrences));
-
-  const schedule = new Schedule(
-    0,
-    tokenAddress,
-    spender,
-    recipient,
-    amount,
-    interval,
-    occurrences,
-    occurrences,
-    tolerance,
+  const schedule = args
+    .nextSerializable<Schedule>()
+    .expect('Schedule is missing or invalid');
+  checkAllowance(
+    schedule.tokenAddress,
+    schedule.spender,
+    amount * u256.fromU64(occurrences), // TODO: use SafeMathU256
   );
-
   scheduleAllSendFT(schedule);
-
   pushSchedule(schedule);
 }
 
