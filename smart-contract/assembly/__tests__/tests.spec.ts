@@ -18,14 +18,19 @@ describe('Scheduler app test', () => {
     // mock allowance
     mockScCall(u256ToBytes(amount));
 
-    const params = new Args()
-      .add(tokenAddress)
-      .add(spender)
-      .add(recipient)
-      .add(amount)
-      .add(interval)
-      .add(occurrences)
-      .add(tolerance);
+    const schedule = new Schedule(
+      0,
+      tokenAddress,
+      spender,
+      recipient,
+      amount,
+      interval,
+      occurrences,
+      occurrences,
+      tolerance,
+    );
+
+    const params = new Args().add(schedule);
 
     startScheduleSendFT(params.serialize());
 

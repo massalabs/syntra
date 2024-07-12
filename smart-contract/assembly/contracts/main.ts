@@ -49,7 +49,7 @@ export function startScheduleSendFT(binaryArgs: StaticArray<u8>): void {
   checkAllowance(
     schedule.tokenAddress,
     schedule.spender,
-    amount * u256.fromU64(occurrences), // TODO: use SafeMathU256
+    schedule.amount * u256.fromU64(schedule.occurrences), // TODO: use SafeMathU256
   );
   scheduleAllSendFT(schedule);
   pushSchedule(schedule);
