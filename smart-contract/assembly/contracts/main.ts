@@ -12,6 +12,11 @@ import {
   idCounterKey,
   readSchedule,
 } from '../internal';
+import { setOwner } from '@massalabs/sc-standards/assembly/contracts/utils/ownership';
+export {
+  ownerAddress,
+  setOwner,
+} from '@massalabs/sc-standards/assembly/contracts/utils/ownership';
 
 export { asyncSendFT } from '../internal';
 
@@ -27,7 +32,7 @@ export function constructor(_: StaticArray<u8>): StaticArray<u8> {
     return [];
   }
 
-  // TODO: initialize ownership
+  setOwner(new Args().add(Context.caller()).serialize());
 
   Storage.set(idCounterKey, u64ToBytes(0));
   return [];
