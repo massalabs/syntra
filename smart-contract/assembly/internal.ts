@@ -72,6 +72,7 @@ export function scheduleAllSendFT(schedule: Schedule): void {
 
 // Storage
 
+const recipientsPrefix = 'RECIPIENT';
 const schedulesPrefix = 'SCHEDULE';
 
 export const idCounterKey = stringToBytes('C');
@@ -90,6 +91,14 @@ function incrementIdCounter(): u64 {
   return inc;
 }
 
+export function getRecipientPrefix(recipient: string): StaticArray<u8> {
+  return stringToBytes(recipientsPrefix + recipient);
+}
+
+export function getRecipientKey(recipient: string, id: u64): StaticArray<u8> {
+  return getRecipientPrefix(recipient).concat(u64ToBytes(id));
+}
+
 function getSchedulePrefix(spender: string): StaticArray<u8> {
   return stringToBytes(schedulesPrefix + spender);
 }
@@ -102,8 +111,9 @@ export function pushSchedule(schedule: Schedule): void {
   const id = incrementIdCounter();
   const key = getScheduleKey(schedule.spender, id);
   schedule.id = id;
-
   Storage.set(key, new Args().add(schedule).serialize());
+
+  Storage.set(getRecipientKey(schedule.recipient, id), key);
 }
 
 export function updateSchedule(schedule: Schedule): void {
@@ -113,7 +123,13 @@ export function updateSchedule(schedule: Schedule): void {
 
 export function removeSchedule(spender: string, id: u64): void {
   const key = getScheduleKey(spender, id);
+  const schedule = new Args(Storage.get(key))
+    .nextSerializable<Schedule>()
+    .unwrap();
   Storage.del(key);
+
+  const recipientKey = getRecipientKey(schedule.recipient, id);
+  Storage.del(recipientKey);
 }
 
 export function readSchedulesBySpender(spender: string): StaticArray<u8> {
@@ -122,6 +138,19 @@ export function readSchedulesBySpender(spender: string): StaticArray<u8> {
   const schedules = new Array<Schedule>(keys.length);
   for (let i = 0; i < keys.length; i++) {
     const data = Storage.get(keys[i]);
+    schedules[i] = new Args(data).nextSerializable<Schedule>().unwrap();
+  }
+
+  return new Args().addSerializableObjectArray(schedules).serialize();
+}
+
+export function readSchedulesByRecipient(recipient: string): StaticArray<u8> {
+  const keyPrefix = getRecipientPrefix(recipient);
+  const keys = Storage.getKeys(keyPrefix);
+  const schedules = new Array<Schedule>(keys.length);
+  for (let i = 0; i < keys.length; i++) {
+    const scheduleKey = Storage.get(keys[i]);
+    const data = Storage.get(scheduleKey);
     schedules[i] = new Args(data).nextSerializable<Schedule>().unwrap();
   }
 

@@ -8,6 +8,7 @@ import {
   scheduleAllSendFT,
   pushSchedule,
   readSchedulesBySpender,
+  readSchedulesByRecipient,
   removeSchedule,
   idCounterKey,
   readSchedule,
@@ -76,6 +77,17 @@ export function getSchedulesBySpender(
     .expect('Spender address is missing or invalid');
 
   return readSchedulesBySpender(spender);
+}
+
+export function getScheduleByRecipient(
+  binaryArgs: StaticArray<u8>,
+): StaticArray<u8> {
+  const args = new Args(binaryArgs);
+  const recipient = args
+    .nextString()
+    .expect('Recipient address is missing or invalid');
+
+  return readSchedulesByRecipient(recipient);
 }
 
 export function getSchedule(binaryArgs: StaticArray<u8>): StaticArray<u8> {
