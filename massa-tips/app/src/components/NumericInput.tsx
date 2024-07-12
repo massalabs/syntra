@@ -4,11 +4,15 @@ import { NumericFormat } from 'react-number-format';
 type NumericInputProps = {
   value: string;
   placeholder: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onNumChange: (e: string) => void;
   error?: string;
 };
 export function NumericInput(props: NumericInputProps) {
-  const { value, placeholder, onChange, error } = props;
+  const { value, placeholder, onNumChange, error } = props;
+
+  function onChange(e: React.ChangeEvent<HTMLInputElement>) {
+    onNumChange(e.target.value);
+  }
 
   return (
     <div>

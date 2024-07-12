@@ -17,15 +17,15 @@ const recurrenceOptions = [
 ];
 
 export function RecurrenceDropdown({
-  onChange,
+  onRecurrenceChange,
 }: {
   value: IOption;
-  onChange: (value: string) => void;
+  onRecurrenceChange: (value: string) => void;
 }) {
   const options = () => {
     return recurrenceOptions.map((option) => ({
       item: `${Intl.t('recurrence.every')} ${option.name}`,
-      onClick: () => onChange(option.name),
+      onClick: () => onRecurrenceChange(option.name),
     }));
   };
 
