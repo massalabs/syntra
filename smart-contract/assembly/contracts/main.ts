@@ -46,9 +46,11 @@ export function startScheduleSendFT(binaryArgs: StaticArray<u8>): void {
   const schedule = args
     .nextSerializable<Schedule>()
     .expect('Schedule is missing or invalid');
+  assert(Context.caller() === new Address(schedule.spender), 'Unauthorized');
   checkAllowance(
     schedule.tokenAddress,
     schedule.spender,
+    // @ts-ignore
     schedule.amount * u256.fromU64(schedule.occurrences), // TODO: use SafeMathU256
   );
   scheduleAllSendFT(schedule);

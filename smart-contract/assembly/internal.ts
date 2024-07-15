@@ -78,16 +78,13 @@ const schedulesPrefix = 'SCHEDULE';
 export const idCounterKey = stringToBytes('C');
 
 function getIdCounter(): u64 {
-  if (!Storage.has(idCounterKey)) {
-    return 0;
-  }
   return bytesToU64(Storage.get(idCounterKey));
 }
 
 function incrementIdCounter(): u64 {
   const counter = getIdCounter();
   const inc = counter + 1;
-  Storage.set(idCounterKey, u64ToBytes(counter + 1));
+  Storage.set(idCounterKey, u64ToBytes(inc));
   return inc;
 }
 
