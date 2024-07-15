@@ -1,17 +1,18 @@
+import { useState } from 'react';
 import { Card } from '../components/Card';
+import { Schedule } from '@/serializable/Schedule';
 import {
   NumericInput,
   RecipientAddressInput,
   RecurrenceDropdown,
 } from '@/components';
 import {
+  Button,
+  useWriteSmartContract,
   ConnectMassaWallet,
   useAccountStore,
-} from '@massalabs/react-ui-kit/src/lib/ConnectMassaWallets';
-import { useWriteSmartContract } from '@massalabs/react-ui-kit/src/lib/massa-react/hooks/useWriteSmartContract';
-import { useState } from 'react';
-import { Schedule } from '@/serializable/Schedule';
-import { Button } from '@massalabs/react-ui-kit';
+  PopupModal,
+} from '@massalabs/react-ui-kit';
 
 const fakeContractAddress =
   'AS1JBKmq7yQG8iTsnw54pSVy1f7YicGuVuXrRdoqz3iLmyNPdEmw';
@@ -27,6 +28,7 @@ export default function HomePage() {
   const [amount, setAmount] = useState<string>('');
   const [recurrence, setRecurrence] = useState<string>('');
   const [recipientAddress, setRecipientAddress] = useState<string>('');
+  const [openPopup, setOpenPopup] = useState<boolean>(false);
 
   function sendNewSchedule() {
     if (!amount || !recurrence || !recipientAddress || !connectedAccount) {
@@ -60,6 +62,22 @@ export default function HomePage() {
 
   return (
     <div className="sm:w-full md:max-w-4xl mx-auto">
+      <PopupModal
+        title="Transaction Status"
+        status={openPopup ? 'displayed' : 'hidden'}
+        onClose={() => setOpenPopup(false)}
+      >
+        <PopupTips
+          _onClose={() => {}}
+          setAmount={setAmount}
+          setRecurrence={setRecurrence}
+          setRecipientAddress={setRecipientAddress}
+          sendNewSchedule={sendNewSchedule}
+          recipientAddress={recipientAddress}
+          amount={amount}
+          recurrence={recurrence}
+        />
+      </PopupModal>
       <div className="flex justify-between mb-2">
         <img
           src="/logo_massa.svg"
@@ -82,6 +100,7 @@ export default function HomePage() {
             the active vesting sessions targeting your wallet address.
           </h4>
         </section>
+
         <section className="mb-10">
           <Card>
             <ConnectMassaWallet />
@@ -98,7 +117,7 @@ export default function HomePage() {
         {connected && (
           <section className="mb-10">
             <Card customClass="flex gap-2">
-              <NumericInput
+              {/* <NumericInput
                 value="0"
                 placeholder="Enter your amount"
                 onNumChange={(amount) => {
@@ -114,20 +133,73 @@ export default function HomePage() {
                   setRecurrence(value);
                 }}
               />
-
               <RecipientAddressInput
                 value={recipientAddress}
                 onAddressChange={(address) => {
                   setRecipientAddress(address);
                 }}
-              />
+              /> */}
 
-              <Button variant="secondary" onClick={sendNewSchedule}>
+              <Button variant="secondary" onClick={() => setOpenPopup(true)}>
                 Create Schedule
               </Button>
             </Card>
           </section>
         )}
+      </div>
+    </div>
+  );
+}
+
+function PopupTips({
+  _onClose,
+  setAmount,
+  setRecurrence,
+  setRecipientAddress,
+  sendNewSchedule,
+  recipientAddress,
+}: {
+  _onClose: () => void;
+  setAmount: (amount: string) => void;
+  setRecurrence: (recurrence: string) => void;
+  setRecipientAddress: (address: string) => void;
+  sendNewSchedule: () => void;
+  recipientAddress: string;
+  amount: string;
+  recurrence: string;
+}) {
+  return (
+    <div>
+      <button onClick={_onClose}>Close</button>
+      // Form to give recurrent tips
+      <div>
+        <NumericInput
+          value="0"
+          placeholder="Enter your amount"
+          onNumChange={(amount) => {
+            setAmount(amount);
+          }}
+        />
+        <RecurrenceDropdown
+          value={{
+            item: 'Daily',
+            itemPreview: 'Every day',
+          }}
+          onRecurrenceChange={function (value: string): void {
+            setRecurrence(value);
+          }}
+        />
+
+        <RecipientAddressInput
+          value={recipientAddress}
+          onAddressChange={(address) => {
+            setRecipientAddress(address);
+          }}
+        />
+
+        <Button variant="secondary" onClick={sendNewSchedule}>
+          Create Schedule
+        </Button>
       </div>
     </div>
   );
