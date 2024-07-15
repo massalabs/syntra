@@ -1,0 +1,25 @@
+name: Smart contract lint and tests
+on: [push]
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: smart-contract/package-lock.json
+
+      - name: Install
+        run: npm ci
+        working-directory: smart-contract
+
+      - name: Lint
+        run: npm run fmt:check
+        working-directory: smart-contract
+
+      - name: Test
+        run: npm run test
+        working-directory: smart-contract
