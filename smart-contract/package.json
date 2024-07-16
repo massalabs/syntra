@@ -19,6 +19,7 @@
     "author": "",
     "license": "ISC",
     "devDependencies": {
+        "@massalabs/as-transformer": "^0.3.2",
         "@as-pect/cli": "^8.1.0",
         "@assemblyscript/loader": "^0.27.29",
         "@massalabs/as-types": "^2.0.0",
