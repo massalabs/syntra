@@ -1,0 +1,368 @@
+{
+  "general": {
+    "click-here": "Click here",
+    "select-this-account": "Select this account",
+    "loading": "loading...",
+    "Massa": "Massa",
+    "Sepolia": "Sepolia",
+    "Ethereum": "Ethereum",
+    "EVM": "EVM",
+    "Testnet": "Testnet",
+    "Buildnet": "Buildnet",
+    "Mainnet": "Mainnet",
+    "Unknown": "Unknown",
+    "Invalid-chain": "Invalid chain",
+    "network": "Network"
+  },
+  "navbar": {
+    "history": "History",
+    "bridge": "Bridge",
+    "claim": "Claim",
+    "faq": "FAQ",
+    "dao-maker": "DAO Maker Claim"
+  },
+  "sc-deploy": {
+    "title": "Bridge is under deployment!",
+    "subtitle": "A new smart contract is being deployed! We should be back soon."
+  },
+  "unavailable": {
+    "title": "Bridge is under maintenance!",
+    "subtitle": "We are working hard to improve the Bridge! We should be back soon."
+  },
+  "desktop": {
+    "title": "Massa bridge is only available on desktop"
+  },
+  "recurrence": {
+    "every": "Every",
+    "day": "day",
+    "week": "week",
+    "month": "month",
+    "year": "year",
+    "hour": "hour",
+    "minute": "minute",
+    "second": "second",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday"
+  },
+  "index": {
+    "box-layout": {
+      "wallet-address": "Wallet address: "
+    },
+    "top-banner": {
+      "bridge-off": "The Bridge process is temporarily down but you can still Redeem tokens. We expect to be back running soon!",
+      "redeem-off": "The Redeem process is temporarily down but you can still Bridge tokens. We expect to be back running soon!",
+      "mainnet-coming-soon": "Massa Bridge on Mainnet is coming soon!"
+    },
+    "footer": {
+      "tos": "Terms of Service",
+      "pop": "Privacy Policy",
+      "massa": "Massa",
+      "massa-station": "Massa Station"
+    },
+    "get-tokens": "Get tokens",
+    "from": "From",
+    "to": "To",
+    "tag": {
+      "not-connected": "Not connected",
+      "connected": "Connected",
+      "wrong-chain": "Unsupported network",
+      "wrong-chain-massa-station-tooltip": "Switch to {network} in top-right corner of Station's homepage",
+      "wrong-chain-bearby-tooltip": "Switch to {network} in top-left corner of Bearby's extension"
+    },
+    "faq": {
+      "get-tokens": {
+        "title": "Get testnet/buildnet tokens",
+        "categories": {
+          "get-Eth-On-Sep": "Get ETH on Sepolia",
+          "get-Weth-And-tDai": "Get WETH and tDAI on Sepolia",
+          "get-Mas-On-Massa": "Get MAS on Massa Buildnet wallet"
+        }
+      },
+      "add-tokens": {
+        "title": "Add tokens to your testnet/buildnet wallets",
+        "categories": {
+          "add-To-Massa": "Add tokens to your Massa wallet",
+          "add-To-Metamask": "Add tokens to your Metamask"
+        }
+      },
+      "mainnet": {
+        "support-channel": "Support discord coming soon.",
+        "massa-wallet": "Massa Wallet",
+        "bearby-wallet": "Bearby Wallet",
+        "massa-documentation": "Massa documentation.",
+        "airdrop-title": "Is there an airdrop available for transactions on the Massa Bridge?",
+        "airdrop-desc": "There is no formal airdrop planned for bridge activity. However, if you are bridging tokens from Ethereum to a newly created Massa address or an address with a zero balance, you will receive {amount} MAS to cover address allocation costs, known as storage fees on the Massa network, and a few future transaction costs.",
+        "transfer-title": "How long does a transfer via Massa Bridge take on each network?",
+        "transfer-desc-1": "Bridging assets from Ethereum to Massa involves three transactions: approving the bridge to spend tokens, locking the tokens on the Bridge contract, and minting tokens on the Massa network. The processing time for each transaction depends on Ethereum confirmation times, typically between fifteen seconds to five minutes. Once confirmed on Ethereum, it should take less than two minutes for the bridge to mint tokens on Massa.",
+        "transfer-desc-2": "Transferring from Massa to Ethereum also consists of three transactions: allowing the bridge to burn your tokens, triggering the burn, and claiming your tokens on Ethereum. Each step on Massa usually takes less than two minutes. Ethereum claim transactions typically finalize in fifteen seconds to two minutes.",
+        "not-visible-title": "What should I do if my transaction is not visible in the explorer?",
+        "not-visible-desc-1": " If your Ethereum transactions don’t appear in the explorer, please make sure that your wallet actually sent the transaction. Typically, with Metamask, this can be done by checking the “Activity” tab. If your wallet has recorded your transaction but you still don’t see it on the explorer, please make sure that you waited for the confirmation time to elapse (typically less than five minutes on Ethereum). If the transaction that doesn’t appear on the explorer is the lock transaction, you can check if your token balance has changed. If it hasn’t, it most certainly mean that the lock transaction wasn’t successful. In this case you should retry to send the lock transaction in the Massa Bridge web app. If previous checks do not solve your issue and you still don’t see your transaction please contact ",
+        "not-visible-desc-2": " If you cannot see you Massa transactions on the explorer, please contact ",
+        "exceed-title": "What happens if my transaction exceeds the expected processing time?",
+        "exceed-desc": "If you initiated a bridge transfer and after 10 min of total processing you don’t see tokens in your destination wallet account, please check for the status of your transfer in the History page. You need to be connected with both wallets on the Massa Bridge web app to access the page. If you don’t see the status of your transfer as the success or fail, for longer than 1h, please contact ",
+        "bridge-native-title": "Can I transfer tokens created on the Massa blockchain to the Ethereum network?",
+        "bridge-native-desc": "  Currently, the bridge only supports bridging Ethereum native tokens to Massa as wrapped assets. It's not yet possible to bridge Massa native assets to Ethereum, but you can redeem Massa wrapped assets for Ethereum native assets, at any time, for the rate of 1:1.",
+        "tutorial-title": "Are there tutorials available on how to use the Massa Bridge?",
+        "tutorial-desc": "How to use bridge tutorial",
+        "tutorial-empty-desc": "Bridge tutorial coming very soon",
+        "suffix-title": "What does the '.e' suffix means in the token symbol on the Massa network?",
+        "suffix-desc": "The “.e” suffix on Massa wrapped assets indicates their origin network is the Ethereum blockchain.",
+        "speed-title": "Can I speed up an Ethereum transaction on the Massa Bridge?",
+        "speed-desc": " If Ethereum network load implies long confirmation times, increase the transaction fee in your Metamask wallet for faster processing.",
+        "what-token-title": "What token do I need to use to pay for transaction fees on the Massa network?",
+        "what-token-desc": " Massa network transactions require Massa’s native asset, the MAS token. When bridging to a new Massa address, you’ll receive {amount} MAS for free, with 0.001 allocated for storing your address on the ledger and the rest for a few future transaction fees. Learn more about Massa storage costs in ",
+        "zero-tx-fees-title": "Why are there zero transaction fees on the Massa network?",
+        "zero-tx-fees-desc": "As Massa is a new network, chain activity is low enough to have zero transaction fees. Validator APY sufficiently incentivizes block production. In the future, as chain activity increases, transaction fees may also increase.",
+        "storage-cost-title": "What is the storage cost on the Massa network?",
+        "storage-cost-desc": "The cost for allocating an address on the ledger for the first time on the Massa network, is 0.001 MAS. For additional information please refer to ",
+        "service-fees-title": "Does Massa Bridge charge service fees?",
+        "service-fees-desc": "As of now, Massa doesn’t charge service fees; users only pay for the transaction costs. However, the service fee will be introduced in the near future.",
+        "claim-title": "Why do I need to claim a transaction when redeeming tokens to Ethereum?",
+        "claim-desc": " For gas efficiency, we haven’t implemented a transaction relaying  service. You must claim your tokens on the Ethereum blockchain to receive them. We might implement a relaying service in the future.",
+        "wallets-title": "What are the recommended wallets on the Massa network?",
+        "wallets-desc-1": " module in the Massa Station desktop app is Massa’s recommended wallet. Alternatively, you can use the community browser-extension",
+        "wallets-desc-2": " Alternatively, you can use the community browser-extension",
+        "wallets-desc-3": ", however, please bearin mind that community wallets are not audited by Massa Labs team.",
+        "bridged-tokens-title": "How can I view the bridged token balance on Massa Station's Wallet module?",
+        "bridged-tokens-subtitle-1": "a. For Massa Station Wallet",
+        "bridged-tokens-subtitle-2": "b. For Bearby Wallet",
+        "bridged-tokens-desc-1": "Step 1: Open Massa Wallet module in the Massa Station app. Select the account to which you bridged tokens.",
+        "bridged-tokens-desc-2": "Step 2: From the menu on the left, click on ‘Assets’.",
+        "bridged-tokens-desc-3": "Step 3: Click on ‘Import token’. You will need to provide the smart-contract address of a token you want to add. Use these Smart contract addresses to see your balance: ",
+        "bridged-tokens-desc-4": "Step 4: Click on ‘Import token’ and pass the address of the token you bridged. You should see the fungible token and its corresponding balance for your wallet account.",
+        "bridged-tokens-desc-5": "Bearby wallet doesn’t support the import of fungible tokens yet. You can be sure your tokens arrived by connecting your wallet to Massa Bridge. Switch From and To networks; From should be Massa Mainnet. Select token you bridged and you will see it’s balance there. Also you can connect your wallet to Dusa Protocol and check the token balance there.",
+        "sc-wallet-title": "Can I use Massa Bridge with a smart-contract wallet?",
+        "sc-wallet-desc": "At the moment it is not possible to use multi-sig wallets to bridge tokens between Ethereum and Massa networks. This might change in the future.",
+        "no-wap-title": "Is it possible to use Massa Bridge without the web app?",
+        "no-wap-desc": "We strongly advise against interacting with Massa Bridge smart contracts except through our official web-app at",
+        "mobile-title": "Can I use Massa Bridge on a mobile phone or tablet?",
+        "mobile-desc": "As of today, Massa Bridge is desktop only.",
+        "feature-request-title": "Where can I submit feature requests?",
+        "feature-request-desc": "You can submit feature requests in our Discord support channel: ",
+        "no-find-title": "You couldn’t find an answer to what you’re looking for?",
+        "no-find-desc-1": "Head to our Discord support channel and open a ticket. ",
+        "no-find-desc-2": " Our support team will review your issue and come back to you as soon as possible."
+      }
+    },
+    "loading-box": {
+      "operation": "Operation",
+      "transaction": "Transaction",
+      "title-bridge": "Processing bridge...",
+      "title-bridge-warning-1": "Bridge transfer",
+      "title-bridge-warning-2": "not yet finalized",
+      "title-bridge-error": "Bridge failed",
+      "title-redeem": "Processing redeem...",
+      "title-redeem-warning-1": "Redeem transfer",
+      "title-redeem-warning-2": "not yet finalized",
+      "redeem-timeout": "Redeem timeout",
+      "title-redeem-error": "Redeem failed",
+      "subtitle": "(it can take up to 5 minutes)",
+      "approve": "Increase allowance",
+      "bridge": "Bridge",
+      "claim": "Claim",
+      "lock": "Lock",
+      "mint": "Mint",
+      "burn-label": "Burn {state}",
+      "burn-label-awaiting-inclusion": "(awaiting inclusion...)",
+      "burn-label-included-pending": "(included pending)",
+      "burn-label-success": "(final)",
+      "burn-label-rejected": "(rejected)",
+      "burn-label-error": "(unknown error)",
+      "burn-label-signature-timeout": "(signature timeout)",
+      "rejected-by-user": "You have rejected the transaction, please try again by clicking below.",
+      "inconsistent-not-found": "Burn (inconsistent or not found)",
+      "claim-label": "Claim {state}",
+      "claim-label-retrieving-info": "(retrieving info...)",
+      "claim-label-awaiting-signature": "(awaiting signature...)",
+      "claim-label-claiming": "(claiming...)",
+      "claim-pending-tooltip": "If you leave, you will see the status of Claim in your {wallet} wallet.",
+      "claim-label-rejected": "(rejected by user)",
+      "claim-label-error": "(unknown error)",
+      "burned": "Burn was successful",
+      "bridged": "You have successfully bridged:",
+      "retrieving-claim-info-1": "We are waiting for information to initiate claim.",
+      "retrieving-claim-info-2": "Please stand by or come back to sign later.",
+      "already-claimed": "You have already initiated a claim for this operation",
+      "claim-message": " One last step remains to finalize the redeem. To receive {token} on {network} you must sign a transaction.",
+      "redeemed": "You have successfully redeemed:",
+      "from-to": "from {from} to {to}.",
+      "check": "Go to your {name} wallet to check the token balance.",
+      "add-tokens-message": "You might need to add the token manually to see its balance.",
+      "instructions": "Instructions",
+      "warning-description": "Transfer delay due to high traffic.",
+      "warning-expect": "Expect tokens in your {wallet}",
+      "warning-time": "within one hour.",
+      "warning-contact": "If not received, contact us at:",
+      "success": "Success!",
+      "error-something": "Something went wrong!",
+      "error-drop": "Please, drop us a message at:",
+      "link-to-instructions": "Instructions",
+      "received-tokens": "You received {amount} in your wallet."
+    },
+    "input": {
+      "placeholder": {
+        "amount": "Amount",
+        "receive": "To receive"
+      }
+    },
+    "button": {
+      "redeem": "Redeem",
+      "bridge": "Bridge"
+    },
+    "total": {
+      "approve": "Total approved: {amount}"
+    },
+    "approve": {
+      "error": {
+        "general": "Something went wrong! Please, try again!",
+        "failed": "Increase allowance failed. Try again.",
+        "allowance-error": "Unknown error happened while increasing allowance. Try again.",
+        "rejected": "Increase allowance rejected by user, try again",
+        "timeout": "Increase allowance timeout. Try again.",
+        "invalid-amount": "Invalid amount",
+        "insufficient-funds": "Insufficient balance"
+      },
+      "success": "Allowance successfully increased",
+      "loading": "Processing allowance increase..."
+    },
+    "lock": {
+      "error": {
+        "rejected": "Lock rejected by user, try again",
+        "wrong-allowance": "Allowance is too low. Try again.",
+        "unknown": "Unknown error, Try again."
+      }
+    },
+    "burn": {
+      "error": {
+        "rejected": "Burn rejected by user, try again",
+        "wrong-allowance": "Allowance is too low. Try again.",
+        "timeout": "Burn operation timed out.",
+        "timeout-signature": "You failed to sign the operation before timeout. Please try again.",
+        "unknown": "Unknown error, Try again."
+      }
+    },
+    "claim": {
+      "error": {
+        "rejected": "Claim rejected by user, try again",
+        "timeout": "Claim timeout out.",
+        "unknown": "Unknown error, Try again."
+      }
+    },
+    "bridge": {
+      "error": {
+        "invalid-amount": "Invalid amount",
+        "insufficient-funds": "Insufficient balance"
+      },
+      "success": "Bridge transfer successfully executed!",
+      "loading": "Processing bridge transfer..."
+    },
+    "warning-no-eth": "To claim tokens, you need to have {fees} {symbol} to pay for transaction fees.",
+    "balance": {
+      "error": "We couldn't fetch your balance! Please, try again!"
+    },
+    "fee-estimate": {
+      "bridge-rate": "Bridge rate",
+      "network-fees": "Transaction fees on {name} {network} est.",
+      "on": "on",
+      "tooltip-massa": "Massa blockchain charges {fees} MAS to pay for the storage on the ledger."
+    }
+  },
+  "unexpected-error": {
+    "title": "Ops!",
+    "description": "An unexpected error has occurred"
+  },
+  "connect-wallet": {
+    "title": "Connect wallets",
+    "connected": "Connected wallets",
+    "description-mainnet": "Connect wallet to a supported mainnet and Massa Mainnet, to bridge tokens.",
+    "description-buildnet": "Connect wallet to a supported testnet and Massa Buildnet, to bridge tokens.",
+    "button": "Connect",
+    "empty-balance": "You’ll receive {amount} MAS!",
+    "empty-balance-description": "It seems you wish to bridge tokens to a new wallet account that has 0.00 MAS on it. Your account is eligible for allocation of {amount} MAS for storage costs and gas fees of a few future transfers. We’ll send it to you at the same time of the bridge transfer.",
+    "card-destination": {
+      "from": "EVM Wallet",
+      "to": "Massa wallet",
+      "non-massa-wallet": "Switch accounts directly within your wallet.",
+      "switch": "switch wallet",
+      "select-wallet": "Select wallet",
+      "your-wallet": "Your wallet",
+      "bearby-not-installed": "Bearby extension is either turned off or not installed. Make sure the extension is on and refresh the page.",
+      "get-bearby": "Get Bearby here",
+      "massa-station-not-detected": "Massa Station desktop app is not detected. Make sure the app is opened, or click below to install it.",
+      "get-massa-station": "Get Massa Station",
+      "massa-wallet-not-detected": "Massa Wallet is not detected. Make sure the plugin is installed, or click below to install it.",
+      "get-massa-wallet": "Get Massa Wallet",
+      "massa-wallet-no-account": "No wallet accounts found in Massa Wallet.",
+      "massa-wallet-create-account": "Create an account",
+      "not-detected": "wallet is not detected."
+    },
+    "MASSASTATION": "MassaWallet",
+    "BEARBY": "Bearby",
+    "connected-cards": {
+      "wallet-balance": "Balance: "
+    },
+    "wrong-chain-evm": "Wrong wallet network. Please, switch network in \"connected wallets\" popup.",
+    "wrong-chain-massa": "Wrong wallet network. Please, switch to a supported {network} in your {name} wallet settings",
+    "connect-metamask": {
+      "connect-to-metamask": "Connect to Metamask",
+      "invalid-network": "Current network is not supported. Please, switch to supported network.",
+      "switch-network": "Switch network",
+      "no-metamask": "It seems like you don't have Metamask installed.",
+      "install-metamask": "Install Metamask"
+    }
+  },
+  "get-tokens": {
+    "title": "Get {token} tokens:",
+    "minting": "Minting...",
+    "success": "Yeah! Minted successfully",
+    "errors": {
+      "transaction-execution": "Minting transaction failed or cancelled",
+      "general": "Something went wrong! Please, try again!"
+    },
+    "card": {
+      "tDAI-description": "Send a request to mint tDAI to your wallet",
+      "WETH-description": "Send a request to mint WETH to your wallet",
+      "ETH-description": "Get ETH on Sepolia to pay the fees",
+      "MAS-description": "Get MAS tokens",
+      "link": "Faucet",
+      "mint": "Mint {token}"
+    },
+    "tag": {
+      "tDAI": "Get tDAI",
+      "WETH": "Get wrapped Ethereum",
+      "ETH": "Get Ethereum",
+      "MAS": "Get MAS"
+    }
+  },
+  "terms-of-service": {
+    "title": "Accept the Terms of Service",
+    "description": "You must accept the terms of service to proceed with the Massa Bridge.",
+    "subtitle": "Terms of service",
+    "cta": "Accept"
+  },
+  "history": {
+    "title": "History of transfers",
+    "from": "From",
+    "to": "To",
+    "time": "Time",
+    "amount": "Amount",
+    "status": "Status",
+    "sent": "Sent",
+    "received": "Received",
+    "transaction-id": "Transaction ID",
+    "operation-status": {
+      "pending": "Pending",
+      "done": "Done",
+      "error": "Failed",
+      "claimable": "Click to claim"
+    },
+    "show-recent": "Show recent",
+    "show-previous": "Show previous",
+    "no-history": "No history found for {address}"
+  }
+}
