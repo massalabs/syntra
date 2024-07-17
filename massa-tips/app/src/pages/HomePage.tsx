@@ -9,16 +9,19 @@ import {
 import {
   Button,
   useWriteSmartContract,
-  ConnectMassaWallet,
   useAccountStore,
-  PopupModal,
 } from '@massalabs/react-ui-kit';
+import { ConnectButton } from '@/components/ConnectWalletPopup/ConnectButton';
+import { Address } from '@massalabs/massa-web3';
 
 const fakeContractAddress =
-  'AS1JBKmq7yQG8iTsnw54pSVy1f7YicGuVuXrRdoqz3iLmyNPdEmw';
+  'AS12ip9eFwpdq57EDJhgCMpmDmArLg8CT4UVEFRggXZD8FSz9wKMa';
+
+const fakeTokenAddress = 'AS1JBKmq7yQG8iTsnw54pSVy1f7YicGuVuXrRdoqz3iLmyNPdEmw';
 
 export default function HomePage() {
   const { connectedAccount, currentProvider } = useAccountStore();
+
   const { callSmartContract } = useWriteSmartContract(
     connectedAccount!,
     currentProvider!,
@@ -26,9 +29,12 @@ export default function HomePage() {
   const connected = !!connectedAccount && !!currentProvider;
 
   const [amount, setAmount] = useState<string>('');
-  const [recurrence, setRecurrence] = useState<string>('');
+  const [recurrence, setRecurrence] = useState<number>(0);
   const [recipientAddress, setRecipientAddress] = useState<string>('');
-  const [openPopup, setOpenPopup] = useState<boolean>(false);
+  const [occurrences, setOccurrence] = useState<string>('');
+  const [remainingOccurrences, setRemainingOccurrences] = useState<number>(0);
+  const [tolerance, setTolerance] = useState<number>(0);
+  const [error, setError] = useState<string>('');
 
   function sendNewSchedule() {
     if (!amount || !recurrence || !recipientAddress || !connectedAccount) {
@@ -39,110 +45,95 @@ export default function HomePage() {
       return;
     }
 
+    try {
+      Address.fromString(recipientAddress);
+    } catch (error) {
+      setError('Invalid recipient address');
+    }
+
     const schedule = new Schedule(
-      BigInt(amount),
-      recurrence,
-      recipientAddress,
+      BigInt(0),
+      fakeTokenAddress,
       connectedAccount.address(),
+      recipientAddress,
+      BigInt(amount),
+      BigInt(recurrence),
+      BigInt(occurrences),
+      BigInt(remainingOccurrences),
+      BigInt(tolerance),
     );
 
-    callSmartContract(
-      'startScheduleSendFT',
-      fakeContractAddress,
-      schedule.serialize(),
-      {
-        pending: 'string',
-        success: 'string',
-        error: 'string',
-        timeout: 'string',
-      },
-      0n,
-    );
+    // callSmartContract(
+    //   'startScheduleSendFT',
+    //   fakeContractAddress,
+    //   schedule.serialize(),
+    //   {
+    //     pending: 'string',
+    //     success: 'string',
+    //     error: 'string',
+    //     timeout: 'string',
+    //   },
+    //   0n,
+    // );
   }
 
   return (
-    <div className="sm:w-full md:max-w-4xl mx-auto">
-      <PopupModal
-        title="Transaction Status"
-        status={openPopup ? 'displayed' : 'hidden'}
-        onClose={() => setOpenPopup(false)}
-      >
-        <PopupTips
-          _onClose={() => {}}
-          setAmount={setAmount}
-          setRecurrence={setRecurrence}
-          setRecipientAddress={setRecipientAddress}
-          sendNewSchedule={sendNewSchedule}
-          recipientAddress={recipientAddress}
-          amount={amount}
-          recurrence={recurrence}
-        />
-      </PopupModal>
-      <div className="flex justify-between mb-2">
-        <img
-          src="/logo_massa.svg"
-          alt="Massa logo"
-          style={{ height: '64px' }}
-        />
-      </div>
-      <div className="p-5">
-        <section className="mb-4 p-2">
-          <p className="mas-title mb-2">Massa Tips</p>
-          <h4 className="mas-body">
-            This tool allows receiving vested MAS tokens securely.
-            <br />
-            This app requires a compatible Massa wallet. We recommend{' '}
-            <a className="mas-menu-underline" href="https://station.massa.net">
-              Massa Station
-            </a>
-            .<br />
-            The section below enables you to connect your wallet and, displays
-            the active vesting sessions targeting your wallet address.
-          </h4>
-        </section>
-
-        <section className="mb-10">
-          <Card>
-            <ConnectMassaWallet />
-          </Card>
-        </section>
-        <section className="mb-10">
-          <Card>
-            <h3 className="mas-h3">
-              Connect a wallet to view your vesting sessions
-            </h3>
-          </Card>
-        </section>
+    <div className="mt-32">
+      <ConnectButton />
+      <div className="flex-col p-5 w-full">
+        <p className="w-full mas-title mb-2 text-center">Massa Tips</p>
 
         {connected && (
-          <section className="mb-10">
-            <Card customClass="flex gap-2">
-              {/* <NumericInput
-                value="0"
-                placeholder="Enter your amount"
-                onNumChange={(amount) => {
-                  setAmount(amount);
-                }}
-              />
-              <RecurrenceDropdown
-                value={{
-                  item: 'Daily',
-                  itemPreview: 'Every day',
-                }}
-                onRecurrenceChange={function (value: string): void {
-                  setRecurrence(value);
-                }}
-              />
-              <RecipientAddressInput
-                value={recipientAddress}
-                onAddressChange={(address) => {
-                  setRecipientAddress(address);
-                }}
-              /> */}
+          <section className="mt-10 space-y-5 max-w-2xl m-auto">
+            <Card customClass="mb-10 space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <InputLabel label="Amount" />
+                  <NumericInput
+                    placeholder="Enter your amount"
+                    onNumChange={(amount) => {
+                      setAmount(amount);
+                    }}
+                    value={amount}
+                  />
+                </div>
+                <div>
+                  <InputLabel label="Recipient Address" />
+                  <RecipientAddressInput
+                    value={recipientAddress}
+                    onAddressChange={(address) => {
+                      setRecipientAddress(address);
+                    }}
+                  />
+                </div>
+                <div>
+                  <InputLabel label="Recurrence" />
+                  <RecurrenceDropdown
+                    value={recurrence} // Assuming your dropdown uses IOption interface
+                    onRecurrenceChange={(value: number) => {
+                      setRecurrence(value);
+                    }}
+                  />
+                </div>
+                <div>
+                  <InputLabel label="Repeat" />
+                  <NumericInput
+                    placeholder="Enter your amount"
+                    onNumChange={(value) => {
+                      setOccurrence(value);
+                    }}
+                    value={occurrences}
+                  />
+                </div>
+              </div>
 
-              <Button variant="secondary" onClick={() => setOpenPopup(true)}>
-                Create Schedule
-              </Button>
+              <span className="text-sm text-red-500">{error}</span>
+
+              <div className="mt-4">
+                <Button variant="secondary" onClick={sendNewSchedule}>
+                  Create Schedule
+                </Button>
+              </div>
             </Card>
           </section>
         )}
@@ -151,56 +142,6 @@ export default function HomePage() {
   );
 }
 
-function PopupTips({
-  _onClose,
-  setAmount,
-  setRecurrence,
-  setRecipientAddress,
-  sendNewSchedule,
-  recipientAddress,
-}: {
-  _onClose: () => void;
-  setAmount: (amount: string) => void;
-  setRecurrence: (recurrence: string) => void;
-  setRecipientAddress: (address: string) => void;
-  sendNewSchedule: () => void;
-  recipientAddress: string;
-  amount: string;
-  recurrence: string;
-}) {
-  return (
-    <div>
-      <button onClick={_onClose}>Close</button>
-      // Form to give recurrent tips
-      <div>
-        <NumericInput
-          value="0"
-          placeholder="Enter your amount"
-          onNumChange={(amount) => {
-            setAmount(amount);
-          }}
-        />
-        <RecurrenceDropdown
-          value={{
-            item: 'Daily',
-            itemPreview: 'Every day',
-          }}
-          onRecurrenceChange={function (value: string): void {
-            setRecurrence(value);
-          }}
-        />
-
-        <RecipientAddressInput
-          value={recipientAddress}
-          onAddressChange={(address) => {
-            setRecipientAddress(address);
-          }}
-        />
-
-        <Button variant="secondary" onClick={sendNewSchedule}>
-          Create Schedule
-        </Button>
-      </div>
-    </div>
-  );
+function InputLabel(props: { label: string }) {
+  return <p className="text-sm text-gray-500 mb-2">{props.label}</p>;
 }

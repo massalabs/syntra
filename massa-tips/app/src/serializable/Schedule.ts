@@ -12,20 +12,24 @@ export class Schedule implements ISerializable<Schedule> {
     public recipient: string = '',
     public amount: bigint = 0n,
     public interval: bigint = 0n,
-    public times: bigint = 0n,
+    public occurrences: bigint = 0n,
+    public remaining: bigint = 0n,
     public tolerance: bigint = 0n,
+    public history: Transfer[] = [],
   ) {}
 
   serialize(): Uint8Array {
-    const args = new Args();
-    args.addU64(this.id);
-    args.addString(this.tokenAddress);
-    args.addString(this.spender);
-    args.addString(this.recipient);
-    args.addU256(this.amount);
-    args.addU64(this.interval);
-    args.addU64(this.times);
-    args.addU64(this.tolerance);
+    const args = new Args()
+      .addU64(this.id)
+      .addString(this.tokenAddress)
+      .addString(this.spender)
+      .addString(this.recipient)
+      .addU256(this.amount)
+      .addU64(this.interval)
+      .addU64(this.occurrences)
+      .addU64(this.remaining)
+      .addU64(this.tolerance)
+      .addSerializableObjectArray(this.history);
     return new Uint8Array(args.serialize());
   }
 
@@ -38,8 +42,28 @@ export class Schedule implements ISerializable<Schedule> {
     this.recipient = args.nextString();
     this.amount = args.nextU256();
     this.interval = args.nextU64();
-    this.times = args.nextU64();
+    this.occurrences = args.nextU64();
+    this.remaining = args.nextU64();
     this.tolerance = args.nextU64();
+    this.history = args.nextSerializableObjectArray(Transfer);
+
+    return { instance: this, offset: args.getOffset() };
+  }
+}
+
+export class Transfer implements ISerializable<Transfer> {
+  constructor(public period: bigint = 0n, public thread: number = 0) {}
+
+  serialize(): Uint8Array {
+    const args = new Args().addU64(this.period).addU8(BigInt(this.thread));
+    return new Uint8Array(args.serialize());
+  }
+
+  deserialize(data: Uint8Array, offset: number): IDeserializedResult<Transfer> {
+    const args = new Args(data, offset);
+
+    this.period = args.nextU64();
+    this.thread = Number(args.nextU8());
 
     return { instance: this, offset: args.getOffset() };
   }

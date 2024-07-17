@@ -8,8 +8,11 @@ import {
 import { Toast } from '@massalabs/react-ui-kit';
 
 import HomePage from './pages/HomePage';
+import useAccountSync from './hooks/useAccountAsync';
 
 function App() {
+  useAccountSync();
+
   return (
     <Router>
       <Toast />
