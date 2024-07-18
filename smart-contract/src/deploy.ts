@@ -1,61 +1,35 @@
-import * as dotenv from 'dotenv';
-import path from 'path';
-import { readFileSync } from 'fs';
-import { fileURLToPath } from 'url';
-import { getEnvVariable } from './utils';
-import { deploySC, WalletClient, ISCData } from '@massalabs/massa-sc-deployer';
+/* eslint-disable no-console */
 import {
+  Account,
   Args,
-  fromMAS,
-  MAX_GAS_DEPLOYMENT,
-  CHAIN_ID,
+  JsonRPCClient,
+  Mas,
+  SmartContract,
 } from '@massalabs/massa-web3';
+import { getScByteCode } from './utils';
 
-// Obtain the current file name and directory paths
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(path.dirname(__filename));
+async function deploy() {
+  const client = JsonRPCClient.buildnet();
+  const account = await Account.fromEnv();
 
-// Load .env file content into process.env
-dotenv.config();
+  console.log('Deploying contract...');
 
-// Get environment variables
-const publicApi = getEnvVariable('JSON_RPC_URL_PUBLIC');
-const secretKey = getEnvVariable('WALLET_SECRET_KEY');
-// Define deployment parameters
-const chainId = CHAIN_ID.BuildNet; // Choose the chain ID corresponding to the network you want to deploy to
-const maxGas = MAX_GAS_DEPLOYMENT; // Gas for deployment Default is the maximum gas allowed for deployment
-const fees = 0n; // Fees to be paid for deployment. Default is 0
-const waitFirstEvent = true;
+  const contract = await SmartContract.deploy(client, account, {
+    byteCode: getScByteCode('build', 'main.wasm'),
+    parameter: new Args().addString('Massa').serialize(),
+    coins: Mas.fromString('0.01'),
+  });
 
-// Create an account using the private keyc
-const deployerAccount = await WalletClient.getAccountFromSecretKey(secretKey);
+  console.log('Contract deployed at: ', contract.address.toString());
 
-/**
- * Deploy one or more smart contracts.
- *
- * @remarks
- * Multiple smart contracts can be deployed by adding more objects to the array.
- * In this example one contract located at 'build/main.wasm' is deployed with
- * 0.1 MASSA and an argument 'Test'.
- *
- * After all deployments, it terminates the process.
- */
-(async () => {
-  await deploySC(
-    publicApi, // JSON RPC URL
-    deployerAccount, // account deploying the smart contract(s)
-    [
-      {
-        data: readFileSync(path.join(__dirname, 'build', 'main.wasm')), // smart contract bytecode
-        coins: fromMAS(0.1), // coins for deployment
-        args: new Args().addString('Test'), // arguments for deployment
-      } as ISCData,
-      // Additional smart contracts can be added here for deployment
-    ],
-    chainId,
-    fees,
-    maxGas,
-    waitFirstEvent,
-  );
-  process.exit(0); // terminate the process after deployment(s)
-})();
+  const events = await client.getEvents({
+    smartContractAddress: contract.address.toString(),
+    isFinal: true,
+  });
+
+  for (const event of events) {
+    console.log('Event: ', event.data);
+  }
+}
+
+deploy();

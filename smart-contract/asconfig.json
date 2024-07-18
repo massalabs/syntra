@@ -9,7 +9,7 @@
             "sourceMap": true,
             "optimizeLevel": 3,
             "shrinkLevel": 0,
-            "converge": false,
+            "converge": true,
             "noAssert": false,
             "transform": ["@massalabs/as-transformer"]
         }
