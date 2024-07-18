@@ -38,7 +38,11 @@ export function sendFT(schedule: Schedule): void {
 // Autonomous smart contract feature
 
 // The function asyncSendFT will be trigger by autonomous smart contract feature.
-export function asyncSendFT(schedule: Schedule): void {
+export function asyncSendFT(binaryArgs: StaticArray<u8>): void {
+  const args = new Args(binaryArgs);
+  const schedule = args
+    .nextSerializable<Schedule>()
+    .expect('Schedule is missing or invalid');
   // send token
   sendFT(schedule);
 
