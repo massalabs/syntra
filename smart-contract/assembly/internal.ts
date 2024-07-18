@@ -43,6 +43,14 @@ export function asyncSendFT(binaryArgs: StaticArray<u8>): void {
   const schedule = args
     .nextSerializable<Schedule>()
     .expect('Schedule is missing or invalid');
+
+  // assert ASC or that the caller is the spender
+  assert(
+    Context.callee() === Context.caller() ||
+      Context.caller() === new Address(schedule.spender),
+    'Unauthorized',
+  );
+
   // send token
   sendFT(schedule);
 
