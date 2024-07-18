@@ -62,7 +62,7 @@ export function scheduleAllSendFT(schedule: Schedule): void {
       Context.currentThread(),
       Context.currentPeriod() + schedule.interval * n + schedule.tolerance,
       Context.currentThread(),
-      40000000, // TODO: calibrate max gas
+      5016458,
       0,
       0, // TODO: calibrate coins depending on the presence of the recipient balance in the token storage
       new Args().add(schedule).serialize(),
