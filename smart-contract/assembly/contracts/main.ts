@@ -53,6 +53,8 @@ export function startScheduleSendFT(binaryArgs: StaticArray<u8>): void {
     // @ts-ignore
     schedule.amount * u256.fromU64(schedule.occurrences), // TODO: use SafeMathU256
   );
+  schedule.remaining = schedule.occurrences;
+  schedule.history = [];
   scheduleAllSendFT(schedule);
   pushSchedule(schedule);
 }
