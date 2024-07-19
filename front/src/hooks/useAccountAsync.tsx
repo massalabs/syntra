@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useAccountStore } from '@massalabs/react-ui-kit';
+// TODO - Export in ui-kit
 import { useLocalStorage } from '@massalabs/react-ui-kit/src/lib/util/hooks/useLocalStorage';
 
 type SavedAccount = {

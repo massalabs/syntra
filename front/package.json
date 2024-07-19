@@ -6,14 +6,22 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prettier": "prettier --check .",
+    "prettier:fix": "prettier --write .",
+    "fmt": "npm run prettier:fix && npm run lint:fix",
+    "fmt:check": "npm run prettier && npm run lint",
+    "prepare": "husky install"
   },
   "dependencies": {
-    "@massalabs/massa-web3": "^5.0.0-next.20240711155152",
+    "@massalabs/massa-web3": "^5.0.0-next",
+    "@massalabs/react-ui-kit": "^0.0.5",
     "@massalabs/wallet-provider": "^2.0.1-dev",
     "currency.js": "^2.0.4",
     "delay": "^6.0.0",
+    "dot-object": "^2.1.5",
     "esbuild": "0.17.19",
     "moment-timezone": "^0.5.45",
     "react": "^18.2.0",

@@ -54,6 +54,7 @@ export function ConnectButton() {
   );
 }
 
+// TODO: To move in ui-kit
 function PingAnimation() {
   return (
     <span className="absolute flex h-3 w-3 top-0 right-0 -mr-1 -mt-1">

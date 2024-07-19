@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Card } from '../components/Card';
 import { Schedule } from '@/serializable/Schedule';
 import {
   NumericInput,
@@ -11,13 +10,23 @@ import {
   useWriteSmartContract,
   useAccountStore,
 } from '@massalabs/react-ui-kit';
+import { Card } from '@massalabs/react-ui-kit/src/components/Card/Card';
 import { ConnectButton } from '@/components/ConnectWalletPopup/ConnectButton';
-import { Address } from '@massalabs/massa-web3';
+import {
+  Address,
+  Args,
+  JsonRPCClient,
+  Mas,
+  Operation,
+  OperationStatus,
+  U256,
+} from '@massalabs/massa-web3';
+import { ITransactionDetails } from '@massalabs/wallet-provider';
 
 const fakeContractAddress =
-  'AS12ip9eFwpdq57EDJhgCMpmDmArLg8CT4UVEFRggXZD8FSz9wKMa';
+  'AS12wH9Cx4u5dRB9WmoQxqRhv3riVfeu4CsSsBeQwjdApYridXBfG';
 
-const fakeTokenAddress = 'AS1JBKmq7yQG8iTsnw54pSVy1f7YicGuVuXrRdoqz3iLmyNPdEmw';
+const fakeTokenAddress = 'AS1L79EoEFNpbxCsBi7VpCX5WXZewpUopXykKhPH33NuBksdSqDW';
 
 export default function HomePage() {
   const { connectedAccount, currentProvider } = useAccountStore();
@@ -28,16 +37,20 @@ export default function HomePage() {
   );
   const connected = !!connectedAccount && !!currentProvider;
 
-  const [amount, setAmount] = useState<string>('');
-  const [recurrence, setRecurrence] = useState<number>(0);
-  const [recipientAddress, setRecipientAddress] = useState<string>('');
-  const [occurrences, setOccurrence] = useState<string>('');
-  const [remainingOccurrences, setRemainingOccurrences] = useState<number>(0);
-  const [tolerance, setTolerance] = useState<number>(0);
+  const [amount, setAmount] = useState<string>(
+    Mas.fromString('0.01').toString(),
+  );
+  const [interval, setInterval] = useState<number>(50);
+  const [recipientAddress, setRecipientAddress] = useState<string>(
+    'AU1dvPZNjcTQfNQQuysWyxLLhEzw4kB9cGW2RMMVAQGrkzZHqWGD',
+  );
+  const [occurrences, setOccurrence] = useState<string>('5');
+  const [remainingOccurrences, setRemainingOccurrences] = useState<number>(2);
+  const [tolerance, setTolerance] = useState<number>(1); // Period number
   const [error, setError] = useState<string>('');
 
-  function sendNewSchedule() {
-    if (!amount || !recurrence || !recipientAddress || !connectedAccount) {
+  async function sendNewSchedule() {
+    if (!amount || !interval || !recipientAddress || !connectedAccount) {
       console.error('Missing required fields');
       return;
     } else if (isNaN(Number(amount))) {
@@ -57,24 +70,159 @@ export default function HomePage() {
       connectedAccount.address(),
       recipientAddress,
       BigInt(amount),
-      BigInt(recurrence),
+      BigInt(interval),
       BigInt(occurrences),
       BigInt(remainingOccurrences),
       BigInt(tolerance),
     );
 
-    // callSmartContract(
-    //   'startScheduleSendFT',
-    //   fakeContractAddress,
-    //   schedule.serialize(),
-    //   {
-    //     pending: 'string',
-    //     success: 'string',
-    //     error: 'string',
-    //     timeout: 'string',
-    //   },
-    //   0n,
-    // );
+    console.log('Calling smart contract...');
+
+    const op = (await connectedAccount.callSC(
+      fakeContractAddress,
+      'startScheduleSendFT',
+      schedule.serialize(),
+      Mas.fromString('0.01'),
+      Mas.fromString('0.01'),
+      BigInt(4000000000),
+    )) as ITransactionDetails;
+
+    console.log('Operation:', op);
+
+    if (!op) {
+      console.error('Failed to start schedule');
+      return;
+    }
+
+    const operation = new Operation(JsonRPCClient.buildnet(), op.operationId);
+
+    const status = await operation.waitSpeculativeExecution();
+
+    console.log('Status:', OperationStatus[status]);
+    if (status === OperationStatus.Error) {
+      console.error('Failed to startschedule');
+      return;
+    }
+
+    const event = await operation.getSpeculativeEvents();
+
+    for (const e of event) {
+      console.log('Event:', e.data);
+    }
+  }
+
+  async function increaseAllowance() {
+    if (!amount || !connectedAccount) {
+      console.error('Missing required fields');
+      return;
+    } else if (isNaN(Number(amount))) {
+      console.error('Invalid amount');
+      return;
+    }
+
+    console.log('Calling smart contract...');
+
+    const op = (await connectedAccount.callSC(
+      fakeTokenAddress,
+      'increaseAllowance',
+      new Args()
+        .addString(fakeContractAddress)
+        .addU256(BigInt(amount))
+        .serialize(),
+      BigInt(amount),
+      Mas.fromString('0.01'),
+      BigInt(4000000000),
+    )) as ITransactionDetails;
+
+    console.log('Operation:', op);
+
+    if (!op) {
+      console.error('Failed to approve amount');
+      return;
+    }
+
+    const operation = new Operation(JsonRPCClient.buildnet(), op.operationId);
+
+    const status = await operation.waitSpeculativeExecution();
+
+    console.log('Status:', status);
+    if (status === OperationStatus.Error) {
+      console.error('Failed to approve amount');
+      return;
+    }
+
+    const event = await operation.getSpeculativeEvents();
+
+    for (const e of event) {
+      console.log('Event:', e.data);
+    }
+  }
+
+  async function getBalanceof(address: string) {
+    if (!address || !connectedAccount) {
+      console.error('Missing required fields');
+      return;
+    }
+
+    console.log('Calling smart contract...');
+
+    const op = await connectedAccount.readSc(
+      fakeTokenAddress,
+      'balanceOf',
+      new Args().addString(address).serialize(),
+      Mas.fromString('0.01'),
+      Mas.fromString('0.01'),
+      BigInt(4000000000),
+    );
+
+    console.log('Operation:', U256.fromBytes(op.returnValue));
+  }
+
+  async function getSchedulesBySpender(spender: string) {
+    if (!spender || !connectedAccount) {
+      console.error('Missing required fields');
+      return;
+    }
+
+    console.log('Calling smart contract...');
+
+    const op = await connectedAccount.readSc(
+      fakeContractAddress,
+      'getSchedulesBySpender',
+      new Args().addString(spender).serialize(),
+      Mas.fromString('0.01'),
+      Mas.fromString('0.01'),
+      BigInt(4000000000),
+    );
+
+    console.log(op.returnValue);
+
+    const arg = new Args(op.returnValue).nextSerializableObjectArray(Schedule);
+
+    for (const s of arg) {
+      console.log('Schedule:', s);
+    }
+  }
+
+  async function getScheduleByRecipient(recipient: string) {
+    if (!recipient || !connectedAccount) {
+      console.error('Missing required fields');
+      return;
+    }
+
+    console.log('Calling smart contract...');
+
+    // TODO: Fix this in wallet provider. Or at least the readSc
+    const op = await connectedAccount.readSc(
+      fakeContractAddress,
+      'getSchedulesByRecipient',
+      new Args().addString(recipient).serialize(),
+      Mas.fromString('0.01'),
+      Mas.fromString('0.01'),
+      BigInt(4000000000),
+    );
+
+    console.log('Operation:', op.returnValue);
   }
 
   return (
@@ -107,11 +255,11 @@ export default function HomePage() {
                   />
                 </div>
                 <div>
-                  <InputLabel label="Recurrence" />
+                  <InputLabel label="Interval" />
                   <RecurrenceDropdown
-                    value={recurrence} // Assuming your dropdown uses IOption interface
+                    value={interval} // Assuming your dropdown uses IOption interface
                     onRecurrenceChange={(value: number) => {
-                      setRecurrence(value);
+                      setInterval(value);
                     }}
                   />
                 </div>
@@ -129,7 +277,10 @@ export default function HomePage() {
 
               <span className="text-sm text-red-500">{error}</span>
 
-              <div className="mt-4">
+              <div className="flex mt-4 gap-4">
+                <Button variant="secondary" onClick={increaseAllowance}>
+                  Allow {Mas.toString(BigInt(amount))} Mas
+                </Button>
                 <Button variant="secondary" onClick={sendNewSchedule}>
                   Create Schedule
                 </Button>
@@ -138,6 +289,23 @@ export default function HomePage() {
           </section>
         )}
       </div>
+      <button onClick={() => getBalanceof(recipientAddress)}>
+        Get Balance recipient
+      </button>
+
+      <button onClick={() => getBalanceof(connectedAccount?.address() || '')}>
+        Get Balance connected account
+      </button>
+
+      <button
+        onClick={() => getSchedulesBySpender(connectedAccount?.address() || '')}
+      >
+        Get Schedules by spender
+      </button>
+
+      <button onClick={() => getScheduleByRecipient(recipientAddress)}>
+        Get Schedules by recipient
+      </button>
     </div>
   );
 }
