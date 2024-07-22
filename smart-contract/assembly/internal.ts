@@ -16,6 +16,8 @@ import {
   u64ToBytes,
 } from '@massalabs/as-types';
 
+const MAX_GAS_ASYNC_FT = 5016458;
+
 // Token helpers
 export function checkAllowance(
   tokenAddress: string,
@@ -75,7 +77,7 @@ export function scheduleAllSendFT(schedule: Schedule): void {
       Context.currentThread(),
       Context.currentPeriod() + schedule.interval * n + schedule.tolerance,
       Context.currentThread(),
-      5016458,
+      MAX_GAS_ASYNC_FT,
       0,
       getBalanceEntryCost(schedule.tokenAddress, schedule.recipient),
       new Args().add(schedule).serialize(),

@@ -80,6 +80,4 @@ async function main() {
   // await send();
 }
 
-(async () => {
-  await main();
-})();
+main();

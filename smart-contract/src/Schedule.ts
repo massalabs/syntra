@@ -28,7 +28,7 @@ export class Schedule implements ISerializable<Schedule> {
       .addU64(this.interval)
       .addU64(this.occurrences)
       .addU64(this.remaining)
-      .addU64(this.tolerance)
+      .addU32(this.tolerance)
       .addSerializableObjectArray(this.history);
     return new Uint8Array(args.serialize());
   }
@@ -44,7 +44,7 @@ export class Schedule implements ISerializable<Schedule> {
     this.interval = args.nextU64();
     this.occurrences = args.nextU64();
     this.remaining = args.nextU64();
-    this.tolerance = args.nextU64();
+    this.tolerance = args.nextU32();
     this.history = args.nextSerializableObjectArray(Transfer);
 
     return { instance: this, offset: args.getOffset() };
