@@ -6,6 +6,7 @@ import {
   Storage,
 } from '@massalabs/massa-as-sdk';
 import { TokenWrapper } from '@massalabs/sc-standards/assembly/contracts/FT';
+import { getBalanceEntryCost } from '@massalabs/sc-standards/assembly/contracts/FT/token-external';
 import { u256 } from 'as-bignum/assembly';
 import { Schedule, Transfer } from './Schedule';
 import {
@@ -76,7 +77,7 @@ export function scheduleAllSendFT(schedule: Schedule): void {
       Context.currentThread(),
       5016458,
       0,
-      0, // TODO: calibrate coins depending on the presence of the recipient balance in the token storage
+      getBalanceEntryCost(schedule.tokenAddress, schedule.recipient),
       new Args().add(schedule).serialize(),
     );
   }

@@ -49,6 +49,6 @@
         "node": ">=16"
     },
     "dependencies": {
-        "@massalabs/sc-standards": "^1.2.2"
+        "@massalabs/sc-standards": "^1.2.3-dev"
     }
 }
