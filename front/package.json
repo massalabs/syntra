@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@massalabs/massa-web3": "^5.0.0-next",
-    "@massalabs/react-ui-kit": "^0.0.5",
+    "@massalabs/react-ui-kit": "../../ui-kit/",
     "@massalabs/wallet-provider": "^2.0.1-dev",
     "currency.js": "^2.0.4",
     "delay": "^6.0.0",
@@ -53,5 +53,12 @@
     "typescript": "^5.2.2",
     "vite": "^5.1.7",
     "vite-plugin-svgr": "^4.2.0"
+  },
+  "overrides": {
+    "@massalabs/react-ui-kit": {
+      "dependencies": {
+        "@massalabs/massa-web3": "^5.0.0-next"
+      }
+    }
   }
 }

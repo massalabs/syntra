@@ -4,6 +4,19 @@ import {
   IDeserializedResult,
 } from '@massalabs/massa-web3';
 
+type ScheduleInfo = {
+  id?: bigint;
+  amount: bigint;
+  interval: bigint;
+  recipient: string;
+  spender: string;
+  tokenAddress: string;
+  occurrences: bigint;
+  remaining: bigint;
+  tolerance: bigint;
+  history?: Transfer[];
+};
+
 export class Schedule implements ISerializable<Schedule> {
   constructor(
     public id: bigint = 0n,
@@ -48,6 +61,21 @@ export class Schedule implements ISerializable<Schedule> {
     this.history = args.nextSerializableObjectArray(Transfer);
 
     return { instance: this, offset: args.getOffset() };
+  }
+
+  static fromScheduleInfo(info: ScheduleInfo): Schedule {
+    return new Schedule(
+      info.id,
+      info.tokenAddress,
+      info.spender,
+      info.recipient,
+      info.amount,
+      info.interval,
+      info.occurrences,
+      info.remaining,
+      info.tolerance,
+      info.history,
+    );
   }
 }
 
