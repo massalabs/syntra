@@ -2,11 +2,7 @@ import { Button, useAccountStore } from '@massalabs/react-ui-kit';
 import Intl from '@/i18n/i18n';
 import { useState } from 'react';
 import { ConnectWalletPopup } from './ConnectWalletPopup';
-
-const truncateAddress = (address?: string, startLength = 6, endLength = 4) => {
-  if (!address) return '';
-  return `${address.slice(0, startLength)}...${address.slice(-endLength)}`;
-};
+import { truncateAddress } from '@/utils/address';
 
 export function ConnectButton() {
   const [open, setOpen] = useState(false);

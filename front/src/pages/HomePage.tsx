@@ -3,7 +3,7 @@ import {
   RecipientAddressInput,
   RecurrenceDropdown,
 } from '@/components';
-import { fakeTokenAddress } from '@/const/contracts';
+import { fakeSchedulerAddress, fakeTokenAddress } from '@/const/contracts';
 import { Button, useAccountStore } from '@massalabs/react-ui-kit';
 import { ConnectButton } from '@/components/ConnectWalletPopup/ConnectButton';
 import { Card } from '@massalabs/react-ui-kit/src/components/Card/Card';
@@ -11,12 +11,16 @@ import { Mas } from '@massalabs/massa-web3';
 import useCreateSchedule from '@/services/useCreateSchedule';
 import useGetSchedule from '@/services/useGetSchedule';
 import useToken from '@/services/useToken';
+import ScheduleTable from '@/components/scheduleTable';
 
+// TODO: Calculate coins to be sent according to the number of occurrence (0.3 * occurrence)
 export default function HomePage() {
   const { connectedAccount, currentProvider } = useAccountStore();
   const { scheduleInfo, setScheduleInfo, createSchedule } = useCreateSchedule();
-  const { increaseAllowance, getBalanceOf } = useToken(fakeTokenAddress);
-  const { getSchedulesBySpender, getScheduleByRecipient } = useGetSchedule();
+  const { spenderSchedules, getSchedulesBySpender, getScheduleByRecipient } =
+    useGetSchedule();
+  const { increaseAllowance, getBalanceOf, getAllowanceOf, decreaseAllowance } =
+    useToken(fakeTokenAddress);
 
   const connected = !!connectedAccount && !!currentProvider;
 
@@ -31,11 +35,13 @@ export default function HomePage() {
             <Card customClass="mb-10 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <InputLabel label="Amount" />
+                  <InputLabel
+                    label={`Amount ${Mas.toString(scheduleInfo.amount)} Mas`}
+                  />
                   <NumericInput
                     placeholder="Enter your amount"
                     onNumChange={(amount) => {
-                      setScheduleInfo('amount', amount);
+                      setScheduleInfo('amount', BigInt(amount));
                     }}
                     value={scheduleInfo.amount.toString()}
                   />
@@ -64,7 +70,7 @@ export default function HomePage() {
                     placeholder="Enter your amount"
                     value={scheduleInfo.occurrences.toString()}
                     onNumChange={(value) => {
-                      setScheduleInfo('occurrences', value);
+                      setScheduleInfo('occurrences', BigInt(value));
                     }}
                   />
                 </div>
@@ -73,9 +79,15 @@ export default function HomePage() {
               <div className="flex mt-4 gap-4">
                 <Button
                   variant="secondary"
-                  onClick={() => increaseAllowance(scheduleInfo.amount)}
+                  onClick={() =>
+                    increaseAllowance(
+                      scheduleInfo.amount * scheduleInfo.occurrences,
+                    )
+                  }
                 >
-                  Allow {Mas.toString(scheduleInfo.amount)} Mas
+                  {`Allow ${Mas.toString(
+                    scheduleInfo.amount * scheduleInfo.occurrences,
+                  )} Mas`}
                 </Button>
                 <Button variant="secondary" onClick={createSchedule}>
                   Create Schedule
@@ -86,8 +98,7 @@ export default function HomePage() {
         )}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5">
-        <div className="p-4 border rounded-lg shadow-md">
-          <label className="block mb-2 font-semibold">Token Balance</label>
+        <InfoOpCard title="Token Balance">
           <button
             className="btn btn-primary mb-2"
             onClick={() => getBalanceOf(connectedAccount?.address() || '')}
@@ -100,10 +111,9 @@ export default function HomePage() {
           >
             Get Balance recipient
           </button>
-        </div>
+        </InfoOpCard>
 
-        <div className="p-4 border rounded-lg shadow-md">
-          <label className="block mb-2 font-semibold">Schedule Info</label>
+        <InfoOpCard title="Schedule Info">
           <button
             className="btn btn-primary mb-2"
             onClick={() =>
@@ -118,12 +128,44 @@ export default function HomePage() {
           >
             Get Schedules by recipient
           </button>
-        </div>
+        </InfoOpCard>
+        <InfoOpCard title="Allowance">
+          <button
+            className="btn btn-primary"
+            onClick={() => getAllowanceOf(fakeSchedulerAddress)}
+          >
+            Get Allowance of Tips contract
+          </button>
+
+          {/* Remove allowance */}
+          <button
+            className="btn btn-primary"
+            onClick={() => decreaseAllowance(scheduleInfo.amount)}
+          >
+            Decrease Allowance
+          </button>
+        </InfoOpCard>
       </div>
+      <ScheduleTable schedules={spenderSchedules} />
     </div>
   );
 }
 
 function InputLabel(props: { label: string }) {
   return <p className="text-sm text-gray-500 mb-2">{props.label}</p>;
+}
+
+function InfoOpCard({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="p-4 border rounded-lg shadow-lg bg-white">
+      <label className="block mb-2 font-semibold">{title}</label>
+      {children}
+    </div>
+  );
 }

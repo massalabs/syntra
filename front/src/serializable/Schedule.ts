@@ -12,8 +12,8 @@ type ScheduleInfo = {
   spender: string;
   tokenAddress: string;
   occurrences: bigint;
-  remaining: bigint;
   tolerance: bigint;
+  remaining?: bigint;
   history?: Transfer[];
 };
 

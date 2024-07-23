@@ -2,9 +2,11 @@ import { fakeSchedulerAddress } from '@/const/contracts';
 import { Schedule } from '@/serializable/Schedule';
 import { Args, Mas } from '@massalabs/massa-web3';
 import { useAccountStore } from '@massalabs/react-ui-kit';
+import { useState } from 'react';
 
 export default function useGetSchedule() {
   const { connectedAccount } = useAccountStore();
+  const [spenderSchedules, setSpenderSchedules] = useState<Schedule[]>([]);
 
   async function getSchedulesBySpender(spender: string) {
     if (!spender) {
@@ -12,7 +14,11 @@ export default function useGetSchedule() {
       return;
     }
 
-    getSchedule('getSchedulesBySpender', new Args().addString(spender));
+    const result = await getSchedule(
+      'getSchedulesBySpender',
+      new Args().addString(spender),
+    );
+    setSpenderSchedules(result);
   }
 
   async function getScheduleByRecipient(recipient: string) {
@@ -23,13 +29,19 @@ export default function useGetSchedule() {
 
     console.log('Recipient:', recipient);
 
-    getSchedule('getSchedulesByRecipient', new Args().addString(recipient));
+    await getSchedule(
+      'getScheduleByRecipient',
+      new Args().addString(recipient),
+    );
   }
 
-  async function getSchedule(functionName: string, args: Args) {
+  async function getSchedule(
+    functionName: string,
+    args: Args,
+  ): Promise<Schedule[]> {
     if (!connectedAccount) {
       console.error('You must be connected to an account');
-      return;
+      return [];
     }
 
     const res = await connectedAccount.readSc(
@@ -46,7 +58,7 @@ export default function useGetSchedule() {
     // Weird sometime it returns an array [0,0,0,0] and sometimes it returns an empty Array
     if (res.returnValue.length === 0) {
       console.log('No schedules found');
-      return;
+      return [];
     }
 
     const schedules = new Args(res.returnValue).nextSerializableObjectArray(
@@ -56,9 +68,12 @@ export default function useGetSchedule() {
     for (const s of schedules) {
       console.log('Schedule:', s);
     }
+
+    return schedules;
   }
 
   return {
+    spenderSchedules,
     getSchedulesBySpender,
     getScheduleByRecipient,
   };

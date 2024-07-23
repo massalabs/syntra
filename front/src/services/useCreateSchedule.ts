@@ -6,6 +6,7 @@ import {
   useWriteSmartContract,
 } from '@massalabs/react-ui-kit';
 import { useState } from 'react';
+import useToken from './useToken';
 
 type ScheduleInfo = {
   amount: bigint;
@@ -14,30 +15,29 @@ type ScheduleInfo = {
   spender: string;
   tokenAddress: string;
   occurrences: bigint;
-  remaining: bigint;
   tolerance: bigint;
-  history: Transfer[];
+};
+
+const defaultScheduleInfo: ScheduleInfo = {
+  amount: Mas.fromString('0.1'),
+  interval: 10n,
+  recipient: 'AU1dvPZNjcTQfNQQuysWyxLLhEzw4kB9cGW2RMMVAQGrkzZHqWGD',
+  spender: 'AU12FUbb8snr7qTEzSdTVH8tbmEouHydQTUAKDXY9LDwkdYMNBVGF',
+  tokenAddress: fakeTokenAddress,
+  occurrences: 4n,
+  tolerance: 4n,
 };
 
 export default function useCreateSchedule() {
   const { connectedAccount, currentProvider } = useAccountStore();
+  const { getBalanceOf, getAllowanceOf } = useToken(fakeTokenAddress);
 
   const { callSmartContract } = useWriteSmartContract(
     connectedAccount!,
     currentProvider!,
   );
 
-  const [scheduleInfo, setInfo] = useState<ScheduleInfo>({
-    amount: 0n,
-    interval: 0n,
-    recipient: '',
-    spender: '',
-    tokenAddress: '',
-    occurrences: 0n,
-    remaining: 0n,
-    tolerance: 0n,
-    history: [],
-  });
+  const [scheduleInfo, setInfo] = useState<ScheduleInfo>(defaultScheduleInfo);
 
   const setScheduleInfo = (
     key: keyof ScheduleInfo,
@@ -69,14 +69,14 @@ export default function useCreateSchedule() {
     }
     const op = await callSmartContract(
       'startScheduleSendFT',
-      fakeTokenAddress,
+      fakeSchedulerAddress,
       Schedule.fromScheduleInfo(scheduleInfo).serialize(),
       {
-        success: 'Amount approved successfully',
-        pending: 'Approving amount...',
-        error: 'Failed to approve amount',
+        success: 'Schedule successfully created',
+        pending: 'Creating new schedule...',
+        error: 'Failed to create schedule',
       },
-      Mas.fromString('0.01'),
+      Mas.fromString('0.3'),
       Mas.fromString('0.01'),
     );
 
