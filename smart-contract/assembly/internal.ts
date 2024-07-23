@@ -26,7 +26,10 @@ export function checkAllowance(
 ): void {
   const coin = new TokenWrapper(new Address(tokenAddress));
   const allowance = coin.allowance(new Address(spender), Context.callee());
-  assert(allowance < amount, 'Not enough allowance');
+  assert(
+    allowance >= amount,
+    `Not enough allowance, actual ${allowance}, required ${amount}`,
+  );
 }
 
 export function sendFT(schedule: Schedule): void {
@@ -130,6 +133,7 @@ export function pushSchedule(schedule: Schedule): void {
 
 export function updateSchedule(schedule: Schedule): void {
   const key = getScheduleKey(schedule.spender, schedule.id);
+  assert(Storage.has(key), 'Schedule not found');
   Storage.set(key, new Args().add(schedule).serialize());
 }
 
