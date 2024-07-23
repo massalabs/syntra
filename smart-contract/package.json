@@ -5,6 +5,7 @@
     "main": "index.js",
     "scripts": {
         "test": "asp --summary",
+        "e2e": "npx tsx src/tests/e2e.ts",
         "build": "npx massa-as-compile",
         "clean": "rimraf build",
         "deploy": "npm run build && tsx src/deploy.ts",

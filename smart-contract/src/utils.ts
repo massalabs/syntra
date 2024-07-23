@@ -1,4 +1,3 @@
-import * as dotenv from 'dotenv';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -9,6 +8,7 @@ import {
   SmartContract,
 } from '@massalabs/massa-web3';
 
+import * as dotenv from 'dotenv';
 dotenv.config();
 
 export function getEnvVariable(key: string): string {
