@@ -6,6 +6,7 @@ import {
   Storage,
 } from '@massalabs/massa-as-sdk';
 import { TokenWrapper } from '@massalabs/sc-standards/assembly/contracts/FT';
+import { getBalanceEntryCost } from '@massalabs/sc-standards/assembly/contracts/FT/token-external';
 import { u256 } from 'as-bignum/assembly';
 import { Schedule, Transfer } from './Schedule';
 import {
@@ -14,6 +15,8 @@ import {
   stringToBytes,
   u64ToBytes,
 } from '@massalabs/as-types';
+
+const MAX_GAS_ASYNC_FT = 5016458;
 
 // Token helpers
 export function checkAllowance(
@@ -38,7 +41,19 @@ export function sendFT(schedule: Schedule): void {
 // Autonomous smart contract feature
 
 // The function asyncSendFT will be trigger by autonomous smart contract feature.
-export function asyncSendFT(schedule: Schedule): void {
+export function asyncSendFT(binaryArgs: StaticArray<u8>): void {
+  const args = new Args(binaryArgs);
+  const schedule = args
+    .nextSerializable<Schedule>()
+    .expect('Schedule is missing or invalid');
+
+  // assert ASC or that the caller is the spender
+  assert(
+    Context.callee() === Context.caller() ||
+      Context.caller() === new Address(schedule.spender),
+    'Unauthorized',
+  );
+
   // send token
   sendFT(schedule);
 
@@ -62,9 +77,9 @@ export function scheduleAllSendFT(schedule: Schedule): void {
       Context.currentThread(),
       Context.currentPeriod() + schedule.interval * n + schedule.tolerance,
       Context.currentThread(),
-      40000000, // TODO: calibrate max gas
+      MAX_GAS_ASYNC_FT,
       0,
-      0, // TODO: calibrate coins depending on the presence of the recipient balance in the token storage
+      getBalanceEntryCost(schedule.tokenAddress, schedule.recipient),
       new Args().add(schedule).serialize(),
     );
   }

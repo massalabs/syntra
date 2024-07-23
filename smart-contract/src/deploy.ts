@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import {
   Account,
   Args,
@@ -8,7 +7,7 @@ import {
 } from '@massalabs/massa-web3';
 import { getScByteCode } from './utils';
 
-async function deploy() {
+export async function deploy() {
   const client = JsonRPCClient.buildnet();
   const account = await Account.fromEnv();
 
@@ -16,20 +15,24 @@ async function deploy() {
 
   const contract = await SmartContract.deploy(client, account, {
     byteCode: getScByteCode('build', 'main.wasm'),
-    parameter: new Args().addString('Massa').serialize(),
+    parameter: new Args().serialize(),
     coins: Mas.fromString('0.01'),
   });
 
-  console.log('Contract deployed at: ', contract.address.toString());
+  const smartContractAddress = contract.address.toString();
+
+  console.log('Contract deployed at: ', smartContractAddress);
 
   const events = await client.getEvents({
-    smartContractAddress: contract.address.toString(),
+    smartContractAddress,
     isFinal: true,
   });
 
   for (const event of events) {
     console.log('Event: ', event.data);
   }
+
+  return smartContractAddress;
 }
 
 deploy();
