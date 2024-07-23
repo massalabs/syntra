@@ -26,7 +26,10 @@ export function checkAllowance(
 ): void {
   const coin = new TokenWrapper(new Address(tokenAddress));
   const allowance = coin.allowance(new Address(spender), Context.callee());
-  assert(allowance < amount, 'Not enough allowance');
+  assert(
+    allowance >= amount,
+    'Not enough allowance, actual ${allowance}, required ${amount}',
+  );
 }
 
 export function sendFT(schedule: Schedule): void {
@@ -48,11 +51,11 @@ export function asyncSendFT(binaryArgs: StaticArray<u8>): void {
     .expect('Schedule is missing or invalid');
 
   // assert ASC or that the caller is the spender
-  assert(
-    Context.callee() === Context.caller() ||
-      Context.caller() === new Address(schedule.spender),
-    'Unauthorized',
-  );
+  // assert(
+  //   Context.callee() === Context.caller() ||
+  //     Context.caller() === new Address(schedule.spender),
+  //   'Unauthorized',
+  // );
 
   // send token
   sendFT(schedule);

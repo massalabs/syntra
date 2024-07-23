@@ -16,7 +16,7 @@ export async function deploy() {
   const contract = await SmartContract.deploy(client, account, {
     byteCode: getScByteCode('build', 'main.wasm'),
     parameter: new Args().serialize(),
-    coins: Mas.fromString('0.01'),
+    coins: Mas.fromString('1'),
   });
 
   const smartContractAddress = contract.address.toString();
