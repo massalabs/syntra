@@ -81,11 +81,13 @@ export function scheduleAllSendFT(schedule: Schedule): void {
       Context.currentPeriod() + schedule.interval * n + schedule.tolerance,
       Context.currentThread(),
       MAX_GAS_ASYNC_FT,
-      0,
+      100000000,
       getBalanceEntryCost(schedule.tokenAddress, schedule.recipient),
       new Args().add(schedule).serialize(),
     );
   }
+
+  generateEvent('Scheduled all transfers');
 }
 
 // Storage
@@ -123,12 +125,11 @@ function getScheduleKey(spender: string, id: u64): StaticArray<u8> {
 }
 
 export function pushSchedule(schedule: Schedule): void {
-  const id = incrementIdCounter();
-  const key = getScheduleKey(schedule.spender, id);
-  schedule.id = id;
-  Storage.set(key, new Args().add(schedule).serialize());
+  schedule.id = incrementIdCounter();
+  const key = getScheduleKey(schedule.spender, schedule.id);
 
-  Storage.set(getRecipientKey(schedule.recipient, id), key);
+  Storage.set(key, new Args().add(schedule).serialize());
+  Storage.set(getRecipientKey(schedule.recipient, schedule.id), key);
 }
 
 export function updateSchedule(schedule: Schedule): void {

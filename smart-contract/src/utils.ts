@@ -39,3 +39,14 @@ export async function getClientAndContract(contractAddress: string) {
     ),
   };
 }
+
+export function periodsToSeconds(
+  periods: number,
+  periodDuration = 20000,
+): number {
+  return periods * periodDuration;
+}
+
+export function separator() {
+  console.log('\n' + '-'.repeat(20) + '\n');
+}

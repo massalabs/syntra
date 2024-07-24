@@ -2,7 +2,6 @@ import {
   Account,
   Args,
   JsonRPCClient,
-  Mas,
   SmartContract,
 } from '@massalabs/massa-web3';
 import { getScByteCode } from './utils';
@@ -10,16 +9,16 @@ import { getScByteCode } from './utils';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-export async function deploy() {
+export async function deploy(file: string, args: Args, coins: bigint) {
   const client = JsonRPCClient.buildnet();
   const account = await Account.fromEnv();
 
   console.log('Deploying contract...');
 
   const contract = await SmartContract.deploy(client, account, {
-    byteCode: getScByteCode('build', 'main.wasm'),
-    parameter: new Args().serialize(),
-    coins: Mas.fromString('0.01'),
+    byteCode: getScByteCode('build', file),
+    parameter: args.serialize(),
+    coins: coins,
   });
 
   const contractAddress = contract.address.toString();
@@ -31,5 +30,5 @@ export async function deploy() {
     isFinal: true,
   });
 
-  return { contractAddress, events };
+  return { contractAddress, events, contract };
 }
