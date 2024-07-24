@@ -10,11 +10,11 @@ export class Schedule implements ISerializable<Schedule> {
     public tokenAddress: string = '',
     public spender: string = '',
     public recipient: string = '',
-    public amount: bigint = 0n,
-    public interval: bigint = 0n,
-    public occurrences: bigint = 0n,
-    public remaining: bigint = 0n,
-    public tolerance: bigint = 0n,
+    public amount: bigint = 1n,
+    public interval: bigint = 1n,
+    public occurrences: bigint = 1n,
+    public remaining: bigint = 1n,
+    public tolerance: bigint = 1n,
     public history: Transfer[] = [],
   ) {}
 

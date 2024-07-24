@@ -16,7 +16,7 @@ import {
   u64ToBytes,
 } from '@massalabs/as-types';
 
-const MAX_GAS_ASYNC_FT = 5016458;
+const MAX_GAS_ASYNC_FT = 10_000_000;
 
 // Token helpers
 export function checkAllowance(
@@ -45,10 +45,16 @@ export function sendFT(schedule: Schedule): void {
 
 // The function asyncSendFT will be trigger by autonomous smart contract feature.
 export function asyncSendFT(binaryArgs: StaticArray<u8>): void {
+  // deserialize params
   const args = new Args(binaryArgs);
-  const schedule = args
+  const spender = args.next<string>().expect('spender is missing or invalid');
+  const id = args.next<u64>().expect('id is missing or invalid');
+
+  // read storage
+  const key = getScheduleKey(spender, id);
+  const schedule = new Args(Storage.get(key))
     .nextSerializable<Schedule>()
-    .expect('Schedule is missing or invalid');
+    .unwrap();
 
   // assert ASC or that the caller is the spender
   assert(
@@ -73,21 +79,34 @@ export function asyncSendFT(binaryArgs: StaticArray<u8>): void {
 
 export function scheduleAllSendFT(schedule: Schedule): void {
   for (let n: u64 = 1; n <= schedule.occurrences; n++) {
+    const validityStartPeriod =
+      Context.currentPeriod() + schedule.interval * n - schedule.tolerance;
+    const validityStartThread = Context.currentThread();
+    const validityEndPeriod =
+      Context.currentPeriod() + schedule.interval * n + schedule.tolerance;
+    const validityEndThread = Context.currentThread();
     sendMessage(
       Context.callee(),
       'asyncSendFT',
-      Context.currentPeriod() + schedule.interval * n - schedule.tolerance,
-      Context.currentThread(),
-      Context.currentPeriod() + schedule.interval * n + schedule.tolerance,
-      Context.currentThread(),
+      validityStartPeriod,
+      validityStartThread,
+      validityEndPeriod, // exclusive
+      validityEndThread,
       MAX_GAS_ASYNC_FT,
-      100000000,
+      1_000_000,
       getBalanceEntryCost(schedule.tokenAddress, schedule.recipient),
-      new Args().add(schedule).serialize(),
+      new Args().add(schedule.spender).add(schedule.id).serialize(),
+    );
+    generateEvent(
+      schedule.createDispatchEvent(
+        n,
+        validityStartPeriod,
+        validityStartThread,
+        validityEndPeriod,
+        validityEndThread,
+      ),
     );
   }
-
-  generateEvent('Scheduled all transfers');
 }
 
 // Storage
@@ -147,6 +166,7 @@ export function removeSchedule(spender: string, id: u64): void {
 
   const recipientKey = getRecipientKey(schedule.recipient, id);
   Storage.del(recipientKey);
+  generateEvent(schedule.createCancelEvent());
 }
 
 export function readSchedulesBySpender(spender: string): StaticArray<u8> {

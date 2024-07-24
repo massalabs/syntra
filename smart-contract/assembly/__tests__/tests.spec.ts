@@ -171,25 +171,25 @@ describe('async send FT', () => {
       .unwrap()[0];
     switchUser(contractAddress);
     mockScCall([]);
-    asyncSendFT(new Args().add(schedule).serialize());
+    asyncSendFT(new Args().add(schedule.spender).add(schedule.id).serialize());
     const schedules = new Args(
       getSchedulesBySpender(new Args().add(spender1).serialize()),
     )
       .nextSerializableObjectArray<Schedule>()
       .unwrap();
-    assert(schedules.length == 1);
-    assert(schedules[0].remaining == occurrences - 1);
+    expect(schedules).toHaveLength(1);
+    expect(schedules[0].remaining).toBe(occurrences - 1);
 
     // seconde autonomous execution
     mockScCall([]);
-    asyncSendFT(new Args().add(schedule).serialize());
+    asyncSendFT(new Args().add(schedule.spender).add(schedule.id).serialize());
     const schedules2 = new Args(
       getSchedulesBySpender(new Args().add(spender1).serialize()),
     )
       .nextSerializableObjectArray<Schedule>()
       .unwrap();
-    assert(schedules2.length == 1);
-    assert(schedules2[0].remaining == occurrences - 1);
+    expect(schedules2).toHaveLength(1);
+    expect(schedules2[0].remaining).toBe(occurrences - 2);
   });
 });
 

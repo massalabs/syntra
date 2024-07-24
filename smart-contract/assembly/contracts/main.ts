@@ -1,5 +1,10 @@
 // The entry file of your WebAssembly module.
-import { Address, Context, Storage } from '@massalabs/massa-as-sdk';
+import {
+  Address,
+  Context,
+  generateEvent,
+  Storage,
+} from '@massalabs/massa-as-sdk';
 import { Args, u64ToBytes } from '@massalabs/as-types';
 import { u256 } from 'as-bignum/assembly';
 import { Schedule } from '../Schedule';
@@ -61,11 +66,13 @@ export function startScheduleSendFT(binaryArgs: StaticArray<u8>): void {
 
   schedule.history = [];
 
-  scheduleAllSendFT(schedule);
-
   pushSchedule(schedule);
+  scheduleAllSendFT(schedule);
+  generateEvent(schedule.createCreationEvent());
 }
 
+// cancelScheduleSendFT will make all the remaining transfers of the schedule fail because the schedule will be removed.
+// and the async call try to read the schedule will fail.
 export function cancelScheduleSendFT(binaryArgs: StaticArray<u8>): void {
   const args = new Args(binaryArgs);
   const spender = args

@@ -15,3 +15,17 @@ export async function getSchedulesBySpender(
 
   return new Args(result.value).nextSerializableObjectArray<Schedule>(Schedule);
 }
+
+export async function getSchedulesByRecipient(
+  contractAddress: string,
+  spender: string,
+) {
+  const { contract } = await getClientAndContract(contractAddress);
+
+  const result = await contract.read(
+    'getSchedulesByRecipient',
+    new Args().addString(spender).serialize(),
+  );
+
+  return new Args(result.value).nextSerializableObjectArray<Schedule>(Schedule);
+}

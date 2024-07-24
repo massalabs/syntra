@@ -1,5 +1,10 @@
 import { Args, Serializable, Result } from '@massalabs/as-types';
-import { createEvent } from '@massalabs/massa-as-sdk';
+import {
+  createEvent,
+  assertIsSmartContract,
+  validateAddress,
+  isAddressEoa,
+} from '@massalabs/massa-as-sdk';
 import { u256 } from 'as-bignum/assembly';
 
 export class Schedule implements Serializable {
@@ -8,13 +13,23 @@ export class Schedule implements Serializable {
     public tokenAddress: string = '',
     public spender: string = '',
     public recipient: string = '',
-    public amount: u256 = u256.Zero,
-    public interval: u64 = 0,
-    public occurrences: u64 = 0,
-    public remaining: u64 = 0,
-    public tolerance: u32 = 0,
+    public amount: u256 = u256.One,
+    public interval: u64 = 1,
+    public occurrences: u64 = 1,
+    public remaining: u64 = 1,
+    public tolerance: u32 = 1,
     public history: Transfer[] = [],
   ) {}
+
+  validate(): void {
+    assert(this.interval > 0, 'interval must be greater than 0');
+    assert(this.amount > u256.Zero, 'amount must be greater than 0');
+    assertIsSmartContract(this.tokenAddress);
+    assert(validateAddress(this.spender), 'spender is not a valid Address');
+    assert(isAddressEoa(this.spender), 'spender is not a EOA');
+    assert(validateAddress(this.recipient), 'recipient is not a valid Address');
+    assert(isAddressEoa(this.recipient), 'recipient is not a EOA');
+  }
 
   serialize(): StaticArray<u8> {
     return new Args()
@@ -94,6 +109,31 @@ export class Schedule implements Serializable {
       this.remaining.toString(),
       period.toString(),
       thread.toString(),
+    ]);
+  }
+
+  public createCreationEvent(): string {
+    return createEvent('Create', [this.id.toString()]);
+  }
+
+  public createCancelEvent(): string {
+    return createEvent('Cancel', [this.id.toString()]);
+  }
+
+  public createDispatchEvent(
+    n: u64,
+    validityStartPeriod: u64,
+    validityStartThread: u8,
+    validityEndPeriod: u64,
+    validityEndThread: u8,
+  ): string {
+    return createEvent('Dispatch', [
+      this.id.toString(),
+      n.toString(),
+      validityStartPeriod.toString(),
+      validityStartThread.toString(),
+      validityEndPeriod.toString(),
+      validityEndThread.toString(),
     ]);
   }
 }

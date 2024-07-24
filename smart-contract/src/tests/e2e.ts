@@ -1,25 +1,28 @@
 import { scheduler } from 'node:timers/promises';
-import { Account, Args, JsonRPCClient, Mas, U128 } from '@massalabs/massa-web3';
-import * as dotenv from 'dotenv';
+import { Account, Args, JsonRPCClient, Mas } from '@massalabs/massa-web3';
 import { create } from '../create';
 import { deploy } from '../lib-deploy';
 import { Schedule } from '../Schedule';
-import { increaseAllowance } from '../allowance';
+import { increaseAllowance } from '../token/allowance';
 import { getSchedulesBySpender } from '../read';
-import { periodsToSeconds, separator } from '../utils';
-import { mint } from '../token/mint';
+import {
+  getEnvVariable,
+  logEvents,
+  periodsToSeconds,
+  separator,
+} from '../utils';
 import { logBalances } from '../token/read';
 
+import * as dotenv from 'dotenv';
 dotenv.config();
 
 async function setupAccounts() {
   const account = await Account.fromEnv();
-  const recipientAccount = await Account.fromEnv('RECIPIENT_PK');
+  const recipient = getEnvVariable('RECIPIENT_ADDRESS');
   return {
     account,
-    recipientAccount,
     spender: account.address.toString(),
-    recipient: recipientAccount.address.toString(),
+    recipient,
   };
 }
 
@@ -30,8 +33,8 @@ async function main() {
   const tokenArgs = new Args()
     .addString('MassaTips')
     .addString('MT')
-    .addU8(18n)
-    .addU256(0n);
+    .addU8(0n)
+    .addU256(1000000000n);
 
   const { contractAddress: tokenAddress } = await deploy(
     'token.wasm',
@@ -50,20 +53,12 @@ async function main() {
     tokenAddress,
     spender,
     recipient,
-    Mas.fromString('0.1'),
     1n,
-    0n,
+    1n,
+    1n,
+    1n,
+    1n,
   );
-
-  const mintEvents = await mint(
-    client,
-    account,
-    tokenAddress,
-    account.address.toString(),
-    U128.MAX,
-  );
-  console.log('Token minted');
-  mintEvents.forEach((event) => console.log('Event: ', event.data));
 
   const allowanceEvents = await increaseAllowance(
     client,
@@ -73,21 +68,27 @@ async function main() {
     schedule.amount * schedule.occurrences,
   );
   console.log('Allowance increased');
-  allowanceEvents.forEach((event) => console.log('Event: ', event.data));
+  logEvents(allowanceEvents);
 
   const createEvents = await create(schedulerAddress, schedule);
-  console.log('Schedule created');
-  createEvents.forEach((event) => console.log('Event: ', event.data));
+  console.log(
+    'Schedule created',
+    `current period: ${await client.fetchPeriod()}`,
+  );
+  logEvents(createEvents);
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 10; i++) {
     separator();
     await scheduler.wait(periodsToSeconds(Number(schedule.occurrences)));
-    console.log(`Iteration ${i + 1}:`);
+    console.log(
+      `Iteration ${i + 1}:`,
+      `current period: ${await client.fetchPeriod()}`,
+    );
     const schedules = await getSchedulesBySpender(schedulerAddress, spender);
     schedules.forEach((schedule, idx) =>
       console.log(
         // eslint-disable-next-line max-len
-        `Schedule ${idx}: recipient: ${schedule.recipient}, amount: ${schedule.amount}, remaining: ${schedule.remaining}, occurrences: ${schedule.occurrences}`,
+        `Schedule ${idx}: id: ${schedule.id} recipient: ${schedule.recipient}, amount: ${schedule.amount}, remaining: ${schedule.remaining}, occurrences: ${schedule.occurrences}`,
       ),
     );
     await logBalances(tokenAddress, spender, recipient);
@@ -95,7 +96,7 @@ async function main() {
       smartContractAddress: schedulerAddress,
       isFinal: true,
     });
-    events.forEach((event, idx) => console.log(`Event ${idx}`, event.data));
+    logEvents(events);
   }
 }
 

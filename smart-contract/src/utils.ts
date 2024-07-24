@@ -5,6 +5,7 @@ import {
   Account,
   Address,
   JsonRPCClient,
+  SCOutputEvent,
   SmartContract,
 } from '@massalabs/massa-web3';
 
@@ -49,4 +50,12 @@ export function periodsToSeconds(
 
 export function separator() {
   console.log('\n' + '-'.repeat(20) + '\n');
+}
+
+export function logEvents(events: SCOutputEvent[]) {
+  events.forEach((event) =>
+    console.log(
+      `Event${event.context.is_error ? ' (error)' : ''}:  ${event.data}`,
+    ),
+  );
 }
