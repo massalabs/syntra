@@ -8,10 +8,10 @@ interface ScheduleTableProps {
 
 const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules }) => {
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto border rounded-md h-full mt-2">
       <table className="min-w-full divide-y divide-gray-200">
         <thead>
-          <tr>
+          <tr className="bg-[#ebfdc5]">
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               ID
             </th>
@@ -30,7 +30,7 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules }) => {
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Interval
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Occurrences
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">

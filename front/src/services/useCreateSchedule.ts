@@ -1,4 +1,4 @@
-import { fakeSchedulerAddress, fakeTokenAddress } from '@/const/contracts';
+import { schedulerAddress, fakeTokenAddress } from '@/const/contracts';
 import { Schedule, Transfer } from '@/serializable/Schedule';
 import { Address, JsonRPCClient, Mas, Operation } from '@massalabs/massa-web3';
 import {
@@ -6,7 +6,6 @@ import {
   useWriteSmartContract,
 } from '@massalabs/react-ui-kit';
 import { useState } from 'react';
-import useToken from './useToken';
 
 type ScheduleInfo = {
   amount: bigint;
@@ -30,7 +29,6 @@ const defaultScheduleInfo: ScheduleInfo = {
 
 export default function useCreateSchedule() {
   const { connectedAccount, currentProvider } = useAccountStore();
-  const { getBalanceOf, getAllowanceOf } = useToken(fakeTokenAddress);
 
   const { callSmartContract } = useWriteSmartContract(
     connectedAccount!,
@@ -69,7 +67,7 @@ export default function useCreateSchedule() {
     }
     const op = await callSmartContract(
       'startScheduleSendFT',
-      fakeSchedulerAddress,
+      schedulerAddress,
       Schedule.fromScheduleInfo(scheduleInfo).serialize(),
       {
         success: 'Schedule successfully created',

@@ -1,158 +1,170 @@
+/* eslint-disable max-len */
 import {
   NumericInput,
   RecipientAddressInput,
   RecurrenceDropdown,
 } from '@/components';
-import { fakeSchedulerAddress, fakeTokenAddress } from '@/const/contracts';
-import { Button, useAccountStore } from '@massalabs/react-ui-kit';
+import { fakeTokenAddress } from '@/const/contracts';
+import {
+  Button,
+  Dropdown,
+  formatAmount,
+  useAccountStore,
+} from '@massalabs/react-ui-kit';
 import { ConnectButton } from '@/components/ConnectWalletPopup/ConnectButton';
 import { Card } from '@massalabs/react-ui-kit/src/components/Card/Card';
-import { Mas } from '@massalabs/massa-web3';
 import useCreateSchedule from '@/services/useCreateSchedule';
 import useGetSchedule from '@/services/useGetSchedule';
 import useToken from '@/services/useToken';
 import ScheduleTable from '@/components/scheduleTable';
+import { useRef, useEffect } from 'react';
 
-// TODO: Calculate coins to be sent according to the number of occurrence (0.3 * occurrence)
 export default function HomePage() {
   const { connectedAccount, currentProvider } = useAccountStore();
   const { scheduleInfo, setScheduleInfo, createSchedule } = useCreateSchedule();
-  const { spenderSchedules, getSchedulesBySpender, getScheduleByRecipient } =
-    useGetSchedule();
-  const { increaseAllowance, getBalanceOf, getAllowanceOf, decreaseAllowance } =
-    useToken(fakeTokenAddress);
+  const { spenderSchedules, getSchedulesBySpender } = useGetSchedule();
+  const { increaseAllowance } = useToken(fakeTokenAddress);
 
   const connected = !!connectedAccount && !!currentProvider;
 
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const scrollToList = () => {
+    if (listRef.current) {
+      listRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  useEffect(() => {
+    if (connectedAccount) {
+      const fetchSchedules = async () => {
+        const address = await connectedAccount.address();
+        getSchedulesBySpender(address);
+      };
+      fetchSchedules();
+    }
+  }, [connectedAccount, getSchedulesBySpender]);
+
   return (
-    <div className="mt-32">
-      <ConnectButton />
-      <div className="flex-col p-5 w-full">
-        <p className="w-full mas-title mb-2 text-center">Massa Tips</p>
+    <>
+      <div className="h-screen flex flex-col justify-between">
+        <ConnectButton />
 
-        {connected && (
-          <section className="mt-10 space-y-5 max-w-2xl m-auto">
-            <Card customClass="mb-10 space-y-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <InputLabel
-                    label={`Amount ${Mas.toString(scheduleInfo.amount)} Mas`}
-                  />
-                  <NumericInput
-                    placeholder="Enter your amount"
-                    onNumChange={(amount) => {
-                      setScheduleInfo('amount', BigInt(amount));
-                    }}
-                    value={scheduleInfo.amount.toString()}
-                  />
-                </div>
-                <div>
-                  <InputLabel label="Recipient Address" />
-                  <RecipientAddressInput
-                    value={scheduleInfo.recipient}
-                    onAddressChange={(address) => {
-                      setScheduleInfo('recipient', address);
-                    }}
-                  />
-                </div>
-                <div>
-                  <InputLabel label="Interval" />
-                  <RecurrenceDropdown
-                    value={Number(scheduleInfo.interval)} // Assuming your dropdown uses IOption interface
-                    onRecurrenceChange={(value: number) => {
-                      setScheduleInfo('interval', BigInt(value));
-                    }}
-                  />
-                </div>
-                <div>
-                  <InputLabel label="Repeat" />
-                  <NumericInput
-                    placeholder="Enter your amount"
-                    value={scheduleInfo.occurrences.toString()}
-                    onNumChange={(value) => {
-                      setScheduleInfo('occurrences', BigInt(value));
-                    }}
-                  />
-                </div>
-              </div>
+        <div className="flex flex-col p-5 w-full flex-1">
+          <p className="w-full text-4xl font-bold text-white mb-2 text-center">
+            Massa Tips
+          </p>
 
-              <div className="flex mt-4 gap-4">
-                <Button
-                  variant="secondary"
-                  onClick={() =>
-                    increaseAllowance(
-                      scheduleInfo.amount * scheduleInfo.occurrences,
-                    )
+          {connected && (
+            <div className="flex flex-col justify-center items-center gap-4 flex-1">
+              <section className="max-w-2xl w-full mx-auto border rounded-md mb-6 bg-white shadow-lg p-6">
+                <Card customClass="space-y-5 bg-transparent">
+                  <div>
+                    <div className="grid grid-cols-6 gap-2">
+                      <div className="col-span-3">
+                        <InputLabel
+                          label={`Amount ${
+                            formatAmount(scheduleInfo.amount).preview
+                          } Mas`}
+                        />
+                        <NumericInput
+                          placeholder="Enter your amount"
+                          onNumChange={(amount) => {
+                            setScheduleInfo('amount', BigInt(amount));
+                          }}
+                          value={scheduleInfo.amount.toString()}
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <InputLabel label="Interval" />
+                        <RecurrenceDropdown
+                          value={Number(scheduleInfo.interval)}
+                          onRecurrenceChange={(value: number) => {
+                            setScheduleInfo('interval', BigInt(value));
+                          }}
+                        />
+                      </div>
+                      <div className="col-span-1">
+                        <InputLabel label="Repeat" />
+                        <NumericInput
+                          placeholder="Enter your amount"
+                          value={scheduleInfo.occurrences.toString()}
+                          onNumChange={(value) => {
+                            setScheduleInfo('occurrences', BigInt(value));
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <InputLabel label="Recipient Address" />
+                      <RecipientAddressInput
+                        value={scheduleInfo.recipient}
+                        onAddressChange={(address) => {
+                          setScheduleInfo('recipient', address);
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <InputLabel label="Token" />
+                      <Dropdown options={[]} />
+                    </div>
+                  </div>
+                  <Button
+                    variant="secondary"
+                    onClick={() =>
+                      increaseAllowance(
+                        scheduleInfo.amount * scheduleInfo.occurrences,
+                      )
+                    }
+                    className="border-2 border-gray-800 hover:bg-[#f27a93] hover:border-[bg-[#f27a93]] w-full py-2 rounded-md mt-4 ease-out"
+                  >
+                    {`Allow ${
+                      formatAmount(
+                        scheduleInfo.amount * scheduleInfo.occurrences,
+                      ).preview
+                    } Mas`}
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={createSchedule}
+                    className="bg-[#f27a93] text-white border-4 w-full py-2 rounded-md mt-4 ring-0 outline-none"
+                  >
+                    Create Schedule
+                  </Button>
+                </Card>
+              </section>
+              <button
+                className="p-2 rounded-full bg-white hover:bg-gray-200 text-blue-500"
+                onClick={() => {
+                  scrollToList();
+                  if (connectedAccount) {
+                    getSchedulesBySpender(connectedAccount.address());
                   }
-                >
-                  {`Allow ${Mas.toString(
-                    scheduleInfo.amount * scheduleInfo.occurrences,
-                  )} Mas`}
-                </Button>
-                <Button variant="secondary" onClick={createSchedule}>
-                  Create Schedule
-                </Button>
-              </div>
-            </Card>
-          </section>
+                }}
+              >
+                ↓
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div
+        ref={listRef}
+        className="h-screen flex flex-col items-center justify-center bg-gray-100"
+      >
+        {spenderSchedules.length > 0 ? (
+          <ScheduleTable schedules={spenderSchedules} />
+        ) : (
+          <div className="text-center text-gray-500">No schedules found</div>
         )}
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5">
-        <InfoOpCard title="Token Balance">
-          <button
-            className="btn btn-primary mb-2"
-            onClick={() => getBalanceOf(connectedAccount?.address() || '')}
-          >
-            Get Balance connected account
-          </button>
-          <button
-            className="btn btn-primary"
-            onClick={() => getBalanceOf(scheduleInfo.recipient)}
-          >
-            Get Balance recipient
-          </button>
-        </InfoOpCard>
-
-        <InfoOpCard title="Schedule Info">
-          <button
-            className="btn btn-primary mb-2"
-            onClick={() =>
-              getSchedulesBySpender(connectedAccount?.address() || '')
-            }
-          >
-            Get Schedules by spender
-          </button>
-          <button
-            className="btn btn-primary"
-            onClick={() => getScheduleByRecipient(scheduleInfo.recipient)}
-          >
-            Get Schedules by recipient
-          </button>
-        </InfoOpCard>
-        <InfoOpCard title="Allowance">
-          <button
-            className="btn btn-primary"
-            onClick={() => getAllowanceOf(fakeSchedulerAddress)}
-          >
-            Get Allowance of Tips contract
-          </button>
-
-          {/* Remove allowance */}
-          <button
-            className="btn btn-primary"
-            onClick={() => decreaseAllowance(scheduleInfo.amount)}
-          >
-            Decrease Allowance
-          </button>
-        </InfoOpCard>
-      </div>
-      <ScheduleTable schedules={spenderSchedules} />
-    </div>
+    </>
   );
 }
 
 function InputLabel(props: { label: string }) {
-  return <p className="text-sm text-gray-500 mb-2">{props.label}</p>;
+  return <p className="text-sm text-gray-700 mb-2">{props.label}</p>;
 }
 
 function InfoOpCard({

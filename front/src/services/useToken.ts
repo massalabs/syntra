@@ -1,4 +1,4 @@
-import { fakeSchedulerAddress } from '@/const/contracts';
+import { schedulerAddress } from '@/const/contracts';
 import { truncateAddress } from '@/utils/address';
 import { Args, Mas, U256 } from '@massalabs/massa-web3';
 import {
@@ -51,7 +51,7 @@ export default function useToken(ftAddress: string) {
     await callSmartContract(
       'increaseAllowance',
       ftAddress,
-      new Args().addString(fakeSchedulerAddress).addU256(amount).serialize(),
+      new Args().addString(schedulerAddress).addU256(amount).serialize(),
       {
         success: 'Amount approved successfully',
         pending: 'Approving amount...',
@@ -74,7 +74,7 @@ export default function useToken(ftAddress: string) {
     await callSmartContract(
       'decreaseAllowance',
       ftAddress,
-      new Args().addString(fakeSchedulerAddress).addU256(U256.MAX).serialize(),
+      new Args().addString(schedulerAddress).addU256(U256.MAX).serialize(),
       {
         success: 'Amount approved successfully',
         pending: 'Approving amount...',

@@ -1,25 +1,37 @@
-import { fakeSchedulerAddress } from '@/const/contracts';
+import { schedulerAddress } from '@/const/contracts';
 import { Schedule } from '@/serializable/Schedule';
 import { Args, Mas } from '@massalabs/massa-web3';
 import { useAccountStore } from '@massalabs/react-ui-kit';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export default function useGetSchedule() {
   const { connectedAccount } = useAccountStore();
   const [spenderSchedules, setSpenderSchedules] = useState<Schedule[]>([]);
+  const getSchedulesBySpender = useCallback(
+    async (spender: string) => {
+      if (!spender) {
+        console.error('Missing required fields');
+        return;
+      }
 
-  async function getSchedulesBySpender(spender: string) {
-    if (!spender) {
-      console.error('Missing required fields');
-      return;
-    }
+      const result = await getSchedule(
+        'getSchedulesBySpender',
+        new Args().addString(spender),
+      );
+      setSpenderSchedules(result);
+    },
+    [getSchedule, setSpenderSchedules],
+  );
+  useEffect(() => {
+    const fetchSchedules = async () => {
+      if (connectedAccount) {
+        const address = await connectedAccount.address();
+        getSchedulesBySpender(address);
+      }
+    };
 
-    const result = await getSchedule(
-      'getSchedulesBySpender',
-      new Args().addString(spender),
-    );
-    setSpenderSchedules(result);
-  }
+    fetchSchedules();
+  }, [connectedAccount]);
 
   async function getScheduleByRecipient(recipient: string) {
     if (!recipient) {
@@ -45,12 +57,12 @@ export default function useGetSchedule() {
     }
 
     const res = await connectedAccount.readSc(
-      fakeSchedulerAddress,
+      schedulerAddress,
       functionName,
       args.serialize(),
       Mas.fromString('0.01'),
-      Mas.fromString('0.01'),
-      BigInt(4000000000),
+      Mas.fromString('0'),
+      BigInt(0),
     );
 
     console.log('Operation:', res);
