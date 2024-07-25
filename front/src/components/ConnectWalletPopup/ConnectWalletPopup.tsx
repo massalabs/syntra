@@ -28,11 +28,6 @@ export function ConnectWalletPopup(props: ConnectWalletPopupProps) {
           <label className="mas-title mb-4">
             {Intl.t('connect-wallet.title')}
           </label>
-          {/* <div className="mas-body">
-            {getIsMainnet()
-              ? Intl.t('connect-wallet.description-mainnet')
-              : Intl.t('connect-wallet.description-buildnet')}
-          </div> */}
         </div>
       </PopupModalHeader>
       <PopupModalContent>

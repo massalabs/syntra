@@ -7,6 +7,8 @@ type NumericInputProps = {
   onNumChange: (e: string) => void;
   error?: string;
 };
+
+// TODO: To add in ui-kit
 export function NumericInput(props: NumericInputProps) {
   const { value, placeholder, onNumChange, error } = props;
 

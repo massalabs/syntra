@@ -1,5 +1,5 @@
 import { Dropdown } from '@massalabs/react-ui-kit';
-import Intl from '../i18n/i18n';
+import Intl from '@/i18n/i18n';
 
 const recurrenceOptions = [
   {

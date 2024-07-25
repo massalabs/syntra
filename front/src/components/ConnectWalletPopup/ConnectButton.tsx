@@ -2,11 +2,7 @@ import { Button, useAccountStore } from '@massalabs/react-ui-kit';
 import Intl from '@/i18n/i18n';
 import { useState } from 'react';
 import { ConnectWalletPopup } from './ConnectWalletPopup';
-
-const truncateAddress = (address?: string, startLength = 6, endLength = 4) => {
-  if (!address) return '';
-  return `${address.slice(0, startLength)}...${address.slice(-endLength)}`;
-};
+import { truncateAddress } from '@/utils/address';
 
 export function ConnectButton() {
   const [open, setOpen] = useState(false);
@@ -54,6 +50,7 @@ export function ConnectButton() {
   );
 }
 
+// TODO: To move in ui-kit
 function PingAnimation() {
   return (
     <span className="absolute flex h-3 w-3 top-0 right-0 -mr-1 -mt-1">
