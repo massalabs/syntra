@@ -1,4 +1,3 @@
-import * as dotenv from 'dotenv';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -6,9 +5,11 @@ import {
   Account,
   Address,
   JsonRPCClient,
+  SCOutputEvent,
   SmartContract,
 } from '@massalabs/massa-web3';
 
+import * as dotenv from 'dotenv';
 dotenv.config();
 
 export function getEnvVariable(key: string): string {
@@ -38,4 +39,23 @@ export async function getClientAndContract(contractAddress: string) {
       account,
     ),
   };
+}
+
+export function periodsToSeconds(
+  periods: number,
+  periodDuration = 20000,
+): number {
+  return periods * periodDuration;
+}
+
+export function separator() {
+  console.log('\n' + '-'.repeat(20) + '\n');
+}
+
+export function logEvents(events: SCOutputEvent[]) {
+  events.forEach((event) =>
+    console.log(
+      `Event${event.context.is_error ? ' (error)' : ''}:  ${event.data}`,
+    ),
+  );
 }

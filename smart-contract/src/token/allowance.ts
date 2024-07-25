@@ -24,5 +24,6 @@ export async function increaseAllowance(
   );
 
   await operation.waitSpeculativeExecution();
-  console.log('allowance increased');
+
+  return await operation.getSpeculativeEvents();
 }

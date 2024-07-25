@@ -1,4 +1,5 @@
 import {
+  asyncSendFT,
   cancelScheduleSendFT,
   constructor,
   getSchedule,
@@ -44,7 +45,7 @@ beforeEach(() => {
 
 function createSchedule(spender: string = spender1): void {
   // mock allowance
-  mockScCall(u256ToBytes(amount));
+  mockScCall(u256ToBytes(amount * u256.fromU64(occurrences)));
 
   const schedule = new Schedule(
     0,
@@ -157,6 +158,38 @@ describe('Scheduler app test', () => {
     expect(new Args(scheduleSer).next<Schedule>().unwrap()).toStrictEqual(
       schedules[0],
     );
+  });
+});
+
+describe('async send FT', () => {
+  test('success', () => {
+    createSchedule();
+    const schedule = new Args(
+      getSchedulesBySpender(new Args().add(spender1).serialize()),
+    )
+      .nextSerializableObjectArray<Schedule>()
+      .unwrap()[0];
+    switchUser(contractAddress);
+    mockScCall([]);
+    asyncSendFT(new Args().add(schedule.spender).add(schedule.id).serialize());
+    const schedules = new Args(
+      getSchedulesBySpender(new Args().add(spender1).serialize()),
+    )
+      .nextSerializableObjectArray<Schedule>()
+      .unwrap();
+    expect(schedules).toHaveLength(1);
+    expect(schedules[0].remaining).toBe(occurrences - 1);
+
+    // seconde autonomous execution
+    mockScCall([]);
+    asyncSendFT(new Args().add(schedule.spender).add(schedule.id).serialize());
+    const schedules2 = new Args(
+      getSchedulesBySpender(new Args().add(spender1).serialize()),
+    )
+      .nextSerializableObjectArray<Schedule>()
+      .unwrap();
+    expect(schedules2).toHaveLength(1);
+    expect(schedules2[0].remaining).toBe(occurrences - 2);
   });
 });
 
