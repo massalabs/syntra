@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import {
   NumericInput,
   RecipientAddressInput,
@@ -45,6 +44,7 @@ export default function HomePage() {
     }
   }, [connectedAccount, getSchedulesBySpender]);
 
+  /* eslint-disable max-len */
   return (
     <>
       <div className="h-screen flex flex-col justify-between">
@@ -165,19 +165,4 @@ export default function HomePage() {
 
 function InputLabel(props: { label: string }) {
   return <p className="text-sm text-gray-700 mb-2">{props.label}</p>;
-}
-
-function InfoOpCard({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="p-4 border rounded-lg shadow-lg bg-white">
-      <label className="block mb-2 font-semibold">{title}</label>
-      {children}
-    </div>
-  );
 }
