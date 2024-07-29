@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useAccountStore } from '@massalabs/react-ui-kit';
+import { useAccountStore } from '@massalabs/react-ui-kit/src/lib/ConnectMassaWallets';
 // TODO - Export in ui-kit
 import { useLocalStorage } from '@massalabs/react-ui-kit/src/lib/util/hooks/useLocalStorage';
 
@@ -28,7 +28,7 @@ const useAccountSync = () => {
   // Save account and provider to local storage
   useEffect(() => {
     if (!connectedAccount) return;
-    const { account, provider } = savedAccount;
+    const { account } = savedAccount;
     if (account !== connectedAccount.address()) {
       console.log('connectedAccount', connectedAccount);
       setSavedAccount({
@@ -36,7 +36,7 @@ const useAccountSync = () => {
         account: connectedAccount.address(),
       });
     }
-  }, [connectedAccount]);
+  }, [connectedAccount, savedAccount, setSavedAccount]);
 
   // Sync account and provider from local storage
   useEffect(() => {
@@ -58,7 +58,14 @@ const useAccountSync = () => {
         setCurrentProvider(savedProvider);
       }
     });
-  }, [providers]);
+  }, [
+    providers,
+    savedAccount,
+    connectedAccount,
+    currentProvider,
+    setConnectedAccount,
+    setCurrentProvider,
+  ]);
 };
 
 export default useAccountSync;

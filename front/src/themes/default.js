@@ -1,16 +1,10 @@
 import { createThemes } from 'tw-colors';
 import plugin from 'tailwindcss/plugin';
 
-const colorGreen = '#1AE19D';
-const colorWhite = '#FFFFFF';
-const colorDarkGrey = '#BBBAD9';
-const colorLightGrey = '#F5F5FF';
-const colorDarkBlue = '#010112';
-const colorBasicBlue = '#060625';
-const colorLightBlue = '#0C0C33';
-const colorWarning = '#FFA41D';
-const colorError = '#FF4F4F';
-const colorInfo = '#010112';
+const colorRed = '#F1685D';
+const colorBeige = '#EBEBE6';
+const colorGrey = '#495A54';
+const colorDarkGrey = '#292928';
 
 /** @type {import('tailwindcss').Config} */
 // eslint-disable-next-line no-undef
@@ -24,65 +18,65 @@ module.exports = {
   plugins: [
     createThemes({
       light: {
-        primary: colorWhite,
-        secondary: colorLightGrey,
-        tertiary: colorDarkGrey,
-        neutral: colorDarkBlue,
-        info: colorDarkBlue,
+        primary: colorRed,
+        secondary: colorBeige,
+        tertiary: colorBeige,
+        neutral: colorGrey,
+        info: colorGrey,
         // states:
-        's-success': colorGreen,
-        's-error': colorError,
-        's-warning': colorWarning,
-        's-info': colorDarkBlue,
-        's-info-1': colorInfo,
+        's-success': colorRed,
+        's-error': colorRed,
+        's-warning': colorRed,
+        's-info': colorGrey,
+        's-info-1': colorGrey,
         // components:
-        'c-default': colorDarkBlue,
-        'c-hover': colorLightBlue,
-        'c-pressed': colorBasicBlue,
-        'c-disabled-1': colorDarkGrey,
-        'c-disabled-2': colorLightGrey,
-        'c-error': colorError,
+        'c-default': colorGrey,
+        'c-hover': colorGrey,
+        'c-pressed': colorGrey,
+        'c-disabled-1': colorGrey,
+        'c-disabled-2': colorBeige,
+        'c-error': colorRed,
         // icons:
-        'i-primary': colorDarkBlue,
-        'i-secondary': colorWhite,
+        'i-primary': colorGrey,
+        'i-secondary': colorBeige,
         'i-tertiary': colorDarkGrey,
         // fonts:
-        'f-primary': colorDarkBlue,
-        'f-secondary': colorWhite,
-        'f-tertiary': colorDarkGrey,
-        'f-disabled-1': colorDarkGrey,
-        'f-disabled-2': colorWhite,
+        'f-primary': colorGrey,
+        'f-secondary': colorBeige,
+        'f-tertiary': colorGrey,
+        'f-disabled-1': colorGrey,
+        'f-disabled-2': colorBeige,
       },
       dark: {
-        primary: colorDarkBlue,
-        secondary: colorBasicBlue,
-        tertiary: colorLightBlue,
-        brand: colorGreen,
-        neutral: colorWhite,
-        info: colorDarkGrey,
+        primary: colorGrey,
+        secondary: colorGrey,
+        tertiary: colorBeige,
+        brand: colorRed,
+        neutral: colorBeige,
+        info: colorGrey,
         // states:
-        's-success': colorGreen,
-        's-error': colorError,
-        's-warning': colorWarning,
-        's-info': colorDarkGrey,
-        's-info-1': colorInfo,
+        's-success': colorRed,
+        's-error': colorRed,
+        's-warning': colorRed,
+        's-info': colorGrey,
+        's-info-1': colorGrey,
         // components:
-        'c-default': colorWhite,
-        'c-hover': colorDarkGrey,
-        'c-pressed': colorLightGrey,
-        'c-disabled-1': colorDarkGrey,
-        'c-disabled-2': colorLightGrey,
-        'c-error': colorError,
+        'c-default': colorBeige,
+        'c-hover': colorGrey,
+        'c-pressed': colorGrey,
+        'c-disabled-1': colorGrey,
+        'c-disabled-2': colorBeige,
+        'c-error': colorRed,
         // icons:
-        'i-primary': colorWhite,
-        'i-secondary': colorDarkBlue,
-        'i-tertiary': colorGreen,
+        'i-primary': colorBeige,
+        'i-secondary': colorGrey,
+        'i-tertiary': colorRed,
         // fonts:
-        'f-primary': colorWhite,
-        'f-secondary': colorDarkBlue,
-        'f-tertiary': colorGreen,
-        'f-disabled-1': colorDarkGrey,
-        'f-disabled-2': colorWhite,
+        'f-primary': colorBeige,
+        'f-secondary': colorGrey,
+        'f-tertiary': colorRed,
+        'f-disabled-1': colorGrey,
+        'f-disabled-2': colorBeige,
       },
     }),
     plugin(function ({ addComponents, theme }) {

@@ -83,18 +83,20 @@ export function scheduleAllSendFT(schedule: Schedule): void {
       Context.currentPeriod() + schedule.interval * n - schedule.tolerance;
     const validityStartThread = Context.currentThread();
     const validityEndPeriod =
-      Context.currentPeriod() + schedule.interval * n + schedule.tolerance;
+      Context.currentPeriod() + schedule.interval * n + schedule.tolerance + 1; // +1 because validity-end is exclusive
     const validityEndThread = Context.currentThread();
     sendMessage(
       Context.callee(),
       'asyncSendFT',
       validityStartPeriod,
       validityStartThread,
-      validityEndPeriod, // exclusive
+      validityEndPeriod,
       validityEndThread,
       MAX_GAS_ASYNC_FT,
       1_000_000,
-      getBalanceEntryCost(schedule.tokenAddress, schedule.recipient),
+      n === 1
+        ? getBalanceEntryCost(schedule.tokenAddress, schedule.recipient)
+        : 0,
       new Args().add(schedule.spender).add(schedule.id).serialize(),
     );
     generateEvent(
