@@ -44,7 +44,6 @@ export default function HomePage() {
     }
   }, [connectedAccount, getSchedulesBySpender]);
 
-  /* eslint-disable max-len */
   return (
     <>
       <div className="h-screen flex flex-col justify-between">
