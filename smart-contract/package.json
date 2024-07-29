@@ -22,7 +22,6 @@
     "devDependencies": {
         "@as-pect/cli": "^8.1.0",
         "@assemblyscript/loader": "^0.27.29",
-        "@massalabs/as-transformer": "^0.3.2",
         "@massalabs/as-types": "^2.0.0",
         "@massalabs/eslint-config": "^0.0.11",
         "@massalabs/massa-as-sdk": "^3.0.1-dev",
@@ -50,6 +49,7 @@
         "node": ">=16"
     },
     "dependencies": {
-        "@massalabs/sc-standards": "^1.2.3-dev"
+        "@massalabs/sc-standards": "^1.2.3-dev",
+        "as-bignum": "^0.3.1"
     }
 }
