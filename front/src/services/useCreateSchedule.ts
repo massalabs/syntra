@@ -65,6 +65,7 @@ export default function useCreateSchedule() {
     } catch (error) {
       throw new Error('Invalid recipient address');
     }
+
     const op = await callSmartContract(
       'startScheduleSendFT',
       schedulerAddress,

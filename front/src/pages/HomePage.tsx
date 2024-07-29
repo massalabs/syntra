@@ -78,8 +78,8 @@ export default function HomePage() {
                       <div className="col-span-2">
                         <InputLabel label="Interval" />
                         <RecurrenceDropdown
-                          value={Number(scheduleInfo.interval)}
-                          onRecurrenceChange={(value: number) => {
+                          value={scheduleInfo.interval}
+                          onRecurrenceChange={(value: bigint) => {
                             setScheduleInfo('interval', BigInt(value));
                           }}
                         />
@@ -116,7 +116,6 @@ export default function HomePage() {
                         scheduleInfo.amount * scheduleInfo.occurrences,
                       )
                     }
-                    className="border-2 border-gray-800 hover:bg-[#f27a93] hover:border-[bg-[#f27a93]] w-full py-2 rounded-md mt-4 ease-out"
                   >
                     {`Allow ${
                       formatAmount(
@@ -127,7 +126,7 @@ export default function HomePage() {
                   <Button
                     variant="secondary"
                     onClick={createSchedule}
-                    className="bg-[#f27a93] text-white border-4 w-full py-2 rounded-md mt-4 ring-0 outline-none"
+                    className="bg-primary text-white border-4 w-full py-2 rounded-md mt-4 ring-0 outline-none"
                   >
                     Create Schedule
                   </Button>
