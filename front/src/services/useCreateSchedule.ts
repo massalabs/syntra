@@ -1,3 +1,4 @@
+import { assets } from '@/const/assets';
 import { schedulerAddress, fakeTokenAddress } from '@/const/contracts';
 import { Schedule, Transfer } from '@/serializable/Schedule';
 import { Address, JsonRPCClient, Mas, Operation } from '@massalabs/massa-web3';
@@ -22,7 +23,7 @@ const defaultScheduleInfo: ScheduleInfo = {
   interval: 10n,
   recipient: 'AU1dvPZNjcTQfNQQuysWyxLLhEzw4kB9cGW2RMMVAQGrkzZHqWGD',
   spender: 'AU12FUbb8snr7qTEzSdTVH8tbmEouHydQTUAKDXY9LDwkdYMNBVGF',
-  tokenAddress: fakeTokenAddress,
+  tokenAddress: assets[0].address,
   occurrences: 4n,
   tolerance: 4n,
 };

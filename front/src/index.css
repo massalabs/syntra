@@ -25,7 +25,7 @@ a:hover {
 }
 
 body {
-  background-image: url('../public/background.png');
+  background-image: url('/background.png');
   background-repeat: no-repeat;
   background-size: cover;
   margin: 0;
