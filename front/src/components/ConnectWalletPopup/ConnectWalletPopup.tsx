@@ -4,7 +4,6 @@ import {
   PopupModalContent,
   PopupModalHeader,
 } from '@massalabs/react-ui-kit';
-// import { ConnectWallets } from './ConnectWallets';
 import Intl from '@/i18n/i18n';
 
 interface ConnectWalletPopupProps {
@@ -13,8 +12,6 @@ interface ConnectWalletPopupProps {
 
 export function ConnectWalletPopup(props: ConnectWalletPopupProps) {
   const { setOpen } = props;
-
-  //   const { isMainnet: getIsMainnet } = useBridgeModeStore();
 
   return (
     <PopupModal
