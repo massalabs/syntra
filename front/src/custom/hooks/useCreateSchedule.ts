@@ -1,6 +1,9 @@
-import { schedulerAddress, fakeTokenAddress } from '@/const/contracts';
+import { schedulerAddress } from '@/const/contracts';
+
+import { tokenList } from '@/const/tokens';
+
 import { Schedule, Transfer } from '@/serializable/Schedule';
-import { Address, JsonRPCClient, Mas, Operation } from '@massalabs/massa-web3';
+import { Address, Mas } from '@massalabs/massa-web3';
 import {
   useAccountStore,
   useWriteSmartContract,
@@ -22,18 +25,15 @@ const defaultScheduleInfo: ScheduleInfo = {
   interval: 10n,
   recipient: 'AU1dvPZNjcTQfNQQuysWyxLLhEzw4kB9cGW2RMMVAQGrkzZHqWGD',
   spender: 'AU12FUbb8snr7qTEzSdTVH8tbmEouHydQTUAKDXY9LDwkdYMNBVGF',
-  tokenAddress: fakeTokenAddress,
+  tokenAddress: tokenList[0].address,
   occurrences: 4n,
   tolerance: 4n,
 };
 
 export default function useCreateSchedule() {
-  const { connectedAccount, currentProvider } = useAccountStore();
+  const { connectedAccount } = useAccountStore();
 
-  const { callSmartContract } = useWriteSmartContract(
-    connectedAccount!,
-    currentProvider!,
-  );
+  const { callSmartContract } = useWriteSmartContract(connectedAccount!, false);
 
   const [scheduleInfo, setInfo] = useState<ScheduleInfo>(defaultScheduleInfo);
 
@@ -84,8 +84,7 @@ export default function useCreateSchedule() {
       return;
     }
 
-    const operation = new Operation(JsonRPCClient.buildnet(), op);
-    const event = await operation.getSpeculativeEvents();
+    const event = await op.getSpeculativeEvents();
 
     for (const e of event) {
       console.log('Event:', e.data);

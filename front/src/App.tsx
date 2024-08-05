@@ -8,7 +8,7 @@ import {
 import { Toast } from '@massalabs/react-ui-kit';
 
 import HomePage from './pages/HomePage';
-import useAccountSync from './hooks/useAccountAsync';
+import useAccountSync from './custom/hooks/useAccountAsync';
 
 function App() {
   useAccountSync();

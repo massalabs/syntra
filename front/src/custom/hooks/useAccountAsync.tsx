@@ -10,10 +10,10 @@ type SavedAccount = {
 
 const useAccountSync = () => {
   const {
-    providers,
-    currentProvider,
+    wallets,
+    currentWallet,
     connectedAccount,
-    setCurrentProvider,
+    setCurrentWallet,
     setConnectedAccount,
   } = useAccountStore();
 
@@ -29,42 +29,42 @@ const useAccountSync = () => {
   useEffect(() => {
     if (!connectedAccount) return;
     const { account } = savedAccount;
-    if (account !== connectedAccount.address()) {
+    if (account !== connectedAccount.address) {
       console.log('connectedAccount', connectedAccount);
       setSavedAccount({
-        provider: connectedAccount.providerName(),
-        account: connectedAccount.address(),
+        provider: connectedAccount.providerName,
+        account: connectedAccount.address,
       });
     }
   }, [connectedAccount, savedAccount, setSavedAccount]);
 
   // Sync account and provider from local storage
   useEffect(() => {
-    if (providers.length === 0) return;
+    if (wallets.length === 0) return;
     const { account, provider } = savedAccount;
     if (!account || !provider) return;
 
-    const savedProvider = providers.find((p) => p.name() === provider);
+    const savedProvider = wallets.find((p) => p.name() === provider);
 
     if (!savedProvider) return;
 
     savedProvider.accounts().then((accounts) => {
-      const acc = accounts.find((a) => a.address() === account);
-      if (acc?.address() !== connectedAccount?.address()) {
+      const acc = accounts.find((a) => a.address === account);
+      if (acc?.address !== connectedAccount?.address) {
         setConnectedAccount(acc);
       }
 
-      if (currentProvider?.name() !== savedProvider.name()) {
-        setCurrentProvider(savedProvider);
+      if (currentWallet?.name() !== savedProvider.name()) {
+        setCurrentWallet(savedProvider);
       }
     });
   }, [
-    providers,
+    wallets,
     savedAccount,
     connectedAccount,
-    currentProvider,
+    currentWallet,
     setConnectedAccount,
-    setCurrentProvider,
+    setCurrentWallet,
   ]);
 };
 

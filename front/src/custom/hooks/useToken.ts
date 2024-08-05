@@ -7,11 +7,9 @@ import {
 } from '@massalabs/react-ui-kit';
 
 export default function useToken(ftAddress: string) {
-  const { connectedAccount, currentProvider } = useAccountStore();
-  const { callSmartContract } = useWriteSmartContract(
-    connectedAccount!,
-    currentProvider!,
-  );
+  const { connectedAccount } = useAccountStore();
+  // TODO - set the right isMainnet value
+  const { callSmartContract } = useWriteSmartContract(connectedAccount!, false);
 
   async function getAllowanceOf(spender: string): Promise<bigint> {
     if (!spender || !connectedAccount) {
@@ -19,24 +17,22 @@ export default function useToken(ftAddress: string) {
       return BigInt(0);
     }
 
-    const op = await connectedAccount.readSc(
-      ftAddress,
-      'allowance',
-      new Args()
-        .addString(connectedAccount.address())
+    const res = await connectedAccount.readSC({
+      caller: connectedAccount.address,
+      target: ftAddress,
+      func: 'allowance',
+      parameter: new Args()
+        .addString(connectedAccount.address)
         .addString(spender)
         .serialize(),
-      Mas.fromString('0.01'),
-      Mas.fromString('0.01'),
-      BigInt(4000000000),
-    );
+    });
 
     console.log(
       `Allowance of ${truncateAddress(spender)}:`,
-      U256.fromBytes(op.returnValue),
+      U256.fromBytes(res.value),
     );
 
-    return U256.fromBytes(op.returnValue);
+    return U256.fromBytes(res.value);
   }
 
   async function increaseAllowance(amount: bigint) {
@@ -91,21 +87,19 @@ export default function useToken(ftAddress: string) {
       return BigInt(0);
     }
 
-    const op = await connectedAccount.readSc(
-      ftAddress,
-      'balanceOf',
-      new Args().addString(address).serialize(),
-      Mas.fromString('0.01'),
-      Mas.fromString('0.01'),
-      BigInt(4000000000),
-    );
+    const op = await connectedAccount.readSC({
+      caller: connectedAccount.address,
+      target: ftAddress,
+      func: 'balanceOf',
+      parameter: new Args().addString(address).serialize(),
+    });
 
     console.log(
       `Balance of ${truncateAddress(address)}:`,
-      U256.fromBytes(op.returnValue),
+      U256.fromBytes(op.value),
     );
 
-    return U256.fromBytes(op.returnValue);
+    return U256.fromBytes(op.value);
   }
 
   return { increaseAllowance, getBalanceOf, getAllowanceOf, decreaseAllowance };

@@ -18,7 +18,7 @@ export function ConnectButton() {
         customClass="h-[54px] relative"
         onClick={() => setOpen(true)}
       >
-        {truncateAddress(connectedAccount?.address())}
+        {truncateAddress(connectedAccount?.address)}
         {showPingAnimation && <PingAnimation />}
       </Button>
     );
