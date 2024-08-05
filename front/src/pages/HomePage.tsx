@@ -4,12 +4,7 @@ import {
   RecurrenceDropdown,
 } from '@/components';
 import { fakeTokenAddress } from '@/const/contracts';
-import {
-  Button,
-  Dropdown,
-  formatAmount,
-  useAccountStore,
-} from '@massalabs/react-ui-kit';
+import { Button, formatAmount, useAccountStore } from '@massalabs/react-ui-kit';
 import { ConnectButton } from '@/components/ConnectWalletPopup/ConnectButton';
 import { Card } from '@massalabs/react-ui-kit/src/components/Card/Card';
 import useCreateSchedule from '@/services/useCreateSchedule';
@@ -17,6 +12,7 @@ import useGetSchedule from '@/services/useGetSchedule';
 import useToken from '@/services/useToken';
 import ScheduleTable from '@/components/scheduleTable';
 import { useRef, useEffect } from 'react';
+import SelectAsset from '@/components/SelectAsset';
 
 export default function HomePage() {
   const { connectedAccount, currentProvider } = useAccountStore();
@@ -105,7 +101,12 @@ export default function HomePage() {
                     </div>
                     <div>
                       <InputLabel label="Token" />
-                      <Dropdown options={[]} />
+                      <SelectAsset
+                        onSelectAsset={(asset) => {
+                          if (asset.address)
+                            setScheduleInfo('tokenAddress', asset.address);
+                        }}
+                      />
                     </div>
                   </div>
                   <Button
