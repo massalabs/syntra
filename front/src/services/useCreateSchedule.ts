@@ -1,7 +1,7 @@
 import { assets } from '@/const/assets';
-import { schedulerAddress, fakeTokenAddress } from '@/const/contracts';
+import { schedulerAddress } from '@/const/contracts';
 import { Schedule, Transfer } from '@/serializable/Schedule';
-import { Address, JsonRPCClient, Mas, Operation } from '@massalabs/massa-web3';
+import { Address, Mas } from '@massalabs/massa-web3';
 import {
   useAccountStore,
   useWriteSmartContract,
@@ -25,16 +25,13 @@ const defaultScheduleInfo: ScheduleInfo = {
   spender: 'AU12FUbb8snr7qTEzSdTVH8tbmEouHydQTUAKDXY9LDwkdYMNBVGF',
   tokenAddress: assets[0].address,
   occurrences: 4n,
-  tolerance: 4n,
+  tolerance: 3n,
 };
 
 export default function useCreateSchedule() {
-  const { connectedAccount, currentProvider } = useAccountStore();
+  const { connectedAccount } = useAccountStore();
 
-  const { callSmartContract } = useWriteSmartContract(
-    connectedAccount!,
-    currentProvider!,
-  );
+  const { callSmartContract } = useWriteSmartContract(connectedAccount!);
 
   const [scheduleInfo, setInfo] = useState<ScheduleInfo>(defaultScheduleInfo);
 
@@ -52,6 +49,7 @@ export default function useCreateSchedule() {
 
   async function createSchedule() {
     const { amount, interval, recipient } = scheduleInfo;
+    scheduleInfo.spender = connectedAccount!.address;
 
     if (!amount || !interval || !recipient || !connectedAccount) {
       console.error('Missing required fields');
@@ -67,7 +65,7 @@ export default function useCreateSchedule() {
       throw new Error('Invalid recipient address');
     }
 
-    const op = await callSmartContract(
+    const operation = await callSmartContract(
       'startScheduleSendFT',
       schedulerAddress,
       Schedule.fromScheduleInfo(scheduleInfo).serialize(),
@@ -80,12 +78,11 @@ export default function useCreateSchedule() {
       Mas.fromString('0.01'),
     );
 
-    if (!op) {
+    if (!operation) {
       console.error('Failed to start schedule');
       return;
     }
 
-    const operation = new Operation(JsonRPCClient.buildnet(), op);
     const event = await operation.getSpeculativeEvents();
 
     for (const e of event) {

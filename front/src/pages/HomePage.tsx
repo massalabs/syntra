@@ -3,7 +3,6 @@ import {
   RecipientAddressInput,
   RecurrenceDropdown,
 } from '@/components';
-import { fakeTokenAddress } from '@/const/contracts';
 import { Button, formatAmount, useAccountStore } from '@massalabs/react-ui-kit';
 import { ConnectButton } from '@/components/ConnectWalletPopup/ConnectButton';
 import { Card } from '@massalabs/react-ui-kit/src/components/Card/Card';
@@ -15,12 +14,12 @@ import { useRef, useEffect } from 'react';
 import SelectAsset from '@/components/SelectAsset';
 
 export default function HomePage() {
-  const { connectedAccount, currentProvider } = useAccountStore();
+  const { connectedAccount } = useAccountStore();
   const { scheduleInfo, setScheduleInfo, createSchedule } = useCreateSchedule();
   const { spenderSchedules, getSchedulesBySpender } = useGetSchedule();
-  const { increaseAllowance } = useToken(fakeTokenAddress);
+  const { increaseAllowance } = useToken(scheduleInfo.tokenAddress);
 
-  const connected = !!connectedAccount && !!currentProvider;
+  const connected = !!connectedAccount;
 
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -32,11 +31,8 @@ export default function HomePage() {
 
   useEffect(() => {
     if (connectedAccount) {
-      const fetchSchedules = async () => {
-        const address = await connectedAccount.address();
-        getSchedulesBySpender(address);
-      };
-      fetchSchedules();
+      const connectedAddress = connectedAccount.address;
+      getSchedulesBySpender(connectedAddress);
     }
   }, [connectedAccount, getSchedulesBySpender]);
 
@@ -137,7 +133,7 @@ export default function HomePage() {
                 onClick={() => {
                   scrollToList();
                   if (connectedAccount) {
-                    getSchedulesBySpender(connectedAccount.address());
+                    getSchedulesBySpender(connectedAccount.address);
                   }
                 }}
               >
