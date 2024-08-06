@@ -2,70 +2,52 @@ import { useEffect } from 'react';
 import { useAccountStore } from '@massalabs/react-ui-kit/src/lib/ConnectMassaWallets';
 // TODO - Export in ui-kit
 import { useLocalStorage } from '@massalabs/react-ui-kit/src/lib/util/hooks/useLocalStorage';
+import { getWallets } from '@massalabs/wallet-provider';
 
 type SavedAccount = {
-  provider: string;
-  account: string;
+  address: string;
 };
 
 const useAccountSync = () => {
-  const {
-    providers,
-    currentProvider,
-    connectedAccount,
-    setCurrentProvider,
-    setConnectedAccount,
-  } = useAccountStore();
+  const { connectedAccount, setConnectedAccount } = useAccountStore();
 
   const [savedAccount, setSavedAccount] = useLocalStorage<SavedAccount>(
     'saved-account',
     {
-      provider: '',
-      account: '',
+      address: '',
     },
   );
 
   // Save account and provider to local storage
   useEffect(() => {
     if (!connectedAccount) return;
-    const { account } = savedAccount;
-    if (account !== connectedAccount.address()) {
+    const { address } = savedAccount;
+    if (address !== connectedAccount.address) {
       console.log('connectedAccount', connectedAccount);
       setSavedAccount({
-        provider: connectedAccount.providerName(),
-        account: connectedAccount.address(),
+        address: connectedAccount.address,
       });
     }
   }, [connectedAccount, savedAccount, setSavedAccount]);
 
   // Sync account and provider from local storage
   useEffect(() => {
-    if (providers.length === 0) return;
-    const { account, provider } = savedAccount;
-    if (!account || !provider) return;
+    const { address } = savedAccount;
+    if (!address) return;
+    if (connectedAccount) return;
 
-    const savedProvider = providers.find((p) => p.name() === provider);
-
-    if (!savedProvider) return;
-
-    savedProvider.accounts().then((accounts) => {
-      const acc = accounts.find((a) => a.address() === account);
-      if (acc?.address() !== connectedAccount?.address()) {
-        setConnectedAccount(acc);
-      }
-
-      if (currentProvider?.name() !== savedProvider.name()) {
-        setCurrentProvider(savedProvider);
+    getWallets().then((wallets) => {
+      for (const wallet of wallets) {
+        wallet.accounts().then((accounts) => {
+          const acc = accounts.find((a) => a.address === address);
+          if (acc) {
+            setConnectedAccount(acc);
+            return;
+          }
+        });
       }
     });
-  }, [
-    providers,
-    savedAccount,
-    connectedAccount,
-    currentProvider,
-    setConnectedAccount,
-    setCurrentProvider,
-  ]);
+  }, [savedAccount, connectedAccount, setConnectedAccount]);
 };
 
 export default useAccountSync;

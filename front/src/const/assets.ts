@@ -1,10 +1,8 @@
-import { fakeTokenAddress } from './contracts';
-
 export const assets = [
   {
-    name: 'Dummy asset',
-    address: fakeTokenAddress,
-    symbol: 'DAS',
+    name: 'tDAI.s',
+    address: 'AS124FuWHWqiWurCvobu5ovTGucWJPa6ouHbGLQ9e7kMwWt2Xsm84',
+    symbol: 'tDAI.s',
     decimals: 18,
     balance: undefined,
     isDefault: true,
@@ -12,21 +10,11 @@ export const assets = [
     originChainId: 0,
   },
   {
-    name: 'PUR token',
-    address: 'ASBLBLABLA...BLA',
-    symbol: 'PUR',
-    decimals: 18,
+    name: 'Wrapped MASSA',
+    address: 'AS12FW5Rs5YN2zdpEnqwj4iHUUPt9R4Eqjq2qtpJFNKW3mn33RuLU',
+    symbol: 'WMAS',
+    decimals: 9,
     balance: undefined,
-    isDefault: true,
-    dollarValue: undefined,
-    originChainId: 0,
-  },
-  {
-    name: 'PUR token',
-    address: 'ASBLBLABLA...BLA',
-    symbol: 'WETH',
-    decimals: 18,
-    balance: '1001000000000000000000',
     isDefault: true,
     dollarValue: undefined,
     originChainId: 0,

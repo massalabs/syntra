@@ -1,6 +1,6 @@
 import { schedulerAddress } from '@/const/contracts';
 import { Schedule } from '@/serializable/Schedule';
-import { Args, Mas } from '@massalabs/massa-web3';
+import { Args } from '@massalabs/massa-web3';
 import { useAccountStore } from '@massalabs/react-ui-kit';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -15,24 +15,22 @@ export default function useGetSchedule() {
         return [];
       }
 
-      const res = await connectedAccount.readSc(
-        schedulerAddress,
-        functionName,
-        args.serialize(),
-        Mas.fromString('0.01'),
-        Mas.fromString('0'),
-        BigInt(0),
-      );
+      const res = await connectedAccount.readSC({
+        func: functionName,
+        target: schedulerAddress,
+        parameter: args.serialize(),
+        caller: connectedAccount.address,
+      });
 
       console.log('Operation:', res);
 
       // Weird sometime it returns an array [0,0,0,0] and sometimes it returns an empty Array
-      if (res.returnValue.length === 0) {
+      if (res.value.length === 0) {
         console.log('No schedules found');
         return [];
       }
 
-      const schedules = new Args(res.returnValue).nextSerializableObjectArray(
+      const schedules = new Args(res.value).nextSerializableObjectArray(
         Schedule,
       );
 
@@ -63,7 +61,7 @@ export default function useGetSchedule() {
   useEffect(() => {
     const fetchSchedules = async () => {
       if (connectedAccount) {
-        const address = connectedAccount.address();
+        const address = connectedAccount.address;
         getSchedulesBySpender(address);
       }
     };

@@ -19,7 +19,9 @@ export function NumericInput(props: NumericInputProps) {
   return (
     <div>
       <NumericFormat
-        className={`default-input w-full h-14 pl-5 pr-10 border-none focus:ring-2`}
+        className={
+          'default-input w-full h-14 pl-5 pr-10 border-none focus:ring-2'
+        }
         decimalScale={0}
         allowNegative={false}
         placeholder={placeholder}

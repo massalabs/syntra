@@ -7,11 +7,8 @@ import {
 } from '@massalabs/react-ui-kit';
 
 export default function useToken(ftAddress: string) {
-  const { connectedAccount, currentProvider } = useAccountStore();
-  const { callSmartContract } = useWriteSmartContract(
-    connectedAccount!,
-    currentProvider!,
-  );
+  const { connectedAccount } = useAccountStore();
+  const { callSmartContract } = useWriteSmartContract(connectedAccount!);
 
   async function getAllowanceOf(spender: string): Promise<bigint> {
     if (!spender || !connectedAccount) {
@@ -19,24 +16,25 @@ export default function useToken(ftAddress: string) {
       return BigInt(0);
     }
 
-    const op = await connectedAccount.readSc(
-      ftAddress,
-      'allowance',
-      new Args()
-        .addString(connectedAccount.address())
+    const op = await connectedAccount.readSC({
+      func: 'allowance',
+      target: ftAddress,
+      caller: connectedAccount.address,
+      parameter: new Args()
+        .addString(connectedAccount.address)
         .addString(spender)
         .serialize(),
-      Mas.fromString('0.01'),
-      Mas.fromString('0.01'),
-      BigInt(4000000000),
-    );
+      coins: Mas.fromString('0.01'), // TODO: calibrate allowance storage cost
+      fee: Mas.fromString('0.01'),
+      maxGas: BigInt(4000000000),
+    });
 
     console.log(
       `Allowance of ${truncateAddress(spender)}:`,
-      U256.fromBytes(op.returnValue),
+      U256.fromBytes(op.value),
     );
 
-    return U256.fromBytes(op.returnValue);
+    return U256.fromBytes(op.value);
   }
 
   async function increaseAllowance(amount: bigint) {
@@ -91,21 +89,22 @@ export default function useToken(ftAddress: string) {
       return BigInt(0);
     }
 
-    const op = await connectedAccount.readSc(
-      ftAddress,
-      'balanceOf',
-      new Args().addString(address).serialize(),
-      Mas.fromString('0.01'),
-      Mas.fromString('0.01'),
-      BigInt(4000000000),
-    );
+    const op = await connectedAccount.readSC({
+      func: 'balanceOf',
+      target: ftAddress,
+      caller: connectedAccount.address,
+      parameter: new Args().addString(address).serialize(),
+      coins: Mas.fromString('0.01'),
+      fee: Mas.fromString('0.01'),
+      maxGas: BigInt(4000000000),
+    });
 
     console.log(
       `Balance of ${truncateAddress(address)}:`,
-      U256.fromBytes(op.returnValue),
+      U256.fromBytes(op.value),
     );
 
-    return U256.fromBytes(op.returnValue);
+    return U256.fromBytes(op.value);
   }
 
   return { increaseAllowance, getBalanceOf, getAllowanceOf, decreaseAllowance };
