@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import {
   NumericInput,
   RecipientAddressInput,
@@ -10,7 +11,6 @@ import useCreateSchedule from '@/services/useCreateSchedule';
 import useGetSchedule from '@/services/useGetSchedule';
 import useToken from '@/services/useToken';
 import ScheduleTable from '@/components/scheduleTable';
-import { useRef, useEffect } from 'react';
 import SelectAsset from '@/components/SelectAsset';
 
 export default function HomePage() {
@@ -28,13 +28,6 @@ export default function HomePage() {
       listRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   };
-
-  useEffect(() => {
-    if (connectedAccount) {
-      const connectedAddress = connectedAccount.address;
-      getSchedulesBySpender(connectedAddress);
-    }
-  }, [connectedAccount, getSchedulesBySpender]);
 
   return (
     <>

@@ -8,7 +8,7 @@ import {
 } from '@massalabs/react-ui-kit';
 import { useState } from 'react';
 
-type ScheduleInfo = {
+export type ScheduleInfo = {
   amount: bigint;
   interval: bigint;
   recipient: string;
@@ -22,7 +22,7 @@ const defaultScheduleInfo: ScheduleInfo = {
   amount: Mas.fromString('0.1'),
   interval: 10n,
   recipient: 'AU1dvPZNjcTQfNQQuysWyxLLhEzw4kB9cGW2RMMVAQGrkzZHqWGD',
-  spender: 'AU12FUbb8snr7qTEzSdTVH8tbmEouHydQTUAKDXY9LDwkdYMNBVGF',
+  spender: '',
   tokenAddress: assets[0].address,
   occurrences: 4n,
   tolerance: 3n,

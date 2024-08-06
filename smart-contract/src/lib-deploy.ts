@@ -3,6 +3,7 @@ import {
   Args,
   JsonRPCClient,
   SmartContract,
+  Web3Provider,
 } from '@massalabs/massa-web3';
 import { getScByteCode } from './utils';
 
@@ -15,11 +16,14 @@ export async function deploy(file: string, args: Args, coins: bigint) {
 
   console.log('Deploying contract...');
 
-  const contract = await SmartContract.deploy(client, account, {
-    byteCode: getScByteCode('build', file),
-    parameter: args.serialize(),
-    coins: coins,
-  });
+  const contract = await SmartContract.deploy(
+    new Web3Provider(client, account),
+    getScByteCode('build', file),
+    args.serialize(),
+    {
+      coins: coins,
+    },
+  );
 
   const contractAddress = contract.address.toString();
 
