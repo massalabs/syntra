@@ -22,8 +22,6 @@ export default function useGetSchedule() {
         caller: connectedAccount.address,
       });
 
-      console.log('readonly:', res);
-
       if (res.value.length === 0) {
         console.log('wrong network or contract address');
         return [];
@@ -32,10 +30,6 @@ export default function useGetSchedule() {
       const schedules = new Args(res.value).nextSerializableObjectArray(
         Schedule,
       );
-
-      for (const s of schedules) {
-        console.log('Schedule:', s);
-      }
 
       if (schedules.length === 0) {
         console.log('No schedules found');

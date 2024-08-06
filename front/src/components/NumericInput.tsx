@@ -6,11 +6,12 @@ type NumericInputProps = {
   placeholder: string;
   onNumChange: (e: string) => void;
   error?: string;
+  customClass?: string;
 };
 
 // TODO: To add in ui-kit
 export function NumericInput(props: NumericInputProps) {
-  const { value, placeholder, onNumChange, error } = props;
+  const { value, placeholder, onNumChange, error, customClass } = props;
 
   function onChange(e: React.ChangeEvent<HTMLInputElement>) {
     onNumChange(e.target.value);
@@ -19,9 +20,7 @@ export function NumericInput(props: NumericInputProps) {
   return (
     <div>
       <NumericFormat
-        className={
-          'default-input w-full h-14 pl-5 pr-10 border-none focus:ring-2'
-        }
+        className={'default-input w-full h-14 p-5 border-none focus:ring-2'}
         decimalScale={0}
         allowNegative={false}
         placeholder={placeholder}

@@ -1,9 +1,5 @@
 import { useRef } from 'react';
-import {
-  NumericInput,
-  RecipientAddressInput,
-  RecurrenceDropdown,
-} from '@/components';
+import { NumericInput, RecipientAddressInput, Recurrence } from '@/components';
 import { Button, formatAmount, useAccountStore } from '@massalabs/react-ui-kit';
 import { ConnectButton } from '@/components/ConnectWalletPopup/ConnectButton';
 import { Card } from '@massalabs/react-ui-kit/src/components/Card/Card';
@@ -12,6 +8,7 @@ import useGetSchedule from '@/services/useGetSchedule';
 import useToken from '@/services/useToken';
 import ScheduleTable from '@/components/scheduleTable';
 import SelectAsset from '@/components/SelectAsset';
+import { InputLabel } from '@/components/InputLabel';
 
 export default function HomePage() {
   const { connectedAccount } = useAccountStore();
@@ -41,11 +38,11 @@ export default function HomePage() {
 
           {connected && (
             <div className="flex flex-col justify-center items-center gap-4 flex-1">
-              <section className="max-w-2xl w-full mx-auto border rounded-md mb-6 bg-white shadow-lg p-6">
+              <section className="max-w-2xl w-full mx-auto border rounded-2xl mb-6 bg-white shadow-lg p-6">
                 <Card customClass="space-y-5 bg-transparent">
                   <div>
                     <div className="grid grid-cols-6 gap-2">
-                      <div className="col-span-3">
+                      <div className="col-span-2">
                         <InputLabel
                           label={`Amount ${
                             formatAmount(scheduleInfo.amount).preview
@@ -59,10 +56,8 @@ export default function HomePage() {
                           value={scheduleInfo.amount.toString()}
                         />
                       </div>
-                      <div className="col-span-2">
-                        <InputLabel label="Interval" />
-                        <RecurrenceDropdown
-                          value={scheduleInfo.interval}
+                      <div className="col-span-3">
+                        <Recurrence
                           onRecurrenceChange={(value: bigint) => {
                             setScheduleInfo('interval', BigInt(value));
                           }}
@@ -149,8 +144,4 @@ export default function HomePage() {
       </div>
     </>
   );
-}
-
-function InputLabel(props: { label: string }) {
-  return <p className="text-sm text-gray-700 mb-2">{props.label}</p>;
 }

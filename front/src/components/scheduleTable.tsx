@@ -8,8 +8,8 @@ interface ScheduleTableProps {
 
 const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules }) => {
   return (
-    <div className="overflow-x-auto border rounded-md h-full mt-2">
-      <table className="min-w-full divide-y divide-gray-200">
+    <div className="h-screen p-4">
+      <table className="min-w-full divide-y divide-gray-200 overflow-hidden rounded-2xl shadow-xl">
         <thead>
           <tr className="bg-[#ebfdc5]">
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
