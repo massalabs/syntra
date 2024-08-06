@@ -1,21 +1,9 @@
+import { ScheduleInfo } from '@/services/useCreateSchedule';
 import {
   Args,
   ISerializable,
   IDeserializedResult,
 } from '@massalabs/massa-web3';
-
-type ScheduleInfo = {
-  id?: bigint;
-  amount: bigint;
-  interval: bigint;
-  recipient: string;
-  spender: string;
-  tokenAddress: string;
-  occurrences: bigint;
-  tolerance: bigint;
-  remaining?: bigint;
-  history?: Transfer[];
-};
 
 export class Schedule implements ISerializable<Schedule> {
   constructor(
@@ -65,16 +53,16 @@ export class Schedule implements ISerializable<Schedule> {
 
   static fromScheduleInfo(info: ScheduleInfo): Schedule {
     return new Schedule(
-      info.id,
+      0n,
       info.tokenAddress,
       info.spender,
       info.recipient,
       info.amount,
       info.interval,
       info.occurrences,
-      info.remaining,
+      info.occurrences,
       info.tolerance,
-      info.history,
+      [],
     );
   }
 }

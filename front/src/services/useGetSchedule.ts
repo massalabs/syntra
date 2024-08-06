@@ -22,11 +22,10 @@ export default function useGetSchedule() {
         caller: connectedAccount.address,
       });
 
-      console.log('Operation:', res);
+      console.log('readonly:', res);
 
-      // Weird sometime it returns an array [0,0,0,0] and sometimes it returns an empty Array
       if (res.value.length === 0) {
-        console.log('No schedules found');
+        console.log('wrong network or contract address');
         return [];
       }
 
@@ -36,6 +35,10 @@ export default function useGetSchedule() {
 
       for (const s of schedules) {
         console.log('Schedule:', s);
+      }
+
+      if (schedules.length === 0) {
+        console.log('No schedules found');
       }
 
       return schedules;
@@ -58,15 +61,11 @@ export default function useGetSchedule() {
     },
     [getSchedule, setSpenderSchedules],
   );
-  useEffect(() => {
-    const fetchSchedules = async () => {
-      if (connectedAccount) {
-        const address = connectedAccount.address;
-        getSchedulesBySpender(address);
-      }
-    };
 
-    fetchSchedules();
+  useEffect(() => {
+    if (connectedAccount) {
+      getSchedulesBySpender(connectedAccount.address);
+    }
   }, [connectedAccount, getSchedulesBySpender]);
 
   async function getScheduleByRecipient(recipient: string) {
