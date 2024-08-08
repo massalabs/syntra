@@ -35,7 +35,6 @@ export function Recurrence({
     if (refPeriods.current !== periods) {
       onRecurrenceChange(periods);
       refPeriods.current = periods;
-      console.log('Recurrence changed:', periods);
     }
   }, [periods, onRecurrenceChange]);
 
