@@ -6,7 +6,6 @@ type NumericInputProps = {
   placeholder: string;
   onNumChange: (e: string) => void;
   error?: string;
-  customClass?: string;
 };
 
 // TODO: To add in ui-kit
