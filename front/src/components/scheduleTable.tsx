@@ -8,7 +8,7 @@ interface ScheduleTableProps {
 
 const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules }) => {
   return (
-    <div className="h-screen p-4">
+    <div className="h-full p-10 ">
       <table className="min-w-full divide-y divide-gray-200 overflow-hidden rounded-2xl shadow-xl">
         <thead>
           <tr className="bg-[#ebfdc5]">
