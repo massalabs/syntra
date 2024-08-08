@@ -11,7 +11,7 @@ type NumericInputProps = {
 
 // TODO: To add in ui-kit
 export function NumericInput(props: NumericInputProps) {
-  const { value, placeholder, onNumChange, error, customClass } = props;
+  const { value, placeholder, onNumChange, error, customClass = '' } = props;
 
   function onChange(e: React.ChangeEvent<HTMLInputElement>) {
     onNumChange(e.target.value);
