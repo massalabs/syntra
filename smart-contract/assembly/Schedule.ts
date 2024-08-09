@@ -113,7 +113,10 @@ export class Schedule implements Serializable {
   }
 
   public createCreationEvent(): string {
-    return createEvent('Create', [this.id.toString()]);
+    return createEvent('Create', [
+      this.id.toString(),
+      this.remaining.toString(),
+    ]);
   }
 
   public createCancelEvent(): string {

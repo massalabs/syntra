@@ -6,16 +6,30 @@ import {
 } from '@massalabs/massa-web3';
 
 export class Schedule implements ISerializable<Schedule> {
+  /**
+   * Creates a new Schedule instance.
+   *
+   * @param id - The unique identifier for the schedule. Default is 0n.
+   * @param tokenAddress - The address of the token to be transferred. Default is an empty string.
+   * @param spender - The address of the spender. Default is an empty string.
+   * @param recipient - The address of the recipient. Default is an empty string.
+   * @param amount - The amount of tokens to be transferred. Default is 1n.
+   * @param interval - The interval between transfers in some unit of time. Default is 1n.
+   * @param occurrences - The number of occurrences for the transfer. Default is 1n.
+   * @param remaining - The number of remaining transfers. Default is 1n.
+   * @param tolerance - The tolerance for the transfer timing. Default is 1n.
+   * @param history - The history of transfers. Default is an empty array.
+   */
   constructor(
     public id: bigint = 0n,
     public tokenAddress: string = '',
     public spender: string = '',
     public recipient: string = '',
-    public amount: bigint = 0n,
-    public interval: bigint = 0n,
-    public occurrences: bigint = 0n,
-    public remaining: bigint = 0n,
-    public tolerance: bigint = 0n,
+    public amount: bigint = 1n,
+    public interval: bigint = 1n,
+    public occurrences: bigint = 1n,
+    public remaining: bigint = 1n,
+    public tolerance: bigint = 1n,
     public history: Transfer[] = [],
   ) {}
 
@@ -54,7 +68,7 @@ export class Schedule implements ISerializable<Schedule> {
   static fromScheduleInfo(info: ScheduleInfo): Schedule {
     return new Schedule(
       0n,
-      info.tokenAddress,
+      info.asset.address,
       info.spender,
       info.recipient,
       info.amount,
@@ -62,7 +76,6 @@ export class Schedule implements ISerializable<Schedule> {
       info.occurrences,
       info.occurrences,
       info.tolerance,
-      [],
     );
   }
 }

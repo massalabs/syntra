@@ -23,7 +23,6 @@ const useAccountSync = () => {
     if (!connectedAccount) return;
     const { address } = savedAccount;
     if (address !== connectedAccount.address) {
-      console.log('connectedAccount', connectedAccount);
       setSavedAccount({
         address: connectedAccount.address,
       });

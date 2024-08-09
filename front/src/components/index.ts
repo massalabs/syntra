@@ -1,4 +1,4 @@
 export * from './RecipientAddressInput';
-export * from './RecurrenceDropdown';
+export * from './Recurrence';
 export * from './NumericInput';
 export * from './ConnectWalletPopup';
