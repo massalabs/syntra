@@ -4,7 +4,6 @@ import Intl from '@/i18n/i18n';
 import { NumericInput } from './NumericInput';
 import { InputLabel } from './InputLabel';
 
-// Define a period in milliseconds
 const periodInMilliseconds = 16 * 1000; // 16 seconds
 
 const recurrenceUnits = [

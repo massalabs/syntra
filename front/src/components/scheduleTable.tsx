@@ -1,5 +1,6 @@
 import { Schedule } from '@/serializable/Schedule';
 import { truncateAddress } from '@/utils/address';
+import { formatAmount } from '@massalabs/react-ui-kit';
 import React from 'react';
 
 interface ScheduleTableProps {
@@ -60,7 +61,7 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules }) => {
                 {truncateAddress(schedule.recipient)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {schedule.amount.toString()}
+                {formatAmount(schedule.amount, 18).preview}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {schedule.interval.toString()}

@@ -19,4 +19,14 @@ export const assets = [
     dollarValue: undefined,
     originChainId: 0,
   },
+  {
+    name: 'Massa Tips',
+    address: 'AS1R8zaZaGZ7Xcc3NeZ41KCzkUjcurFKn7LKhquMKEKrYFZDxfxr',
+    symbol: 'TIPS',
+    decimals: 18,
+    balance: undefined,
+    isDefault: true,
+    dollarValue: undefined,
+    originChainId: 0,
+  },
 ];

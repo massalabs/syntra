@@ -9,12 +9,21 @@ import useToken from '@/services/useToken';
 import ScheduleTable from '@/components/scheduleTable';
 import SelectAsset from '@/components/SelectAsset';
 import { InputLabel } from '@/components/InputLabel';
+import { schedulerAddress } from '@/const/contracts';
+
+// TODO: Add error if a required field is missing
+// TODO: Verify there is enough balance
+// TODO: Allow user to restart schedule if stopped: Show user stopped if period is not reached. Allow user to restart
+// TODO: Fix error in contract call
+// TODO: Disable button if amount is zero or no allowance
 
 export default function HomePage() {
   const { connectedAccount } = useAccountStore();
   const { scheduleInfo, setScheduleInfo, createSchedule } = useCreateSchedule();
   const { spenderSchedules, getSchedulesBySpender } = useGetSchedule();
-  const { increaseAllowance } = useToken(scheduleInfo.tokenAddress);
+  const { increaseAllowance, getAllowanceOf } = useToken(
+    scheduleInfo.asset.address!,
+  );
 
   const connected = !!connectedAccount;
 
@@ -44,16 +53,28 @@ export default function HomePage() {
                     <div className="grid grid-cols-6 gap-2">
                       <div className="col-span-2">
                         <InputLabel
-                          label={`Amount ${
-                            formatAmount(scheduleInfo.amount).preview
-                          } Mas`}
+                          label={`${
+                            formatAmount(
+                              scheduleInfo.amount,
+                              scheduleInfo.asset.decimals,
+                            ).preview
+                          } ${scheduleInfo.asset.name}`}
                         />
                         <NumericInput
                           placeholder="Enter your amount"
                           onNumChange={(amount) => {
-                            setScheduleInfo('amount', BigInt(amount));
+                            setScheduleInfo(
+                              'amount',
+                              BigInt(amount) *
+                                BigInt(10 ** scheduleInfo.asset.decimals),
+                            );
                           }}
-                          value={scheduleInfo.amount.toString()}
+                          value={
+                            formatAmount(
+                              scheduleInfo.amount,
+                              scheduleInfo.asset.decimals,
+                            ).preview
+                          }
                         />
                       </div>
                       <div className="col-span-3">
@@ -87,12 +108,17 @@ export default function HomePage() {
                       <InputLabel label="Token" />
                       <SelectAsset
                         onSelectAsset={(asset) => {
-                          if (asset.address)
-                            setScheduleInfo('tokenAddress', asset.address);
+                          if (asset.address) setScheduleInfo('asset', asset);
                         }}
                       />
                     </div>
                   </div>
+                  <Button
+                    variant="secondary"
+                    onClick={() => getAllowanceOf(schedulerAddress)}
+                  >
+                    Get allowance of
+                  </Button>
                   <Button
                     variant="secondary"
                     onClick={() =>
@@ -104,8 +130,9 @@ export default function HomePage() {
                     {`Allow ${
                       formatAmount(
                         scheduleInfo.amount * scheduleInfo.occurrences,
+                        scheduleInfo.asset.decimals,
                       ).preview
-                    } Mas`}
+                    } ${scheduleInfo.asset.name}`}
                   </Button>
                   <Button
                     variant="secondary"

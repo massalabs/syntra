@@ -1,15 +1,10 @@
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
-import {
-  Account,
-  Address,
-  JsonRPCClient,
-  SCOutputEvent,
-  SmartContract,
-} from '@massalabs/massa-web3';
+import { Account, SmartContract, Web3Provider } from '@massalabs/massa-web3';
 
 import * as dotenv from 'dotenv';
+import { SCOutputEvent } from '@massalabs/massa-web3/dist/esm/generated/client'; // TODO - Export it
 dotenv.config();
 
 export function getEnvVariable(key: string): string {
@@ -28,20 +23,16 @@ export function getScByteCode(folderName: string, fileName: string): Buffer {
 }
 
 export async function getClientAndContract(contractAddress: string) {
-  const client = JsonRPCClient.buildnet();
+  const provider = Web3Provider.buildnet(await Account.fromEnv());
   const account = await Account.fromEnv();
   return {
-    client,
+    provider,
     account,
-    contract: SmartContract.fromAddress(
-      client,
-      Address.fromString(contractAddress),
-      account,
-    ),
+    contract: new SmartContract(provider, contractAddress),
   };
 }
 
-export function periodsToSeconds(
+export function periodsToMilliseconds(
   periods: number,
   periodDuration = 20000,
 ): number {
