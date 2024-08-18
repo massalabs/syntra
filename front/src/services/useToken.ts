@@ -25,8 +25,8 @@ export default function useToken(ftAddress: string) {
         .addString(spender)
         .serialize(),
       coins: Mas.fromString('0.01'), // TODO: calibrate allowance storage cost
-      fee: Mas.fromString('0.01'),
-      maxGas: BigInt(4000000000),
+      fee: Mas.fromString('0.01'), // TODO GET MINIMUM FEE
+      maxGas: BigInt(4000000000), // TODO: calibrate gas
     });
 
     console.log(
@@ -45,7 +45,6 @@ export default function useToken(ftAddress: string) {
       console.error('Invalid amount');
       return;
     }
-
     await callSmartContract(
       'increaseAllowance',
       ftAddress,

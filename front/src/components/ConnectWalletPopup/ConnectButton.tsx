@@ -15,7 +15,7 @@ export function ConnectButton() {
       <Button
         disabled={isFetching}
         variant="secondary"
-        customClass="h-[54px] relative"
+        customClass="h-[54px] text-primary"
         onClick={() => setOpen(true)}
       >
         {truncateAddress(connectedAccount?.address)}
@@ -30,7 +30,7 @@ export function ConnectButton() {
         <Button
           variant="secondary"
           disabled={isFetching}
-          customClass="h-[54px] relative"
+          customClass="h-[54px]"
           onClick={() => setOpen(true)}
         >
           {Intl.t('connect-wallet.title')}
@@ -41,7 +41,7 @@ export function ConnectButton() {
   }
   return (
     <>
-      <div className="absolute top-10 right-10">
+      <div className="top-10 right-10 shadow-md rounded-lg border-primary border ">
         {connectedAccount ? <ConnectedWallet /> : <NotConnectedWallet />}
       </div>
 

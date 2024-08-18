@@ -3,8 +3,8 @@ import plugin from 'tailwindcss/plugin';
 
 const colorRed = '#F1685D';
 const colorBeige = '#EBEBE6';
-const colorGrey = '#495A54';
-const colorDarkGrey = '#292928';
+const colorGray = '#F9F9F9';
+const colorDarkGray = '#292928';
 
 /** @type {import('tailwindcss').Config} */
 // eslint-disable-next-line no-undef
@@ -19,63 +19,65 @@ module.exports = {
     createThemes({
       light: {
         primary: colorRed,
-        secondary: colorBeige,
+        secondary: colorGray,
         tertiary: colorBeige,
-        neutral: colorGrey,
-        info: colorGrey,
+        neutral: colorDarkGray,
+        info: colorGray,
+        beige: colorBeige,
+        gray: colorGray,
         // states:
         's-success': colorRed,
         's-error': colorRed,
         's-warning': colorRed,
-        's-info': colorGrey,
-        's-info-1': colorGrey,
+        's-info': colorGray,
+        's-info-1': colorGray,
         // components:
-        'c-default': colorGrey,
-        'c-hover': colorGrey,
-        'c-pressed': colorGrey,
-        'c-disabled-1': colorGrey,
+        'c-default': colorDarkGray,
+        'c-hover': colorDarkGray,
+        'c-pressed': colorGray,
+        'c-disabled-1': colorGray,
         'c-disabled-2': colorBeige,
         'c-error': colorRed,
         // icons:
-        'i-primary': colorGrey,
+        'i-primary': colorGray,
         'i-secondary': colorBeige,
-        'i-tertiary': colorDarkGrey,
+        'i-tertiary': colorDarkGray,
         // fonts:
-        'f-primary': colorGrey,
+        'f-primary': colorDarkGray,
         'f-secondary': colorBeige,
-        'f-tertiary': colorGrey,
-        'f-disabled-1': colorGrey,
+        'f-tertiary': colorGray,
+        'f-disabled-1': colorGray,
         'f-disabled-2': colorBeige,
       },
       dark: {
-        primary: colorGrey,
-        secondary: colorGrey,
+        primary: colorGray,
+        secondary: colorGray,
         tertiary: colorBeige,
         brand: colorRed,
         neutral: colorBeige,
-        info: colorGrey,
+        info: colorGray,
         // states:
         's-success': colorRed,
         's-error': colorRed,
         's-warning': colorRed,
-        's-info': colorGrey,
-        's-info-1': colorGrey,
+        's-info': colorGray,
+        's-info-1': colorGray,
         // components:
         'c-default': colorBeige,
-        'c-hover': colorGrey,
-        'c-pressed': colorGrey,
-        'c-disabled-1': colorGrey,
+        'c-hover': colorGray,
+        'c-pressed': colorGray,
+        'c-disabled-1': colorGray,
         'c-disabled-2': colorBeige,
         'c-error': colorRed,
         // icons:
         'i-primary': colorBeige,
-        'i-secondary': colorGrey,
+        'i-secondary': colorGray,
         'i-tertiary': colorRed,
         // fonts:
         'f-primary': colorBeige,
-        'f-secondary': colorGrey,
+        'f-secondary': colorGray,
         'f-tertiary': colorRed,
-        'f-disabled-1': colorGrey,
+        'f-disabled-1': colorGray,
         'f-disabled-2': colorBeige,
       },
     }),
@@ -164,6 +166,19 @@ module.exports = {
           lineHeight: '16px',
           textDecoration: 'underline',
           fontStyle: 'normal',
+        },
+        function({ addComponents, theme }) {
+          addComponents({
+            '.active-button': {
+              '@apply transition-all duration-100 ease-in-out': {},
+              '&:hover': {
+                '@apply -translate-y-[2%] shadow-md': {},
+              },
+              '&:active': {
+                '@apply translate-y-[2%] shadow-none': {},
+              },
+            },
+          });
         },
       });
     }),
