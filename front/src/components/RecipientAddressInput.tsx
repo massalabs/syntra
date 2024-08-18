@@ -15,5 +15,12 @@ export function RecipientAddressInput({
     onAddressChange(e.target.value);
   }
 
-  return <Input error={error} value={value} onChange={onChange} />;
+  return (
+    <Input
+      error={error}
+      value={value}
+      onChange={onChange}
+      customClass="border-none p-5 mb-0 h-14 focus:ring-1 focus:ring-primary focus:outline-none"
+    />
+  );
 }
