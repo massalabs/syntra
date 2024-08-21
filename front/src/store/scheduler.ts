@@ -4,7 +4,7 @@ import { Args } from '@massalabs/massa-web3';
 import { Asset } from '@massalabs/react-ui-kit/src/lib/token/models/AssetModel';
 import { Schedule } from '@/serializable/Schedule';
 import { schedulerAddress } from '@/const/contracts';
-import { supportedTokens } from '@/const/tokens';
+import { supportedTokens } from '@/const/assets';
 import { useAccountStore } from '@massalabs/react-ui-kit';
 
 export type ScheduleInfo = {

@@ -48,7 +48,7 @@ export default function useSchedule() {
       throw new Error('Invalid recipient address');
     }
 
-    const operation = await callSmartContract(
+    await callSmartContract(
       'startScheduleSendFT',
       schedulerAddress,
       new Args()
@@ -62,17 +62,6 @@ export default function useSchedule() {
       Mas.fromString('10'),
       Mas.fromString('0.01'),
     );
-
-    if (!operation) {
-      console.error('Failed to start schedule');
-      return;
-    }
-
-    const event = await operation.getSpeculativeEvents();
-
-    for (const e of event) {
-      console.log('Event:', e.data);
-    }
   }
 
   return {

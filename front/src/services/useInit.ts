@@ -2,13 +2,23 @@ import { schedulerAddress } from '@/const/contracts';
 import { Slot } from '@massalabs/massa-web3/dist/esm/generated/client';
 import { toast, useAccountStore } from '@massalabs/react-ui-kit';
 import { useEffect, useRef } from 'react';
-import useGetSchedule from './useGetSchedule';
+import { useSchedulerStore } from '@/store/scheduler';
+import { useTokenStore } from '@/store/token';
+import { initTokens, initSchedules } from '@/store/store';
 
-export const useAutoFetchTransfers = () => {
+export const useInit = () => {
   const { connectedAccount } = useAccountStore();
-  const { getSchedulesBySpender } = useGetSchedule();
+  const { getBySpender } = useSchedulerStore();
+  const { refreshBalances } = useTokenStore();
   const lastEventPeriodRef = useRef<Slot>();
   const intervalId = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (connectedAccount) {
+      initTokens();
+      initSchedules();
+    }
+  }, [connectedAccount]);
 
   useEffect(() => {
     if (connectedAccount) {
@@ -23,7 +33,8 @@ export const useAutoFetchTransfers = () => {
           const match = event.data.match(regex);
           if (match) {
             toast.success(event.data);
-            getSchedulesBySpender(connectedAccount.address);
+            getBySpender(connectedAccount.address);
+            refreshBalances();
           }
         }
 
@@ -42,5 +53,5 @@ export const useAutoFetchTransfers = () => {
         clearInterval(intervalId.current);
       }
     };
-  }, [connectedAccount, getSchedulesBySpender]);
+  }, [connectedAccount, getBySpender, refreshBalances]);
 };

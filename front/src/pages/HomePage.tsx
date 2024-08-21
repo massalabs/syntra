@@ -10,18 +10,13 @@ import SelectAsset from '@/components/SelectAsset';
 import { InputLabel } from '@/components/InputLabel';
 import LogoSyntra from '../assets/logo-syntra.svg';
 import { arrowButton, commonButton } from '@/styles/buttons';
-import { useAutoFetchTransfers } from '@/services/useAutoFetchTransfers';
+import { useInit } from '@/services/useInit';
 
 export default function HomePage() {
-  useAutoFetchTransfers();
+  useInit();
   const { connectedAccount } = useAccountStore();
-  const {
-    scheduleInfo,
-    setScheduleInfo,
-    createSchedule,
-    getByRecipient,
-    spenderSchedules,
-  } = useSchedule();
+  const { scheduleInfo, setScheduleInfo, createSchedule, spenderSchedules } =
+    useSchedule();
   const { increaseAllowance } = useToken();
   const scheduleTableRef = useRef<HTMLDivElement>(null);
 
@@ -29,13 +24,13 @@ export default function HomePage() {
     !connectedAccount ||
     scheduleInfo.amount === 0n ||
     !scheduleInfo.asset ||
-    scheduleInfo.asset.allowance >=
+    (scheduleInfo.asset.allowance ?? 0) >=
       scheduleInfo.amount * scheduleInfo.occurrences;
 
   const disableCreateScheduleButton =
     !connectedAccount ||
     !scheduleInfo.amount ||
-    scheduleInfo.asset.allowance <
+    (scheduleInfo.asset.allowance ?? 0) <
       scheduleInfo.amount * scheduleInfo.occurrences;
 
   const scrollToList = () => {
@@ -53,7 +48,7 @@ export default function HomePage() {
         </nav>
 
         {connectedAccount && (
-          <div className="  flex flex-col justify-center items-center gap-10 h-full">
+          <div className="flex flex-col justify-center items-center gap-10 h-full">
             <section className="max-w-2xl w-full mx-auto rounded-2xl shadow-lg p-7 bg-white -mt-40">
               <Card customClass="bg-transparent grid grid-flow-row gap-4 ">
                 <div className="grid grid-cols-6 gap-2">
@@ -156,15 +151,7 @@ export default function HomePage() {
                 </div>
               </Card>
             </section>
-            <button
-              className={arrowButton.join(' ')}
-              onClick={() => {
-                scrollToList();
-                if (connectedAccount) {
-                  getByRecipient(connectedAccount.address);
-                }
-              }}
-            >
+            <button className={arrowButton.join(' ')} onClick={scrollToList}>
               ↓
             </button>
           </div>

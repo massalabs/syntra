@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supportedTokens } from '../const/tokens';
+import { supportedTokens } from '../const/assets';
 import { Asset } from '@massalabs/react-ui-kit/src/lib/token/models/AssetModel';
 import { AssetSelector } from '@massalabs/react-ui-kit/src/lib/token/AssetSelector';
 

@@ -5,7 +5,7 @@ import { useAccountStore } from '@massalabs/react-ui-kit';
 import { MRC20 } from '@massalabs/massa-web3';
 import { config } from '@/const/config';
 import { useModeStore } from './mode';
-import { supportedTokens } from '@/const/tokens';
+import { supportedTokens } from '@/const/assets';
 import { Asset } from '@massalabs/react-ui-kit/src/lib/token/models/AssetModel';
 
 export interface TokenStoreState {
@@ -44,11 +44,9 @@ export const useTokenStore = create<TokenStoreState>((set, get) => ({
         ]);
         token.allowance = accountAllowance;
         token.balance = accountBalance;
-        console.log({ token });
         return token;
       }),
     );
-    console.log({ tokens });
     set({ tokens });
   },
 }));
