@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { assets } from '@/const/assets';
+import { supportedTokens } from '../const/tokens';
 import { Asset } from '@massalabs/react-ui-kit/src/lib/token/models/AssetModel';
 import { AssetSelector } from '@massalabs/react-ui-kit/src/lib/token/AssetSelector';
 
@@ -8,7 +8,7 @@ export default function SelectAsset({
 }: {
   onSelectAsset: (asset: Asset) => void;
 }): JSX.Element {
-  const [selectedAsset, setSelectedAsset] = useState<Asset>(assets[0]);
+  const [selectedAsset, setSelectedAsset] = useState<Asset>(supportedTokens[0]);
 
   function onAssetChange(asset: Asset) {
     setSelectedAsset(asset);
@@ -19,7 +19,7 @@ export default function SelectAsset({
     <AssetSelector
       selectedAsset={selectedAsset}
       onAssetChange={onAssetChange}
-      assets={assets}
+      assets={supportedTokens}
       isAssetsLoading={false}
     />
   );
