@@ -1,84 +1,48 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { NumericInput, RecipientAddressInput, Recurrence } from '@/components';
-import {
-  Button,
-  formatAmount,
-  toast,
-  useAccountStore,
-} from '@massalabs/react-ui-kit';
+import { Button, formatAmount, useAccountStore } from '@massalabs/react-ui-kit';
 import { ConnectButton } from '@/components/ConnectWalletPopup/ConnectButton';
 import { Card } from '@massalabs/react-ui-kit/src/components/Card/Card';
-import useCreateSchedule from '@/services/useCreateSchedule';
-import useGetSchedule from '@/services/useGetSchedule';
+import useSchedule from '@/services/useSchedule';
 import useToken from '@/services/useToken';
 import ScheduleTable from '@/components/scheduleTable';
 import SelectAsset from '@/components/SelectAsset';
 import { InputLabel } from '@/components/InputLabel';
-import { schedulerAddress } from '@/const/contracts';
 import LogoSyntra from '../assets/logo-syntra.svg';
-// TODO export SLOT from massalabs/massa-web3
-import { Slot } from '@massalabs/massa-web3/dist/esm/generated/client';
-
-// TODO: Add error if a required field is missing
-// TODO: Verify there is enough balance
-// TODO: Allow user to restart schedule if stopped: Show user stopped if period is not reached. Allow user to restart
-// TODO: Fix error in contract call
-// TODO: Disable button if amount is zero or no allowance
-// TODO: Get Balance of user
+import { arrowButton, commonButton } from '@/styles/buttons';
+import { useAutoFetchTransfers } from '@/services/useAutoFetchTransfers';
 
 export default function HomePage() {
+  useAutoFetchTransfers();
   const { connectedAccount } = useAccountStore();
-  const { scheduleInfo, setScheduleInfo, createSchedule } = useCreateSchedule();
-  const { spenderSchedules, getSchedulesBySpender } = useGetSchedule();
-  const { increaseAllowance } = useToken(scheduleInfo.asset.address!);
+  const {
+    scheduleInfo,
+    setScheduleInfo,
+    createSchedule,
+    getByRecipient,
+    spenderSchedules,
+  } = useSchedule();
+  const { increaseAllowance } = useToken();
+  const scheduleTableRef = useRef<HTMLDivElement>(null);
 
-  const connected = !!connectedAccount;
+  const disableAllowanceButton =
+    !connectedAccount ||
+    scheduleInfo.amount === 0n ||
+    !scheduleInfo.asset ||
+    scheduleInfo.asset.allowance >=
+      scheduleInfo.amount * scheduleInfo.occurrences;
 
-  const listRef = useRef<HTMLDivElement>(null);
-  const lastEventPeriodRef = useRef<Slot>();
-  const intervalId = useRef<NodeJS.Timeout | null>(null);
+  const disableCreateScheduleButton =
+    !connectedAccount ||
+    !scheduleInfo.amount ||
+    scheduleInfo.asset.allowance <
+      scheduleInfo.amount * scheduleInfo.occurrences;
 
   const scrollToList = () => {
-    if (listRef.current) {
-      listRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (scheduleTableRef.current) {
+      scheduleTableRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   };
-
-  useEffect(() => {
-    if (connectedAccount) {
-      intervalId.current = setInterval(async () => {
-        console.log('fetching events');
-        const events = await connectedAccount.getEvents({
-          smartContractAddress: schedulerAddress,
-          start: lastEventPeriodRef.current,
-        });
-
-        for (const event of events) {
-          console.log('event', event);
-          const regex = /Transfer:([^]+)/;
-          const match = event.data.match(regex);
-          if (match) {
-            toast.success(event.data);
-            getSchedulesBySpender(connectedAccount.address);
-          }
-        }
-
-        if (events.length <= 0) {
-          return;
-        }
-
-        const { period, thread } = events[events.length - 1].context.slot;
-
-        lastEventPeriodRef.current = { period: period + 1, thread };
-      }, 4000);
-    }
-
-    return () => {
-      if (intervalId.current) {
-        clearInterval(intervalId.current);
-      }
-    };
-  }, [connectedAccount]);
 
   return (
     <>
@@ -88,7 +52,7 @@ export default function HomePage() {
           <ConnectButton />
         </nav>
 
-        {connected && (
+        {connectedAccount && (
           <div className="  flex flex-col justify-center items-center gap-10 h-full">
             <section className="max-w-2xl w-full mx-auto rounded-2xl shadow-lg p-7 bg-white -mt-40">
               <Card customClass="bg-transparent grid grid-flow-row gap-4 ">
@@ -156,28 +120,36 @@ export default function HomePage() {
 
                 <div className="grid grid-rows-2 gap-2 mt-5">
                   <Button
+                    disabled={disableAllowanceButton}
                     variant="secondary"
                     onClick={() =>
                       increaseAllowance(
                         scheduleInfo.amount * scheduleInfo.occurrences,
                       )
                     }
-                    // eslint-disable-next-line max-len
-                    customClass="border-primary text-primary bg-white w-full py-2 rounded-md ring-0 hover:-translate-y-[2%] hover:shadow-md active:translate-y-[1%] active:shadow-none transition-all duration-50 ease-in-out"
+                    customClass={[
+                      'border-primary text-primary ',
+                      ...commonButton,
+                    ].join(' ')}
                   >
-                    {`Allow ${
-                      formatAmount(
-                        scheduleInfo.amount * scheduleInfo.occurrences,
-                        scheduleInfo.asset.decimals,
-                      ).preview
-                    } ${scheduleInfo.asset.name}`}
+                    {disableAllowanceButton
+                      ? 'Sufficient Allowance'
+                      : `Allow ${
+                          formatAmount(
+                            scheduleInfo.amount * scheduleInfo.occurrences,
+                            scheduleInfo.asset.decimals,
+                          ).preview
+                        } ${scheduleInfo.asset.name}`}
                   </Button>
 
                   <Button
+                    disabled={disableCreateScheduleButton}
                     variant="secondary"
                     onClick={createSchedule}
-                    // eslint-disable-next-line max-len
-                    className="bg-primary text-white border-4 w-full py-2 rounded-md ring-0 outline-none hover:bg-opacity-80 hover:-translate-y-[2%] hover:shadow-md active:translate-y-[1%] active:shadow-none transition-all duration-50 ease-in-out"
+                    customClass={[
+                      'bg-primary text-white',
+                      ...commonButton,
+                    ].join(' ')}
                   >
                     Create Schedule
                   </Button>
@@ -185,12 +157,11 @@ export default function HomePage() {
               </Card>
             </section>
             <button
-              // eslint-disable-next-line max-len
-              className="p-2 rounded-full bg-white hover:bg-gray-200 text-primary hover:ring-1 ring-primary transition-all duration-100 ease-in-out active:translate-y-1"
+              className={arrowButton.join(' ')}
               onClick={() => {
                 scrollToList();
                 if (connectedAccount) {
-                  getSchedulesBySpender(connectedAccount.address);
+                  getByRecipient(connectedAccount.address);
                 }
               }}
             >
@@ -200,7 +171,7 @@ export default function HomePage() {
         )}
       </div>
 
-      <div ref={listRef} className="h-screen bg-white">
+      <div ref={scheduleTableRef} className="h-screen bg-white">
         {spenderSchedules.length > 0 ? (
           <ScheduleTable schedules={spenderSchedules} />
         ) : (

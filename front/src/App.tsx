@@ -5,13 +5,22 @@ import {
   Routes,
 } from 'react-router-dom';
 
-import { Toast } from '@massalabs/react-ui-kit';
+import { Toast, useAccountStore } from '@massalabs/react-ui-kit';
 
 import HomePage from './pages/HomePage';
 import useAccountSync from './hooks/useAccountAsync';
+import { initTokens } from './store/store';
+import { useEffect } from 'react';
 
 function App() {
   useAccountSync();
+  const { connectedAccount } = useAccountStore();
+
+  useEffect(() => {
+    if (connectedAccount) {
+      initTokens();
+    }
+  }, [connectedAccount]);
 
   return (
     <Router>

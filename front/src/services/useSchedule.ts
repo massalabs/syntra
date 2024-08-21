@@ -1,52 +1,22 @@
-import { assets } from '@/const/assets';
 import { schedulerAddress } from '@/const/contracts';
-import { Schedule, Transfer } from '@/serializable/Schedule';
-import { Address, Args, Mas, SmartContract } from '@massalabs/massa-web3';
+import { Schedule } from '@/serializable/Schedule';
+import { useSchedulerStore } from '@/store/scheduler';
+import { Address, Args, Mas } from '@massalabs/massa-web3';
 import {
   useAccountStore,
   useWriteSmartContract,
 } from '@massalabs/react-ui-kit';
-import { Asset } from '@massalabs/react-ui-kit/src/lib/token/models/AssetModel';
-import { useState } from 'react';
 
-export type ScheduleInfo = {
-  amount: bigint;
-  interval: bigint;
-  recipient: string;
-  spender: string;
-  asset: Asset;
-  occurrences: bigint;
-  tolerance: bigint;
-};
-
-const defaultScheduleInfo: ScheduleInfo = {
-  amount: 0n, // TODO - if amount zero button should be disabled with tips
-  interval: 10n, // TODO - fix  this: currently the input does not depend on this value
-  recipient: 'AU1dvPZNjcTQfNQQuysWyxLLhEzw4kB9cGW2RMMVAQGrkzZHqWGD',
-  spender: '',
-  asset: assets[0],
-  occurrences: 4n,
-  tolerance: 3n,
-};
-
-export default function useCreateSchedule() {
+export default function useSchedule() {
   const { connectedAccount } = useAccountStore();
-
+  const {
+    scheduleInfo,
+    setScheduleInfo,
+    getBySpender,
+    getByRecipient,
+    spenderSchedules,
+  } = useSchedulerStore();
   const { callSmartContract } = useWriteSmartContract(connectedAccount!);
-
-  const [scheduleInfo, setInfo] = useState<ScheduleInfo>(defaultScheduleInfo);
-
-  const setScheduleInfo = (
-    key: keyof ScheduleInfo,
-    value: bigint | string | Transfer[] | Asset,
-  ) => {
-    setInfo((prev) => {
-      return {
-        ...prev,
-        [key]: value,
-      };
-    });
-  };
 
   async function createSchedule() {
     const { amount, interval, recipient } = scheduleInfo;
@@ -109,5 +79,8 @@ export default function useCreateSchedule() {
     scheduleInfo,
     setScheduleInfo,
     createSchedule,
+    getBySpender,
+    getByRecipient,
+    spenderSchedules,
   };
 }
