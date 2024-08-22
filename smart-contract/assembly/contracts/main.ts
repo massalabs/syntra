@@ -54,6 +54,10 @@ export function startScheduleSendFT(binaryArgs: StaticArray<u8>): void {
     .expect('Schedule is missing or invalid');
 
   assert(Context.caller() === new Address(schedule.spender), 'Unauthorized');
+  assert(
+    schedule.recipient !== schedule.spender,
+    'Recipient and spender must be different',
+  );
 
   checkAllowance(
     schedule.tokenAddress,
