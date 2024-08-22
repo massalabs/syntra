@@ -33,11 +33,14 @@ export function checkAllowance(
 }
 
 export function sendFT(schedule: Schedule): void {
-  const coin = new TokenWrapper(new Address(schedule.tokenAddress));
-  coin.transferFrom(
+  const token = new TokenWrapper(new Address(schedule.tokenAddress));
+  const coins = getBalanceEntryCost(schedule.tokenAddress, schedule.recipient);
+
+  token.transferFrom(
     new Address(schedule.spender),
     new Address(schedule.recipient),
     schedule.amount,
+    coins,
   );
 }
 

@@ -9,13 +9,18 @@ import {
 } from '../contracts/main';
 import { Args, u256ToBytes } from '@massalabs/as-types';
 import {
+  Address,
   changeCallStack,
   mockAdminContext,
+  mockBalance,
   mockScCall,
+  mockTransferredCoins,
   resetStorage,
+  Storage,
 } from '@massalabs/massa-as-sdk';
 import { u256 } from 'as-bignum/assembly';
 import { Schedule } from '../Schedule';
+import { balanceKey } from '@massalabs/sc-standards/assembly/contracts/FT/token-internals';
 
 const contractAddress = 'AS12BqZEQ6sByhRLyEuf0YbQmcF2PsDdkNNG1akBJu9XcjZA1eT';
 const admin = 'AU1mhPhXCfh8afoNnbW91bXUVAmu8wU7u8v54yNTMvY7E52KBbz3';
@@ -171,6 +176,13 @@ describe('async send FT', () => {
       .unwrap()[0];
     switchUser(contractAddress);
     mockScCall([]);
+
+    // cost of creating token balance entry
+    const storageCost = 9600000;
+
+    mockBalance(contractAddress, storageCost);
+    mockTransferredCoins(storageCost);
+
     asyncSendFT(new Args().add(schedule.spender).add(schedule.id).serialize());
     const schedules = new Args(
       getSchedulesBySpender(new Args().add(spender1).serialize()),
@@ -181,6 +193,14 @@ describe('async send FT', () => {
     expect(schedules[0].remaining).toBe(occurrences - 1);
 
     // seconde autonomous execution
+
+    // Set the balance entry on token contract
+    Storage.setOf(
+      new Address(tokenAddress),
+      balanceKey(new Address(recipient)),
+      u256ToBytes(schedule.amount),
+    );
+
     mockScCall([]);
     asyncSendFT(new Args().add(schedule.spender).add(schedule.id).serialize());
     const schedules2 = new Args(
