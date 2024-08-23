@@ -57,7 +57,7 @@ export function Recurrence({
         <NumericInput
           value={numUnits.toString()}
           placeholder={'0'}
-          onNumChange={handleNumUnitsChange}
+          onValueChange={handleNumUnitsChange}
         />
       </div>
       <div className="col-span-3">
