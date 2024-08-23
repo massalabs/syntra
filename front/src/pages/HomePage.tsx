@@ -11,6 +11,7 @@ import { InputLabel } from '@/components/InputLabel';
 import LogoSyntra from '../assets/logo-syntra.svg';
 import { arrowButton, commonButton } from '@/styles/buttons';
 import { useInit } from '@/services/useInit';
+import { parseUnits } from '@massalabs/massa-web3';
 
 export default function HomePage() {
   useInit();
@@ -20,12 +21,16 @@ export default function HomePage() {
   const { increaseAllowance } = useToken();
   const scheduleTableRef = useRef<HTMLDivElement>(null);
 
+  const balance = scheduleInfo.asset.balance ?? 0n;
+  const insufficientBalance = balance < scheduleInfo.amount;
+
   const disableAllowanceButton =
     !connectedAccount ||
     scheduleInfo.amount === 0n ||
     !scheduleInfo.asset ||
     (scheduleInfo.asset.allowance ?? 0) >=
-      scheduleInfo.amount * scheduleInfo.occurrences;
+      scheduleInfo.amount * scheduleInfo.occurrences ||
+    insufficientBalance;
 
   const disableCreateScheduleButton =
     !connectedAccount ||
@@ -56,13 +61,13 @@ export default function HomePage() {
                     <InputLabel label={'Amount'} />
                     <NumericInput
                       placeholder="Enter your amount"
-                      onNumChange={(amount) => {
+                      onValueChange={(amount: string) => {
                         setScheduleInfo(
                           'amount',
-                          BigInt(amount) *
-                            BigInt(10 ** scheduleInfo.asset.decimals),
+                          parseUnits(amount, scheduleInfo.asset.decimals),
                         );
                       }}
+                      asset={scheduleInfo.asset}
                       value={
                         formatAmount(
                           scheduleInfo.amount,
@@ -106,7 +111,7 @@ export default function HomePage() {
                     <NumericInput
                       placeholder="Enter amount"
                       value={scheduleInfo.occurrences.toString()}
-                      onNumChange={(value) => {
+                      onValueChange={(value: string) => {
                         setScheduleInfo('occurrences', BigInt(value));
                       }}
                     />
@@ -114,28 +119,27 @@ export default function HomePage() {
                 </div>
 
                 <div className="grid grid-rows-2 gap-2 mt-5">
-                  <Button
-                    disabled={disableAllowanceButton}
-                    variant="secondary"
-                    onClick={() =>
-                      increaseAllowance(
-                        scheduleInfo.amount * scheduleInfo.occurrences,
-                      )
-                    }
-                    customClass={[
-                      'border-primary text-primary ',
-                      ...commonButton,
-                    ].join(' ')}
-                  >
-                    {disableAllowanceButton
-                      ? 'Sufficient Allowance'
-                      : `Allow ${
-                          formatAmount(
-                            scheduleInfo.amount * scheduleInfo.occurrences,
-                            scheduleInfo.asset.decimals,
-                          ).preview
-                        } ${scheduleInfo.asset.name}`}
-                  </Button>
+                  {!disableAllowanceButton && (
+                    <Button
+                      variant="secondary"
+                      onClick={() =>
+                        increaseAllowance(
+                          scheduleInfo.amount * scheduleInfo.occurrences,
+                        )
+                      }
+                      customClass={[
+                        'border-primary text-primary ',
+                        ...commonButton,
+                      ].join(' ')}
+                    >
+                      {`Allow spending ${
+                        formatAmount(
+                          scheduleInfo.amount * scheduleInfo.occurrences,
+                          scheduleInfo.asset.decimals,
+                        ).preview
+                      } ${scheduleInfo.asset.name}`}
+                    </Button>
+                  )}
 
                   <Button
                     disabled={disableCreateScheduleButton}
