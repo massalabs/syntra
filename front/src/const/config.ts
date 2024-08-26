@@ -1,13 +1,16 @@
+import { CHAIN_ID } from '@massalabs/massa-web3';
+import { schedulerAddress } from './contracts';
+
 export enum Mode {
-  mainnet = 'Mainnet',
-  buildnet = 'Buildnet',
+  mainnet = Number(CHAIN_ID.Mainnet),
+  buildnet = Number(CHAIN_ID.Buildnet),
 }
 
 export const config = {
-  [Mode.mainnet]: {
-    SchedulerContract: 'AS1M8wRz3nyjGdHPeZ7oodyrek5aT8BXaqZEBqANTtcaFEESt2rE',
+  [CHAIN_ID.Mainnet.toString()]: {
+    SchedulerContract: schedulerAddress,
   },
-  [Mode.buildnet]: {
-    SchedulerContract: 'AS1M8wRz3nyjGdHPeZ7oodyrek5aT8BXaqZEBqANTtcaFEESt2rE',
+  [CHAIN_ID.Buildnet.toString()]: {
+    SchedulerContract: schedulerAddress,
   },
 };

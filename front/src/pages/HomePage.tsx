@@ -10,11 +10,9 @@ import SelectAsset from '@/components/SelectAsset';
 import { InputLabel } from '@/components/InputLabel';
 import LogoSyntra from '../assets/logo-syntra.svg';
 import { arrowButton, commonButton } from '@/styles/buttons';
-import { useInit } from '@/services/useInit';
 import { parseUnits } from '@massalabs/massa-web3';
 
 export default function HomePage() {
-  useInit();
   const { connectedAccount } = useAccountStore();
   const { scheduleInfo, setScheduleInfo, createSchedule, spenderSchedules } =
     useSchedule();

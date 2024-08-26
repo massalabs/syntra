@@ -1,4 +1,3 @@
-import { schedulerAddress } from '@/const/contracts';
 import { Args, Mas, MRC20 } from '@massalabs/massa-web3';
 import {
   useAccountStore,
@@ -9,7 +8,7 @@ import { useTokenStore } from '@/store/token';
 
 export default function useToken() {
   const { connectedAccount } = useAccountStore();
-  const { scheduleInfo } = useSchedulerStore();
+  const { scheduleInfo, address: schedulerAddress } = useSchedulerStore();
   const { refreshBalances } = useTokenStore();
   const { callSmartContract } = useWriteSmartContract(connectedAccount!);
 
@@ -21,6 +20,7 @@ export default function useToken() {
       console.error('Invalid amount');
       return;
     }
+
     await callSmartContract(
       'increaseAllowance',
       scheduleInfo.asset.address || '',

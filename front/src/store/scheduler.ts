@@ -1,9 +1,8 @@
 import { create } from 'zustand';
-import { Args } from '@massalabs/massa-web3';
+import { Args, Slot } from '@massalabs/massa-web3';
 
 import { Asset } from '@massalabs/react-ui-kit/src/lib/token/models/AssetModel';
 import { Schedule } from '@/serializable/Schedule';
-import { schedulerAddress } from '@/const/contracts';
 import { supportedTokens } from '@/const/assets';
 import { useAccountStore } from '@massalabs/react-ui-kit';
 
@@ -20,7 +19,8 @@ export type ScheduleInfo = {
 interface SchedulerStoreState {
   scheduleInfo: ScheduleInfo;
   spenderSchedules: Schedule[];
-
+  address: string;
+  setSchedulerAddress: (address: string) => void;
   setScheduleInfo: (
     key: keyof ScheduleInfo,
     value: bigint | string | Asset,
@@ -28,6 +28,13 @@ interface SchedulerStoreState {
 
   getBySpender: (spender: string) => Promise<void>;
   getByRecipient: (recipient: string) => Promise<void>;
+  eventPollerStop: () => void;
+  setEventPollerStop: (stop: () => void) => void;
+
+  eventPollerStopOld: NodeJS.Timeout;
+  setEventPollerStopOld: (timeout: NodeJS.Timeout) => void;
+  lastEventSlotOld: Slot | undefined;
+  setLastEventSlotOld: (slot: Slot) => void;
 }
 
 const defaultScheduleInfo: ScheduleInfo = {
@@ -41,8 +48,22 @@ const defaultScheduleInfo: ScheduleInfo = {
 };
 
 export const useSchedulerStore = create<SchedulerStoreState>((set, get) => ({
+  address: '',
   scheduleInfo: defaultScheduleInfo,
   spenderSchedules: [],
+  eventPollerStop: () => {},
+  eventPollerStopOld: setTimeout(() => {}, 0),
+  lastEventSlotOld: undefined,
+
+  setLastEventSlotOld: (slot) => {
+    set({ lastEventSlotOld: slot });
+  },
+  setEventPollerStopOld: (timeout) => {
+    set({ eventPollerStopOld: timeout });
+  },
+  setSchedulerAddress: (address: string) => {
+    set({ address: address });
+  },
 
   setScheduleInfo: (key, value) =>
     set((state) => ({
@@ -58,7 +79,7 @@ export const useSchedulerStore = create<SchedulerStoreState>((set, get) => ({
 
     const res = await connectedAccount.readSC({
       func: 'getSchedulesBySpender',
-      target: schedulerAddress,
+      target: get().address,
       parameter: new Args().addString(spender).serialize(),
       caller: connectedAccount.address,
     });
@@ -76,9 +97,13 @@ export const useSchedulerStore = create<SchedulerStoreState>((set, get) => ({
 
     await connectedAccount.readSC({
       func: 'getScheduleByRecipient',
-      target: schedulerAddress,
+      target: get().address,
       parameter: new Args().addString(recipient).serialize(),
       caller: connectedAccount.address,
     });
+  },
+
+  setEventPollerStop: (stop: () => void) => {
+    set({ eventPollerStop: stop });
   },
 }));

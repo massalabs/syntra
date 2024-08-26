@@ -1,4 +1,3 @@
-import { schedulerAddress } from '@/const/contracts';
 import { Schedule } from '@/serializable/Schedule';
 import { useSchedulerStore } from '@/store/scheduler';
 import { Address, Args, Mas } from '@massalabs/massa-web3';
@@ -15,6 +14,7 @@ export default function useSchedule() {
     getBySpender,
     getByRecipient,
     spenderSchedules,
+    address: schedulerAddress,
   } = useSchedulerStore();
   const { callSmartContract } = useWriteSmartContract(connectedAccount!);
 
@@ -35,10 +35,6 @@ export default function useSchedule() {
       if (!connectedAccount) {
         console.error('Connected account is missing');
       }
-
-      return;
-    } else if (isNaN(Number(amount))) {
-      console.error('Invalid amount');
       return;
     }
 
@@ -62,6 +58,8 @@ export default function useSchedule() {
       Mas.fromString('10'),
       Mas.fromString('0.01'),
     );
+
+    getBySpender(connectedAccount.address);
   }
 
   return {
