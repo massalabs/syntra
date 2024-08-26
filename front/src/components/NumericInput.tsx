@@ -19,9 +19,8 @@ export function NumericInput(props: NumericInputProps) {
 
   useEffect(() => {
     if (asset) {
-      console.log(asset.balance);
       const balance = asset.balance ?? 0n;
-      if (balance < parseUnits(value, asset.decimals)) {
+      if (balance < parseUnits(value.replace(/,/g, ''), asset.decimals)) {
         setAmountError('Insufficient balance');
       } else {
         setAmountError('');
