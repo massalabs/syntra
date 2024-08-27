@@ -31,7 +31,7 @@ export function NumericInput(props: NumericInputProps) {
   return (
     <div>
       <Money
-        customClass="border-none focus:ring-1 focus:ring-primary focus:outline-none"
+        customClass="border-none focus:ring-1 focus:ring-primary focus:outline-none h-14"
         value={value}
         onValueChange={(o) => onValueChange(o.value)}
         placeholder={placeholder}
