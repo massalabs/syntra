@@ -1,4 +1,4 @@
-import { ScheduleInfo } from '@/services/useCreateSchedule';
+import { ScheduleInfo } from '@/store/scheduler';
 import {
   Args,
   ISerializable,
