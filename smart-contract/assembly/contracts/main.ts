@@ -83,14 +83,16 @@ export function cancelSchedules(binaryArgs: StaticArray<u8>): void {
     .nextString()
     .expect('Spender address is missing or invalid');
 
-  const ids = args.next<Array<u64>>().expect('Ids are missing or invalid');
+  const ids = args.next<u64[]>().expect('Ids are missing or invalid');
 
   assert(Context.caller() === new Address(spender), 'Unauthorized');
 
   for (let i = 0; i < ids.length; i++) {
     removeSchedule(spender, ids[i]);
   }
+  // TODO - implement refund ?
 }
+
 // Read
 
 export function getSchedulesBySpender(

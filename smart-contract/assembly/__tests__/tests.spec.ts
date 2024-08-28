@@ -279,7 +279,9 @@ describe('cancelSchedules', () => {
   test('Does not fail if one of the schedules does not exist', () => {
     createSchedule();
 
-    cancelSchedules(new Args().add(spender1).add([u64.MAX_VALUE]).serialize());
+    cancelSchedules(
+      new Args().add(spender1).add([1, u64.MAX_VALUE]).serialize(),
+    );
 
     const schedules = new Args(
       getSchedulesBySpender(new Args().add(spender1).serialize()),
@@ -287,6 +289,6 @@ describe('cancelSchedules', () => {
       .nextSerializableObjectArray<Schedule>()
       .unwrap();
 
-    expect(schedules.length).toBe(1);
+    expect(schedules.length).toBe(0);
   });
 });
