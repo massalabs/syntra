@@ -163,12 +163,18 @@ export function updateSchedule(schedule: Schedule): void {
 }
 
 export function removeSchedule(spender: string, id: u64): void {
-  const key = getScheduleKey(spender, id);
-  const schedule = new Args(Storage.get(key))
+  const scheduleKey = getScheduleKey(spender, id);
+
+  if (!Storage.has(scheduleKey)) {
+    generateEvent(`Cancel failed: Schedule ${id} not found`);
+    return;
+  }
+
+  const schedule = new Args(Storage.get(scheduleKey))
     .nextSerializable<Schedule>()
     .unwrap();
-  Storage.del(key);
 
+  Storage.del(scheduleKey);
   const recipientKey = getRecipientKey(schedule.recipient, id);
   Storage.del(recipientKey);
   generateEvent(schedule.createCancelEvent());

@@ -77,15 +77,20 @@ export function startScheduleSendFT(binaryArgs: StaticArray<u8>): void {
 
 // cancelScheduleSendFT will make all the remaining transfers of the schedule fail because the schedule will be removed.
 // and the async call try to read the schedule will fail.
-export function cancelScheduleSendFT(binaryArgs: StaticArray<u8>): void {
+export function cancelSchedules(binaryArgs: StaticArray<u8>): void {
   const args = new Args(binaryArgs);
   const spender = args
     .nextString()
     .expect('Spender address is missing or invalid');
-  const id = args.nextU64().expect('Id is missing or invalid');
+
+  const ids = args.next<u64[]>().expect('Ids are missing or invalid');
+
   assert(Context.caller() === new Address(spender), 'Unauthorized');
 
-  removeSchedule(spender, id);
+  for (let i = 0; i < ids.length; i++) {
+    removeSchedule(spender, ids[i]);
+  }
+  // TODO - implement refund ?
 }
 
 // Read
