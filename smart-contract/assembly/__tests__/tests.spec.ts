@@ -1,6 +1,6 @@
 import {
   asyncSendFT,
-  cancelScheduleSendFT,
+  cancelSchedules,
   constructor,
   getSchedule,
   getScheduleByRecipient,
@@ -214,12 +214,12 @@ describe('async send FT', () => {
   });
 });
 
-describe('cancelScheduleSendFT', () => {
+describe('cancelSchedules', () => {
   test('success', () => {
     createSchedule();
     createSchedule();
 
-    cancelScheduleSendFT(new Args().add(spender1).add(ids).serialize());
+    cancelSchedules(new Args().add(spender1).add(ids).serialize());
 
     const schedulesSer = getSchedulesBySpender(
       new Args().add(spender1).serialize(),
@@ -246,14 +246,14 @@ describe('cancelScheduleSendFT', () => {
   throws('fail: unauthorized', () => {
     createSchedule();
     switchUser(spender2);
-    cancelScheduleSendFT(new Args().add(spender1).add(ids).serialize());
+    cancelSchedules(new Args().add(spender1).add(ids).serialize());
   });
 
   test('Cancel the first one', () => {
     createSchedule();
     createSchedule(); // second schedule
 
-    cancelScheduleSendFT(new Args().add(spender1).add([ids[0]]).serialize());
+    cancelSchedules(new Args().add(spender1).add([ids[0]]).serialize());
 
     const schedules = new Args(
       getSchedulesBySpender(new Args().add(spender1).serialize()),
@@ -274,5 +274,19 @@ describe('cancelScheduleSendFT', () => {
     expect(new Args(scheduleSer).next<Schedule>().unwrap()).toStrictEqual(
       schedules[0],
     );
+  });
+
+  test('Does not fail if one of the schedules does not exist', () => {
+    createSchedule();
+
+    cancelSchedules(new Args().add(spender1).add([u64.MAX_VALUE]).serialize());
+
+    const schedules = new Args(
+      getSchedulesBySpender(new Args().add(spender1).serialize()),
+    )
+      .nextSerializableObjectArray<Schedule>()
+      .unwrap();
+
+    expect(schedules.length).toBe(1);
   });
 });

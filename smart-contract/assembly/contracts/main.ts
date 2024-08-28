@@ -77,7 +77,7 @@ export function startScheduleSendFT(binaryArgs: StaticArray<u8>): void {
 
 // cancelScheduleSendFT will make all the remaining transfers of the schedule fail because the schedule will be removed.
 // and the async call try to read the schedule will fail.
-export function cancelScheduleSendFT(binaryArgs: StaticArray<u8>): void {
+export function cancelSchedules(binaryArgs: StaticArray<u8>): void {
   const args = new Args(binaryArgs);
   const spender = args
     .nextString()
