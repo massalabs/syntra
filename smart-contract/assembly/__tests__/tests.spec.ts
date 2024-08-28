@@ -33,6 +33,7 @@ const interval: u64 = 60;
 const occurrences: u64 = 10;
 const tolerance: u32 = 5;
 let id: u64 = 1;
+let ids: u64[] = [1, 2];
 
 function switchUser(user: string): void {
   changeCallStack(user + ' , ' + contractAddress);
@@ -216,8 +217,9 @@ describe('async send FT', () => {
 describe('cancelScheduleSendFT', () => {
   test('success', () => {
     createSchedule();
+    createSchedule();
 
-    cancelScheduleSendFT(new Args().add(spender1).add(id).serialize());
+    cancelScheduleSendFT(new Args().add(spender1).add(ids).serialize());
 
     const schedulesSer = getSchedulesBySpender(
       new Args().add(spender1).serialize(),
@@ -244,19 +246,14 @@ describe('cancelScheduleSendFT', () => {
   throws('fail: unauthorized', () => {
     createSchedule();
     switchUser(spender2);
-    cancelScheduleSendFT(new Args().add(spender1).add(id).serialize());
+    cancelScheduleSendFT(new Args().add(spender1).add(ids).serialize());
   });
 
-  test('multiple, cancel the first one', () => {
+  test('Cancel the first one', () => {
     createSchedule();
     createSchedule(); // second schedule
-    id++;
-    cancelScheduleSendFT(
-      new Args()
-        .add(spender1)
-        .add(id - 1)
-        .serialize(),
-    );
+
+    cancelScheduleSendFT(new Args().add(spender1).add([ids[0]]).serialize());
 
     const schedules = new Args(
       getSchedulesBySpender(new Args().add(spender1).serialize()),
@@ -272,7 +269,7 @@ describe('cancelScheduleSendFT', () => {
     expect(schedulesRecipient).toStrictEqual(schedules);
 
     const scheduleSer = getSchedule(
-      new Args().add(spender1).add(id).serialize(),
+      new Args().add(spender1).add(ids[1]).serialize(),
     );
     expect(new Args(scheduleSer).next<Schedule>().unwrap()).toStrictEqual(
       schedules[0],

@@ -82,12 +82,15 @@ export function cancelScheduleSendFT(binaryArgs: StaticArray<u8>): void {
   const spender = args
     .nextString()
     .expect('Spender address is missing or invalid');
-  const id = args.nextU64().expect('Id is missing or invalid');
+
+  const ids = args.next<Array<u64>>().expect('Ids are missing or invalid');
+
   assert(Context.caller() === new Address(spender), 'Unauthorized');
 
-  removeSchedule(spender, id);
+  for (let i = 0; i < ids.length; i++) {
+    removeSchedule(spender, ids[i]);
+  }
 }
-
 // Read
 
 export function getSchedulesBySpender(
