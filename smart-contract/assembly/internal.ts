@@ -1,6 +1,5 @@
 import {
   Address,
-  balance,
   Context,
   generateEvent,
   sendMessage,
@@ -57,6 +56,8 @@ export function asyncSend(binaryArgs: StaticArray<u8>): void {
 
   // read storage
   const key = getScheduleKey(spender, id);
+  assert(Storage.has(key), `Schedule ${id.toString()} not found or canceled`);
+
   const schedule = new Args(Storage.get(key))
     .nextSerializable<Schedule>()
     .unwrap();
@@ -67,9 +68,6 @@ export function asyncSend(binaryArgs: StaticArray<u8>): void {
       Context.caller() === new Address(schedule.spender),
     'Unauthorized',
   );
-
-  const initBal = balance();
-  generateEvent('bal before update sched' + initBal.toString());
 
   // send token
   if (schedule.tokenAddress.length) {
@@ -84,11 +82,9 @@ export function asyncSend(binaryArgs: StaticArray<u8>): void {
   const period = Context.currentPeriod();
   const thread = Context.currentThread();
   schedule.history.push(new Transfer(period));
-  generateEvent('bal before update sched' + balance().toString());
+
   updateSchedule(schedule);
-  generateEvent('bal after update sched' + balance().toString());
-  const cost = initBal - balance();
-  generateEvent('update sched Cost: ' + cost.toString());
+
   // event
   generateEvent(schedule.createTransferEvent(period, thread));
 }
@@ -170,23 +166,20 @@ export function pushSchedule(schedule: Schedule): void {
 
 export function updateSchedule(schedule: Schedule): void {
   const key = getScheduleKey(schedule.spender, schedule.id);
-  assert(Storage.has(key), 'Schedule not found');
+  assert(Storage.has(key), `Schedule ${schedule.id.toString()} not found`);
   Storage.set(key, new Args().add(schedule).serialize());
 }
 
 export function removeSchedule(spender: string, id: u64): void {
   const scheduleKey = getScheduleKey(spender, id);
 
-  if (!Storage.has(scheduleKey)) {
-    generateEvent(`Cancel failed: Schedule ${id} not found`);
-    return;
-  }
+  assert(Storage.has(scheduleKey), `Schedule ${id.toString()} not found`);
 
   const schedule = new Args(Storage.get(scheduleKey))
     .nextSerializable<Schedule>()
     .unwrap();
 
-  assert(schedule.tokenAddress.length, 'Mas schedules cannot be canceled');
+  assert(!schedule.isVesting, 'Vesting schedules cannot be canceled');
 
   Storage.del(scheduleKey);
   const recipientKey = getRecipientKey(schedule.recipient, id);

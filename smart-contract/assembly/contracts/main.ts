@@ -67,12 +67,14 @@ export function startScheduleSend(binaryArgs: StaticArray<u8>): void {
   if (schedule.tokenAddress.length) {
     // to remove when implemented
     assert(!schedule.isVesting, 'Vesting mode is not implemented for FT');
-    // @ts-ignore
-    const totalAmount: u256 =
+
+    checkAllowance(
+      schedule.tokenAddress,
+      schedule.spender,
       // @ts-ignore
       // TODO: use SafeMathU256
-      schedule.amount * u256.fromU64(schedule.occurrences);
-    checkAllowance(schedule.tokenAddress, schedule.spender, totalAmount);
+      schedule.amount * u256.fromU64(schedule.occurrences),
+    );
   } else {
     // if Mas is used, vesting mode is mandatory
     assert(schedule.isVesting, 'Vesting mode is mandatory to use Mas');
@@ -82,7 +84,11 @@ export function startScheduleSend(binaryArgs: StaticArray<u8>): void {
 
   schedule.history = [];
 
-  schedule.operationId = getOriginOperationId()!;
+  const operationId = getOriginOperationId();
+  // operation id is null for readonly calls
+  if (operationId) {
+    schedule.operationId = operationId;
+  }
 
   pushSchedule(schedule);
   scheduleAllSend(schedule);

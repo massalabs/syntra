@@ -2,10 +2,14 @@ import { scheduler } from 'node:timers/promises';
 import {
   Account,
   Args,
+  EventPoller,
+  formatMas,
+  formatUnits,
   JsonRPCClient,
   Mas,
   parseMas,
   parseUnits,
+  SCEvent,
   Web3Provider,
 } from '@massalabs/massa-web3';
 import { create } from '../create';
@@ -19,12 +23,10 @@ import {
   periodsToMilliseconds,
   separator,
 } from '../utils';
-import { logBalances } from '../token/read';
+import { getBallanceOf, logBalances } from '../token/read';
 
 import * as dotenv from 'dotenv';
 dotenv.config();
-
-const isMas = false;
 
 async function setupAccounts() {
   const account = await Account.fromEnv();
@@ -38,17 +40,18 @@ async function setupAccounts() {
   };
 }
 
-async function main() {
+export async function run(isMas: boolean) {
   const client = JsonRPCClient.buildnet();
   const { provider, spender, recipient } = await setupAccounts();
 
   let tokenAddress;
+  const tokenDecimals = 18;
   if (!isMas) {
     const tokenArgs = new Args()
       .addString('MassaTips')
       .addString('MT')
-      .addU8(18n)
-      .addU256(120000000n * 10n ** 18n);
+      .addU8(BigInt(tokenDecimals))
+      .addU256(parseUnits('120000000', tokenDecimals));
 
     const { contractAddress } = await deploy(
       'token.wasm',
@@ -70,7 +73,7 @@ async function main() {
     isMas ? '' : tokenAddress,
     spender,
     recipient,
-    isMas ? parseMas('1') : parseUnits('1', 18),
+    isMas ? parseMas('1') : parseUnits('1', tokenDecimals),
     10n,
     4n,
     4n,
@@ -90,25 +93,55 @@ async function main() {
     // get token info and balance
     logBalances(tokenAddress!, spender, recipient);
   }
-  const createEvents = await create(schedulerAddress, schedule);
+  const recipientInitBal = isMas ? await client.getBalance(recipient) : 0n;
+  const spenderInitBal = isMas
+    ? await client.getBalance(spender)
+    : await getBallanceOf(schedule.tokenAddress, spender);
+
+  const initBalance = await client.getBalance(schedulerAddress, false);
+
+  await create(schedulerAddress, schedule);
+
+  const schedBal = await client.getBalance(schedulerAddress, false);
+
+  console.log('Scheduler init balance:', formatMas(initBalance));
+  console.log('Scheduler balance after create:', formatMas(schedBal));
+
+  if (initBalance > schedBal) {
+    throw new Error('Scheduler contract should keep its coins!');
+  }
 
   console.log(
     'Schedule created',
     `current period: ${await client.fetchPeriod()}`,
   );
-  logEvents(createEvents);
 
-  for (let i = 0; i < schedule.occurrences; i++) {
+  let stop = false;
+  let currentOccurrence: bigint | undefined;
+  const allEvents: SCEvent[] = [];
+  const onData = async (events: SCEvent[]) => {
+    allEvents.push(...events);
+
+    // regex to match the event and extract the remaining occurrences (2 group)
+    const transferRegex = /Transfer:(\d+),(\d+),(\d+),(\d+)/;
+
+    events.forEach((e) => {
+      const match = e.data.match(transferRegex);
+      if (match) {
+        currentOccurrence = schedule.occurrences - BigInt(match[2]);
+      }
+    });
+    if (!currentOccurrence) {
+      return;
+    }
     separator();
 
-    await scheduler.wait(periodsToMilliseconds(Number(schedule.interval)));
-
     console.log(
-      `Iteration ${i + 1}: current period: ${await client.fetchPeriod()}`,
+      `Iteration ${currentOccurrence.toString()}: current period: ${await client.fetchPeriod()}`,
     );
 
     const schedules = await getSchedulesBySpender(schedulerAddress, spender);
-    schedules.forEach(async (schedule, idx) => {
+    schedules.forEach(async (schedule, _idx) => {
       console.table({
         id: schedule.id,
         recipient: schedule.recipient,
@@ -117,21 +150,79 @@ async function main() {
         occurrences: schedule.occurrences,
       });
     });
-    if (isMas) {
-      const spenderBalance = await client.getBalance(spender);
-      const recipientBalance = await client.getBalance(recipient);
-      console.log('Spender balance:', spenderBalance.toString());
-      console.log('Recipient balance:', recipientBalance.toString());
-    } else {
-      await logBalances(tokenAddress!, spender, recipient);
-    }
-    const events = await client.getEvents({
-      smartContractAddress: schedulerAddress,
-      isFinal: true,
-    });
 
-    console.table(events.map((e) => e.data));
+    console.table(allEvents.map((e) => e.data));
+
+    // Test balances
+    if (isMas) {
+      const spenderBalance = await client.getBalance(spender, false);
+      const recipientBalance = await client.getBalance(recipient, false);
+      console.log('Spender balance:', formatMas(spenderBalance));
+      console.log('Recipient balance:', formatMas(recipientBalance));
+      console.log('Recipient init balance:', formatMas(recipientInitBal));
+      console.log(
+        'expected Recipient balance:',
+        formatMas(recipientInitBal + schedule.amount * currentOccurrence),
+      );
+      if (
+        recipientBalance !==
+        recipientInitBal + schedule.amount * currentOccurrence
+      ) {
+        throw new Error('Wrong recipient balance');
+      }
+    } else {
+      const spenderBalance = await getBallanceOf(
+        schedule.tokenAddress,
+        spender,
+      );
+      const recipientBalance = await getBallanceOf(
+        schedule.tokenAddress,
+        recipient,
+      );
+      console.log(
+        'Spender balance:',
+        formatUnits(spenderBalance, tokenDecimals),
+      );
+      console.log(
+        'Recipient balance:',
+        formatUnits(recipientBalance, tokenDecimals),
+      );
+      if (
+        recipientBalance !==
+        recipientInitBal + schedule.amount * currentOccurrence
+      ) {
+        throw new Error('Wrong recipient balance');
+      }
+      if (
+        spenderBalance !==
+        spenderInitBal - schedule.amount * currentOccurrence
+      ) {
+        throw new Error('Wrong spender balance');
+      }
+    }
+    if (currentOccurrence === schedule.occurrences) {
+      stop = true;
+    }
+  };
+
+  const onError = (error: Error) => {
+    console.error('Error:', error);
+    stop = true;
+  };
+  const { stopPolling } = EventPoller.start(
+    provider,
+    {
+      smartContractAddress: schedulerAddress,
+    },
+    onData,
+    onError,
+  );
+
+  while (!stop) {
+    await scheduler.wait(periodsToMilliseconds(0.5));
+  }
+  stopPolling();
+  if (currentOccurrence !== schedule.occurrences) {
+    throw new Error('Wrong number of occurrences');
   }
 }
-
-main().catch(console.error);

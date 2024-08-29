@@ -1,0 +1,30 @@
+name: syntra e2e tests
+on:
+  workflow_dispatch:
+  schedule:
+    # Every day at 00:00 UTC
+    - cron: "0 0 * * *"
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: smart-contract/package-lock.json
+
+      - name: Install
+        run: npm ci
+        working-directory: smart-contract
+
+      - name: Run test suite
+        working-directory: smart-contract
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+        run: |
+          cp .env.ci .env
+          npm run test:e2e
