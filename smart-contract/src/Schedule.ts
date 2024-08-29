@@ -5,6 +5,7 @@ import {
 } from '@massalabs/massa-web3';
 
 export class Schedule implements ISerializable<Schedule> {
+  public operationId = '';
   /**
    * Creates a new Schedule instance.
    *
@@ -21,6 +22,7 @@ export class Schedule implements ISerializable<Schedule> {
    */
   constructor(
     public id: bigint = 0n,
+    public isVesting: boolean = false,
     public tokenAddress: string = '',
     public spender: string = '',
     public recipient: string = '',
@@ -35,6 +37,8 @@ export class Schedule implements ISerializable<Schedule> {
   serialize(): Uint8Array {
     const args = new Args()
       .addU64(this.id)
+      .addString(this.operationId)
+      .addBool(this.isVesting)
       .addString(this.tokenAddress)
       .addString(this.spender)
       .addString(this.recipient)
@@ -51,6 +55,8 @@ export class Schedule implements ISerializable<Schedule> {
     const args = new Args(data, offset);
 
     this.id = args.nextU64();
+    this.operationId = args.nextString();
+    this.isVesting = args.nextBool();
     this.tokenAddress = args.nextString();
     this.spender = args.nextString();
     this.recipient = args.nextString();

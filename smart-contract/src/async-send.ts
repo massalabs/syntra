@@ -1,4 +1,4 @@
-import { Address, Args } from '@massalabs/massa-web3';
+import { Args } from '@massalabs/massa-web3';
 import { Schedule } from './Schedule';
 import { getClientAndContract } from './utils';
 import { getSchedulesByRecipient } from './read';
@@ -10,14 +10,6 @@ export async function asyncSend(contractAddress: string, schedule: Schedule) {
     .addString(schedule.spender)
     .addU64(schedule.id)
     .serialize();
-
-  const estimation = await contract.getGasEstimation(
-    'asyncSendFT',
-    args,
-    Address.fromString(schedule.spender),
-    {},
-  );
-  console.log('Estimation: ', estimation);
 
   const operation = await contract.call('asyncSendFT', args);
 

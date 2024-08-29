@@ -10,6 +10,8 @@ import { u256 } from 'as-bignum/assembly';
 export class Schedule implements Serializable {
   constructor(
     public id: u64 = 0,
+    public operationId: string = '',
+    public isVesting: bool = false,
     public tokenAddress: string = '',
     public spender: string = '',
     public recipient: string = '',
@@ -24,7 +26,9 @@ export class Schedule implements Serializable {
   validate(): void {
     assert(this.interval > 0, 'interval must be greater than 0');
     assert(this.amount > u256.Zero, 'amount must be greater than 0');
-    assertIsSmartContract(this.tokenAddress);
+    if (this.tokenAddress.length) {
+      assertIsSmartContract(this.tokenAddress);
+    }
     assert(validateAddress(this.spender), 'spender is not a valid Address');
     assert(isAddressEoa(this.spender), 'spender is not a EOA');
     assert(validateAddress(this.recipient), 'recipient is not a valid Address');
@@ -34,6 +38,8 @@ export class Schedule implements Serializable {
   serialize(): StaticArray<u8> {
     return new Args()
       .add(this.id)
+      .add(this.operationId)
+      .add(this.isVesting)
       .add(this.tokenAddress)
       .add(this.spender)
       .add(this.recipient)
@@ -51,6 +57,14 @@ export class Schedule implements Serializable {
     const resultId = args.nextU64();
     if (resultId.isErr()) {
       return new Result(0, "Can't deserialize id.");
+    }
+    let resultOpId = args.nextString();
+    if (resultOpId.isErr()) {
+      return new Result(0, "Can't deserialize operationId.");
+    }
+    const resultIsVesting = args.nextBool();
+    if (resultIsVesting.isErr()) {
+      return new Result(0, "Can't deserialize isVesting.");
     }
     const resultTokenAddress = args.nextString();
     if (resultTokenAddress.isErr()) {
@@ -90,6 +104,8 @@ export class Schedule implements Serializable {
     }
 
     this.id = resultId.unwrap();
+    this.operationId = resultOpId.unwrap();
+    this.isVesting = resultIsVesting.unwrap();
     this.tokenAddress = resultTokenAddress.unwrap();
     this.spender = resultSpender.unwrap();
     this.recipient = resultRecipient.unwrap();

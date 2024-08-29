@@ -45,7 +45,7 @@ export default function useSchedule() {
     }
 
     await callSmartContract(
-      'startScheduleSendFT',
+      'startScheduleSend',
       schedulerAddress,
       new Args()
         .addSerializable(Schedule.fromScheduleInfo(scheduleInfo))
@@ -55,8 +55,8 @@ export default function useSchedule() {
         pending: 'Creating new schedule...',
         error: 'Failed to create schedule',
       },
+      // no :/
       Mas.fromString('10'),
-      Mas.fromString('0.01'),
     );
 
     getBySpender(connectedAccount.address);
