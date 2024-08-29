@@ -1,8 +1,10 @@
 // The entry file of your WebAssembly module.
 import {
   Address,
+  balance,
   Context,
   generateEvent,
+  getOriginOperationId,
   Storage,
 } from '@massalabs/massa-as-sdk';
 import { Args, u64ToBytes } from '@massalabs/as-types';
@@ -10,7 +12,7 @@ import { u256 } from 'as-bignum/assembly';
 import { Schedule } from '../Schedule';
 import {
   checkAllowance,
-  scheduleAllSendFT,
+  scheduleAllSend,
   pushSchedule,
   readSchedulesBySpender,
   readSchedulesByRecipient,
@@ -19,12 +21,13 @@ import {
   readSchedule,
 } from '../internal';
 import { setOwner } from '@massalabs/sc-standards/assembly/contracts/utils/ownership';
+import { refundMas } from '../refund';
 export {
   ownerAddress,
   setOwner,
 } from '@massalabs/sc-standards/assembly/contracts/utils/ownership';
 
-export { asyncSendFT } from '../internal';
+export { asyncSend } from '../internal';
 
 /**
  * This function is meant to be called only one time: when the contract is deployed.
@@ -46,9 +49,11 @@ export function constructor(_: StaticArray<u8>): StaticArray<u8> {
 
 // Write
 
-export function startScheduleSendFT(binaryArgs: StaticArray<u8>): void {
+export function startScheduleSend(binaryArgs: StaticArray<u8>): void {
   const args = new Args(binaryArgs);
 
+  let initBal = balance();
+  generateEvent('init balance coins' + initBal.toString());
   const schedule = args
     .nextSerializable<Schedule>()
     .expect('Schedule is missing or invalid');
@@ -59,23 +64,34 @@ export function startScheduleSendFT(binaryArgs: StaticArray<u8>): void {
     'Recipient and spender must be different',
   );
 
-  checkAllowance(
-    schedule.tokenAddress,
-    schedule.spender,
+  if (schedule.tokenAddress.length) {
+    // to remove when implemented
+    assert(!schedule.isVesting, 'Vesting mode is not implemented for FT');
     // @ts-ignore
-    schedule.amount * u256.fromU64(schedule.occurrences), // TODO: use SafeMathU256
-  );
+    const totalAmount: u256 =
+      // @ts-ignore
+      // TODO: use SafeMathU256
+      schedule.amount * u256.fromU64(schedule.occurrences);
+    checkAllowance(schedule.tokenAddress, schedule.spender, totalAmount);
+  } else {
+    // if Mas is used, vesting mode is mandatory
+    assert(schedule.isVesting, 'Vesting mode is mandatory to use Mas');
+  }
 
   schedule.remaining = schedule.occurrences;
 
   schedule.history = [];
 
+  schedule.operationId = getOriginOperationId()!;
+
   pushSchedule(schedule);
-  scheduleAllSendFT(schedule);
+  scheduleAllSend(schedule);
   generateEvent(schedule.createCreationEvent());
+
+  refundMas(schedule, initBal);
 }
 
-// cancelScheduleSendFT will make all the remaining transfers of the schedule fail because the schedule will be removed.
+// cancelScheduleSend will make all the remaining transfers of the schedule fail because the schedule will be removed.
 // and the async call try to read the schedule will fail.
 export function cancelSchedules(binaryArgs: StaticArray<u8>): void {
   const args = new Args(binaryArgs);

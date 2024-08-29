@@ -4,6 +4,8 @@ import {
   Args,
   JsonRPCClient,
   Mas,
+  parseMas,
+  parseUnits,
   Web3Provider,
 } from '@massalabs/massa-web3';
 import { create } from '../create';
@@ -20,8 +22,9 @@ import {
 import { logBalances } from '../token/read';
 
 import * as dotenv from 'dotenv';
-import { mint } from '../token/mint';
 dotenv.config();
+
+const isMas = false;
 
 async function setupAccounts() {
   const account = await Account.fromEnv();
@@ -39,20 +42,21 @@ async function main() {
   const client = JsonRPCClient.buildnet();
   const { provider, spender, recipient } = await setupAccounts();
 
-  const tokenArgs = new Args()
-    .addString('MassaTips')
-    .addString('MT')
-    .addU8(18n)
-    .addU256(120000000n * 10n ** 18n);
+  let tokenAddress;
+  if (!isMas) {
+    const tokenArgs = new Args()
+      .addString('MassaTips')
+      .addString('MT')
+      .addU8(18n)
+      .addU256(120000000n * 10n ** 18n);
 
-  const { contractAddress: tokenAddress } = await deploy(
-    'token.wasm',
-    tokenArgs,
-    Mas.fromString('1'),
-  );
-
-  // const events = await mint(provider, tokenAddress, 1000n * 10n ** 18n);
-  // logEvents(events);
+    const { contractAddress } = await deploy(
+      'token.wasm',
+      tokenArgs,
+      Mas.fromString('1'),
+    );
+    tokenAddress = contractAddress;
+  }
 
   const { contractAddress: schedulerAddress } = await deploy(
     'main.wasm',
@@ -62,28 +66,30 @@ async function main() {
 
   const schedule = new Schedule(
     0n,
-    tokenAddress,
+    isMas ? true : false,
+    isMas ? '' : tokenAddress,
     spender,
     recipient,
-    1n * 10n ** 18n,
+    isMas ? parseMas('1') : parseUnits('1', 18),
     10n,
     4n,
     4n,
     3n,
   );
 
-  const allowanceEvents = await increaseAllowance(
-    provider,
-    tokenAddress,
-    schedulerAddress,
-    schedule.amount * schedule.occurrences,
-  );
-  console.log('Allowance increased');
-  logEvents(allowanceEvents);
+  if (!isMas) {
+    const allowanceEvents = await increaseAllowance(
+      provider,
+      tokenAddress!,
+      schedulerAddress,
+      schedule.amount * schedule.occurrences,
+    );
+    console.log('Allowance increased');
+    logEvents(allowanceEvents);
 
-  // get token info and balance
-  logBalances(tokenAddress, spender, recipient);
-
+    // get token info and balance
+    logBalances(tokenAddress!, spender, recipient);
+  }
   const createEvents = await create(schedulerAddress, schedule);
 
   console.log(
@@ -111,7 +117,14 @@ async function main() {
         occurrences: schedule.occurrences,
       });
     });
-    await logBalances(tokenAddress, spender, recipient);
+    if (isMas) {
+      const spenderBalance = await client.getBalance(spender);
+      const recipientBalance = await client.getBalance(recipient);
+      console.log('Spender balance:', spenderBalance.toString());
+      console.log('Recipient balance:', recipientBalance.toString());
+    } else {
+      await logBalances(tokenAddress!, spender, recipient);
+    }
     const events = await client.getEvents({
       smartContractAddress: schedulerAddress,
       isFinal: true,

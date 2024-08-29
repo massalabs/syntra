@@ -1,9 +1,11 @@
 import {
   Address,
+  balance,
   Context,
   generateEvent,
   sendMessage,
   Storage,
+  transferCoins,
 } from '@massalabs/massa-as-sdk';
 import { TokenWrapper } from '@massalabs/sc-standards/assembly/contracts/FT';
 import { getBalanceEntryCost } from '@massalabs/sc-standards/assembly/contracts/FT/token-external';
@@ -46,8 +48,8 @@ export function sendFT(schedule: Schedule): void {
 
 // Autonomous smart contract feature
 
-// The function asyncSendFT will be trigger by autonomous smart contract feature.
-export function asyncSendFT(binaryArgs: StaticArray<u8>): void {
+// The function asyncSend will be trigger by autonomous smart contract feature.
+export function asyncSend(binaryArgs: StaticArray<u8>): void {
   // deserialize params
   const args = new Args(binaryArgs);
   const spender = args.next<string>().expect('spender is missing or invalid');
@@ -66,21 +68,32 @@ export function asyncSendFT(binaryArgs: StaticArray<u8>): void {
     'Unauthorized',
   );
 
+  const initBal = balance();
+  generateEvent('bal before update sched' + initBal.toString());
+
   // send token
-  sendFT(schedule);
+  if (schedule.tokenAddress.length) {
+    sendFT(schedule);
+  } else {
+    // Mas
+    transferCoins(new Address(schedule.recipient), schedule.amount.toU64());
+  }
 
   // update schedule
   schedule.remaining -= 1;
   const period = Context.currentPeriod();
   const thread = Context.currentThread();
   schedule.history.push(new Transfer(period));
+  generateEvent('bal before update sched' + balance().toString());
   updateSchedule(schedule);
-
+  generateEvent('bal after update sched' + balance().toString());
+  const cost = initBal - balance();
+  generateEvent('update sched Cost: ' + cost.toString());
   // event
   generateEvent(schedule.createTransferEvent(period, thread));
 }
 
-export function scheduleAllSendFT(schedule: Schedule): void {
+export function scheduleAllSend(schedule: Schedule): void {
   for (let n: u64 = 1; n <= schedule.occurrences; n++) {
     const validityStartPeriod =
       Context.currentPeriod() + schedule.interval * n - schedule.tolerance;
@@ -90,16 +103,15 @@ export function scheduleAllSendFT(schedule: Schedule): void {
     const validityEndThread = Context.currentThread();
     sendMessage(
       Context.callee(),
-      'asyncSendFT',
+      'asyncSend',
       validityStartPeriod,
       validityStartThread,
       validityEndPeriod,
       validityEndThread,
       MAX_GAS_ASYNC_FT,
       1_000_000,
-      n === 1
-        ? getBalanceEntryCost(schedule.tokenAddress, schedule.recipient)
-        : 0,
+      // no need to transfer coins, as function is on the same contract
+      0,
       new Args().add(schedule.spender).add(schedule.id).serialize(),
     );
     generateEvent(
@@ -121,7 +133,7 @@ const schedulesPrefix = 'SCHEDULE';
 
 export const idCounterKey = stringToBytes('C');
 
-function getIdCounter(): u64 {
+export function getIdCounter(): u64 {
   return bytesToU64(Storage.get(idCounterKey));
 }
 
@@ -173,6 +185,8 @@ export function removeSchedule(spender: string, id: u64): void {
   const schedule = new Args(Storage.get(scheduleKey))
     .nextSerializable<Schedule>()
     .unwrap();
+
+  assert(schedule.tokenAddress.length, 'Mas schedules cannot be canceled');
 
   Storage.del(scheduleKey);
   const recipientKey = getRecipientKey(schedule.recipient, id);

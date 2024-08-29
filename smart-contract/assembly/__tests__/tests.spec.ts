@@ -1,11 +1,11 @@
 import {
-  asyncSendFT,
   cancelSchedules,
+  asyncSend,
   constructor,
   getSchedule,
   getScheduleByRecipient,
   getSchedulesBySpender,
-  startScheduleSendFT,
+  startScheduleSend,
 } from '../contracts/main';
 import { Args, u256ToBytes } from '@massalabs/as-types';
 import {
@@ -21,6 +21,9 @@ import {
 import { u256 } from 'as-bignum/assembly';
 import { Schedule } from '../Schedule';
 import { balanceKey } from '@massalabs/sc-standards/assembly/contracts/FT/token-internals';
+import { getIdCounter } from '../internal';
+import { UPDATE_COST } from '../refund';
+import { getBalanceEntryCost } from '@massalabs/sc-standards/assembly/contracts/FT/token-external';
 
 const contractAddress = 'AS12BqZEQ6sByhRLyEuf0YbQmcF2PsDdkNNG1akBJu9XcjZA1eT';
 const admin = 'AU1mhPhXCfh8afoNnbW91bXUVAmu8wU7u8v54yNTMvY7E52KBbz3';
@@ -32,8 +35,6 @@ const amount = u256.fromU64(12345678910);
 const interval: u64 = 60;
 const occurrences: u64 = 10;
 const tolerance: u32 = 5;
-let id: u64 = 1;
-let ids: u64[] = [1, 2];
 
 function switchUser(user: string): void {
   changeCallStack(user + ' , ' + contractAddress);
@@ -46,16 +47,43 @@ beforeEach(() => {
   constructor([]);
   mockAdminContext(false);
   switchUser(spender1);
-  id = 1;
 });
 
 function createSchedule(spender: string = spender1): void {
   // mock allowance
+  // @ts-ignore
   mockScCall(u256ToBytes(amount * u256.fromU64(occurrences)));
 
   const schedule = new Schedule(
     0,
+    'lolmao',
+    false,
     tokenAddress,
+    spender,
+    recipient,
+    amount,
+    interval,
+    occurrences,
+    occurrences,
+    tolerance,
+  );
+
+  const updateCost = UPDATE_COST * occurrences;
+  const sendCost = getBalanceEntryCost(tokenAddress, recipient);
+  const total = updateCost + sendCost;
+  mockBalance(spender, total);
+  mockTransferredCoins(total);
+
+  const params = new Args().add(schedule);
+  startScheduleSend(params.serialize());
+}
+
+function createMasSchedule(spender: string = spender1): void {
+  const schedule = new Schedule(
+    0,
+    'lolmao',
+    true,
+    '',
     spender,
     recipient,
     amount,
@@ -67,11 +95,19 @@ function createSchedule(spender: string = spender1): void {
 
   const params = new Args().add(schedule);
 
-  startScheduleSendFT(params.serialize());
+  const updateCost = UPDATE_COST * occurrences;
+  const sendCost = schedule.amount.toU64() * schedule.occurrences;
+  const total = updateCost + sendCost;
+
+  mockBalance(spender, total);
+  mockTransferredCoins(total);
+
+  startScheduleSend(params.serialize());
 }
 
 describe('Scheduler app test', () => {
-  test('startScheduleSendFT', () => {
+  test('startScheduleSend FT', () => {
+    const currentId = getIdCounter();
     createSchedule();
 
     const schedulesSer = getSchedulesBySpender(
@@ -81,8 +117,10 @@ describe('Scheduler app test', () => {
     const schedules = new Args(schedulesSer)
       .nextSerializableObjectArray<Schedule>()
       .unwrap();
+
     expect(schedules.length).toBe(1);
-    expect(schedules[0].id).toBe(id);
+    expect(schedules[0].id).toBe(currentId + 1);
+    expect(schedules[0].isVesting).toBe(false);
     expect(schedules[0].tokenAddress).toBe(tokenAddress);
     expect(schedules[0].spender).toBe(spender1);
     expect(schedules[0].recipient).toBe(recipient);
@@ -103,17 +141,16 @@ describe('Scheduler app test', () => {
     ).toStrictEqual(schedules);
 
     const scheduleSer = getSchedule(
-      new Args().add(spender1).add(id).serialize(),
+      new Args().add(spender1).add(schedules[0].id).serialize(),
     );
     expect(new Args(scheduleSer).next<Schedule>().unwrap()).toStrictEqual(
       schedules[0],
     );
   });
 
-  test('startScheduleSendFT multiple', () => {
-    createSchedule();
-    createSchedule(); // second schedule
-    id++;
+  test('startScheduleSend MAS', () => {
+    const currentId = getIdCounter();
+    createMasSchedule();
 
     const schedulesSer = getSchedulesBySpender(
       new Args().add(spender1).serialize(),
@@ -122,7 +159,20 @@ describe('Scheduler app test', () => {
     const schedules = new Args(schedulesSer)
       .nextSerializableObjectArray<Schedule>()
       .unwrap();
-    expect(schedules.length).toBe(2);
+
+    expect(schedules.length).toBe(1);
+    expect(schedules[0].id).toBe(currentId + 1);
+    expect(schedules[0].tokenAddress).toBe('');
+    expect(schedules[0].isVesting).toBe(true);
+    expect(schedules[0].spender).toBe(spender1);
+    expect(schedules[0].recipient).toBe(recipient);
+    expect(schedules[0].amount).toBe(amount);
+    expect(schedules[0].interval).toBe(interval);
+    expect(schedules[0].occurrences).toBe(occurrences);
+    expect(schedules[0].remaining).toBe(occurrences);
+    expect(schedules[0].tolerance).toBe(tolerance);
+    expect(schedules[0].history).toStrictEqual([]);
+
     const schedulesRecipientSer = getScheduleByRecipient(
       new Args().add(recipient).serialize(),
     );
@@ -133,18 +183,56 @@ describe('Scheduler app test', () => {
     ).toStrictEqual(schedules);
 
     const scheduleSer = getSchedule(
-      new Args().add(spender1).add(id).serialize(),
+      new Args().add(spender1).add(schedules[0].id).serialize(),
+    );
+    expect(new Args(scheduleSer).next<Schedule>().unwrap()).toStrictEqual(
+      schedules[0],
+    );
+  });
+
+  test('startScheduleSend multiple', () => {
+    const currentId = getIdCounter();
+
+    createSchedule();
+    createSchedule(); // second schedule
+
+    const schedulesSer = getSchedulesBySpender(
+      new Args().add(spender1).serialize(),
+    );
+
+    const schedules = new Args(schedulesSer)
+      .nextSerializableObjectArray<Schedule>()
+      .unwrap();
+    expect(schedules.length).toBe(2);
+    expect(schedules[0].id).toBe(currentId + 1);
+    expect(schedules[1].id).toBe(currentId + 2);
+
+    const schedulesRecipientSer = getScheduleByRecipient(
+      new Args().add(recipient).serialize(),
+    );
+    expect(
+      new Args(schedulesRecipientSer)
+        .nextSerializableObjectArray<Schedule>()
+        .unwrap(),
+    ).toStrictEqual(schedules);
+
+    const scheduleSer = getSchedule(
+      new Args()
+        .add(spender1)
+        .add(currentId + 2)
+        .serialize(),
     );
     expect(new Args(scheduleSer).next<Schedule>().unwrap()).toStrictEqual(
       schedules[1],
     );
   });
 
-  test('startScheduleSendFT multiple spenders', () => {
+  test('startScheduleSend multiple spenders', () => {
+    const currentId = getIdCounter();
+
     createSchedule();
     switchUser(spender2);
     createSchedule(spender2); // second schedule
-    id++;
 
     const schedules = new Args(
       getSchedulesBySpender(new Args().add(spender2).serialize()),
@@ -159,7 +247,10 @@ describe('Scheduler app test', () => {
     ).toBe(2);
 
     const scheduleSer = getSchedule(
-      new Args().add(spender2).add(id).serialize(),
+      new Args()
+        .add(spender2)
+        .add(currentId + 2)
+        .serialize(),
     );
     expect(new Args(scheduleSer).next<Schedule>().unwrap()).toStrictEqual(
       schedules[0],
@@ -175,17 +266,14 @@ describe('async send FT', () => {
     )
       .nextSerializableObjectArray<Schedule>()
       .unwrap()[0];
+
+    // prepare async call context
     switchUser(contractAddress);
     mockScCall([]);
 
-    // cost of creating token balance entry
-    const storageCost = 9600000;
-
-    mockBalance(contractAddress, storageCost);
-    mockTransferredCoins(storageCost);
-
-    asyncSendFT(new Args().add(schedule.spender).add(schedule.id).serialize());
-    const schedules = new Args(
+    // 1st autonomous execution
+    asyncSend(new Args().add(schedule.spender).add(schedule.id).serialize());
+    let schedules = new Args(
       getSchedulesBySpender(new Args().add(spender1).serialize()),
     )
       .nextSerializableObjectArray<Schedule>()
@@ -193,9 +281,8 @@ describe('async send FT', () => {
     expect(schedules).toHaveLength(1);
     expect(schedules[0].remaining).toBe(occurrences - 1);
 
-    // seconde autonomous execution
-
     // Set the balance entry on token contract
+    // with this set, the cost of creating token balance entry will be 0
     Storage.setOf(
       new Address(tokenAddress),
       balanceKey(new Address(recipient)),
@@ -203,23 +290,64 @@ describe('async send FT', () => {
     );
 
     mockScCall([]);
-    asyncSendFT(new Args().add(schedule.spender).add(schedule.id).serialize());
-    const schedules2 = new Args(
+
+    // 2n autonomous execution
+    asyncSend(new Args().add(schedule.spender).add(schedule.id).serialize());
+    schedules = new Args(
       getSchedulesBySpender(new Args().add(spender1).serialize()),
     )
       .nextSerializableObjectArray<Schedule>()
       .unwrap();
-    expect(schedules2).toHaveLength(1);
-    expect(schedules2[0].remaining).toBe(occurrences - 2);
+    expect(schedules).toHaveLength(1);
+    expect(schedules[0].remaining).toBe(occurrences - 2);
+  });
+});
+
+describe('async send MAS', () => {
+  test('success', () => {
+    createMasSchedule();
+    const schedule = new Args(
+      getSchedulesBySpender(new Args().add(spender1).serialize()),
+    )
+      .nextSerializableObjectArray<Schedule>()
+      .unwrap()[0];
+
+    switchUser(contractAddress);
+
+    // 1st autonomous execution
+    asyncSend(new Args().add(schedule.spender).add(schedule.id).serialize());
+    let schedules = new Args(
+      getSchedulesBySpender(new Args().add(spender1).serialize()),
+    )
+      .nextSerializableObjectArray<Schedule>()
+      .unwrap();
+    expect(schedules).toHaveLength(1);
+    expect(schedules[0].remaining).toBe(occurrences - 1);
+
+    // 2n autonomous execution
+    asyncSend(new Args().add(schedule.spender).add(schedule.id).serialize());
+    schedules = new Args(
+      getSchedulesBySpender(new Args().add(spender1).serialize()),
+    )
+      .nextSerializableObjectArray<Schedule>()
+      .unwrap();
+    expect(schedules).toHaveLength(1);
+    expect(schedules[0].remaining).toBe(occurrences - 2);
   });
 });
 
 describe('cancelSchedules', () => {
-  test('success', () => {
+  test('cancel 2 schedules', () => {
+    const schedueleId = getIdCounter() + 1;
     createSchedule();
     createSchedule();
 
-    cancelSchedules(new Args().add(spender1).add(ids).serialize());
+    cancelSchedules(
+      new Args()
+        .add(spender1)
+        .add([schedueleId, schedueleId + 1])
+        .serialize(),
+    );
 
     const schedulesSer = getSchedulesBySpender(
       new Args().add(spender1).serialize(),
@@ -239,28 +367,44 @@ describe('cancelSchedules', () => {
     ).toBe(0);
 
     expect(() => {
-      getSchedule(new Args().add(spender1).add(id).serialize());
+      const schedueleId = getIdCounter();
+      const params = new Args().add(spender1).add(schedueleId);
+      getSchedule(params.serialize());
     }).toThrow();
   });
 
-  throws('fail: unauthorized', () => {
-    createSchedule();
-    switchUser(spender2);
-    cancelSchedules(new Args().add(spender1).add(ids).serialize());
+  throws('fail: cancel Mas scheduele', () => {
+    createMasSchedule();
+    cancelSchedules(new Args().add(spender1).add([getIdCounter()]).serialize());
   });
 
-  test('Cancel the first one', () => {
+  throws('fail: unauthorized', () => {
+    const schedueleId = getIdCounter() + 1;
+    createSchedule();
+    switchUser(spender2);
+    cancelSchedules(new Args().add(spender1).add([schedueleId]).serialize());
+  });
+
+  test('multiple create, cancel the first one', () => {
+    const schedueleId = getIdCounter() + 1;
     createSchedule();
     createSchedule(); // second schedule
 
-    cancelSchedules(new Args().add(spender1).add([ids[0]]).serialize());
+    cancelSchedules(
+      new Args()
+        .add(spender1)
+        .add([[schedueleId]])
+        .serialize(),
+    );
 
     const schedules = new Args(
       getSchedulesBySpender(new Args().add(spender1).serialize()),
     )
       .nextSerializableObjectArray<Schedule>()
       .unwrap();
+
     expect(schedules.length).toBe(1);
+
     const schedulesRecipient = new Args(
       getScheduleByRecipient(new Args().add(recipient).serialize()),
     )
@@ -269,8 +413,12 @@ describe('cancelSchedules', () => {
     expect(schedulesRecipient).toStrictEqual(schedules);
 
     const scheduleSer = getSchedule(
-      new Args().add(spender1).add(ids[1]).serialize(),
+      new Args()
+        .add(spender1)
+        .add(schedueleId + 1)
+        .serialize(),
     );
+
     expect(new Args(scheduleSer).next<Schedule>().unwrap()).toStrictEqual(
       schedules[0],
     );
