@@ -6,4 +6,5 @@ export default {
     './node_modules/@massalabs/react-ui-kit/src/**/*.{js,ts,jsx,tsx}',
   ],
   presets: [require('./src/themes/default.js')],
+  plugins: [require('@tailwindcss/forms')],
 };

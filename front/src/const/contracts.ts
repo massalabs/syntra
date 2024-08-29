@@ -1,2 +1,2 @@
 export const schedulerAddress =
-  'AS12kZC5eWxCuKgfhtZoGArq93bkD41hZ1LxhVT4qzFbnjGhsSJNZ';
+  'AS126LJykyfvydksDg3s9Dea67Rid7fquaWHwJWJjAFhSNr69L2Rr';

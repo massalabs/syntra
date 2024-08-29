@@ -1,6 +1,6 @@
 import { Schedule } from '@/serializable/Schedule';
 import { useSchedulerStore } from '@/store/scheduler';
-import { Address, Args, Mas } from '@massalabs/massa-web3';
+import { Address, Args, ArrayTypes, Mas } from '@massalabs/massa-web3';
 import {
   useAccountStore,
   useWriteSmartContract,
@@ -24,16 +24,16 @@ export default function useSchedule() {
 
     if (!amount || !interval || !recipient || !connectedAccount) {
       if (!amount) {
-        console.error('Amount is missing');
+        throw new Error('Amount is missing');
       }
       if (!interval) {
         console.error('Interval is missing');
       }
       if (!recipient) {
-        console.error('Recipient is missing');
+        throw new Error('Recipient is missing');
       }
       if (!connectedAccount) {
-        console.error('Connected account is missing');
+        throw new Error('Connected account is missing');
       }
       return;
     }
@@ -62,12 +62,34 @@ export default function useSchedule() {
     getBySpender(connectedAccount.address);
   }
 
+  async function cancelSchedules(ids: bigint[]) {
+    if (!connectedAccount) throw new Error('Connected account is missing');
+
+    await callSmartContract(
+      'cancelSchedules',
+      schedulerAddress,
+      new Args()
+        .addString(connectedAccount.address)
+        .addArray(ids, ArrayTypes.U64)
+        .serialize(),
+      {
+        success: 'Schedules successfully canceled',
+        pending: 'Cancelling schedules...',
+        error: 'Failed to cancel schedules',
+      },
+      Mas.fromString('1'),
+      Mas.fromString('0.01'),
+    );
+
+    getBySpender(connectedAccount.address);
+  }
   return {
     scheduleInfo,
-    setScheduleInfo,
-    createSchedule,
-    getBySpender,
-    getByRecipient,
     spenderSchedules,
+    getBySpender,
+    createSchedule,
+    getByRecipient,
+    setScheduleInfo,
+    cancelSchedules,
   };
 }
