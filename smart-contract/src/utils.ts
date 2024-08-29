@@ -34,7 +34,7 @@ export async function getClientAndContract(contractAddress: string) {
 
 export function periodsToMilliseconds(
   periods: number,
-  periodDuration = 20000,
+  periodDuration = 16000,
 ): number {
   return periods * periodDuration;
 }

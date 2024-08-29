@@ -385,17 +385,18 @@ describe('cancelSchedules', () => {
     cancelSchedules(new Args().add(spender1).add([schedueleId]).serialize());
   });
 
+  throws('fail: scheduele not fount', () => {
+    createSchedule();
+    switchUser(spender2);
+    cancelSchedules(new Args().add(spender1).add([6666666]).serialize());
+  });
+
   test('multiple create, cancel the first one', () => {
     const schedueleId = getIdCounter() + 1;
     createSchedule();
     createSchedule(); // second schedule
 
-    cancelSchedules(
-      new Args()
-        .add(spender1)
-        .add([[schedueleId]])
-        .serialize(),
-    );
+    cancelSchedules(new Args().add(spender1).add([schedueleId]).serialize());
 
     const schedules = new Args(
       getSchedulesBySpender(new Args().add(spender1).serialize()),
@@ -422,21 +423,5 @@ describe('cancelSchedules', () => {
     expect(new Args(scheduleSer).next<Schedule>().unwrap()).toStrictEqual(
       schedules[0],
     );
-  });
-
-  test('Does not fail if one of the schedules does not exist', () => {
-    createSchedule();
-
-    cancelSchedules(
-      new Args().add(spender1).add([1, u64.MAX_VALUE]).serialize(),
-    );
-
-    const schedules = new Args(
-      getSchedulesBySpender(new Args().add(spender1).serialize()),
-    )
-      .nextSerializableObjectArray<Schedule>()
-      .unwrap();
-
-    expect(schedules.length).toBe(0);
   });
 });
