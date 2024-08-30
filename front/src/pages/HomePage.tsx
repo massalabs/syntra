@@ -1,6 +1,11 @@
 import { useRef } from 'react';
 import { NumericInput, RecipientAddressInput, Recurrence } from '@/components';
-import { Button, formatAmount, useAccountStore } from '@massalabs/react-ui-kit';
+import {
+  Button,
+  formatAmount,
+  toast,
+  useAccountStore,
+} from '@massalabs/react-ui-kit';
 import { ConnectButton } from '@/components/ConnectWalletPopup/ConnectButton';
 import { Card } from '@massalabs/react-ui-kit/src/components/Card/Card';
 import useSchedule from '@/services/useSchedule';
@@ -39,6 +44,15 @@ export default function HomePage() {
   const scrollToList = () => {
     if (scheduleTableRef.current) {
       scheduleTableRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleCreateSchedule = async () => {
+    try {
+      createSchedule();
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to create schedule');
     }
   };
 
@@ -142,7 +156,7 @@ export default function HomePage() {
                   <Button
                     disabled={disableCreateScheduleButton}
                     variant="secondary"
-                    onClick={createSchedule}
+                    onClick={handleCreateSchedule}
                     customClass={[
                       'bg-primary text-white',
                       ...commonButton,
