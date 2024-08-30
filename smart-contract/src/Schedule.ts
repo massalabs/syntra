@@ -10,6 +10,7 @@ export class Schedule implements ISerializable<Schedule> {
    * Creates a new Schedule instance.
    *
    * @param id - The unique identifier for the schedule. Default is 0n.
+   * @param isVesting - The boolean value indicating if the schedule is a vesting schedule. Default is false.
    * @param tokenAddress - The address of the token to be transferred. Default is an empty string.
    * @param spender - The address of the spender. Default is an empty string.
    * @param recipient - The address of the recipient. Default is an empty string.

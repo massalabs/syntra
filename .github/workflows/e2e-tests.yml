@@ -1,4 +1,4 @@
-name: syntra e2e tests
+name: syntra SC e2e tests
 on:
   workflow_dispatch:
   schedule:
@@ -27,4 +27,4 @@ jobs:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
         run: |
           cp .env.ci .env
-          npm run test:e2e
+          npm run e2e

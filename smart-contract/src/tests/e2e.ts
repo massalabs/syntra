@@ -216,6 +216,7 @@ export async function run(isMas: boolean) {
     },
     onData,
     onError,
+    5000,
   );
 
   while (!stop) {
