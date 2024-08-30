@@ -52,8 +52,8 @@ export function constructor(_: StaticArray<u8>): StaticArray<u8> {
 export function startScheduleSend(binaryArgs: StaticArray<u8>): void {
   const args = new Args(binaryArgs);
 
-  let initBal = balance();
-  generateEvent('init balance coins' + initBal.toString());
+  const initBal = balance();
+
   const schedule = args
     .nextSerializable<Schedule>()
     .expect('Schedule is missing or invalid');
