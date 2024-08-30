@@ -6,10 +6,13 @@ import {
 } from '@massalabs/massa-web3';
 
 export class Schedule implements ISerializable<Schedule> {
+  public operationId = '';
+
   /**
    * Creates a new Schedule instance.
    *
    * @param id - The unique identifier for the schedule. Default is 0n.
+   * @param isVesting - The boolean value indicating if the schedule is a vesting schedule. Default is false.
    * @param tokenAddress - The address of the token to be transferred. Default is an empty string.
    * @param spender - The address of the spender. Default is an empty string.
    * @param recipient - The address of the recipient. Default is an empty string.
@@ -22,6 +25,7 @@ export class Schedule implements ISerializable<Schedule> {
    */
   constructor(
     public id: bigint = 0n,
+    public isVesting: boolean = false,
     public tokenAddress: string = '',
     public spender: string = '',
     public recipient: string = '',
@@ -36,6 +40,8 @@ export class Schedule implements ISerializable<Schedule> {
   serialize(): Uint8Array {
     const args = new Args()
       .addU64(this.id)
+      .addString(this.operationId)
+      .addBool(this.isVesting)
       .addString(this.tokenAddress)
       .addString(this.spender)
       .addString(this.recipient)
@@ -52,6 +58,8 @@ export class Schedule implements ISerializable<Schedule> {
     const args = new Args(data, offset);
 
     this.id = args.nextU64();
+    this.operationId = args.nextString();
+    this.isVesting = args.nextBool();
     this.tokenAddress = args.nextString();
     this.spender = args.nextString();
     this.recipient = args.nextString();
@@ -68,6 +76,7 @@ export class Schedule implements ISerializable<Schedule> {
   static fromScheduleInfo(info: ScheduleInfo): Schedule {
     return new Schedule(
       0n,
+      info.isVesting,
       info.asset.address,
       info.spender,
       info.recipient,

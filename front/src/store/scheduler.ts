@@ -8,6 +8,7 @@ import { useAccountStore } from '@massalabs/react-ui-kit';
 
 export type ScheduleInfo = {
   amount: bigint;
+  isVesting: boolean;
   interval: bigint;
   recipient: string;
   spender: string;
@@ -23,7 +24,7 @@ interface SchedulerStoreState {
   setSchedulerAddress: (address: string) => void;
   setScheduleInfo: (
     key: keyof ScheduleInfo,
-    value: bigint | string | Asset,
+    value: bigint | string | Asset | boolean,
   ) => void;
 
   getBySpender: (spender: string) => Promise<void>;
@@ -38,6 +39,7 @@ interface SchedulerStoreState {
 }
 
 const defaultScheduleInfo: ScheduleInfo = {
+  isVesting: false,
   amount: 0n,
   interval: 10n,
   recipient: 'AU1dvPZNjcTQfNQQuysWyxLLhEzw4kB9cGW2RMMVAQGrkzZHqWGD',

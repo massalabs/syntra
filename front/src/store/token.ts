@@ -4,17 +4,19 @@ import { create } from 'zustand';
 import { useAccountStore } from '@massalabs/react-ui-kit';
 import { CHAIN_ID, MRC20 } from '@massalabs/massa-web3';
 import { config } from '@/const/config';
-import { supportedTokens } from '@/const/assets';
+import { MasToken, supportedTokens } from '@/const/assets';
 import { Asset } from '@massalabs/react-ui-kit/src/lib/token/models/AssetModel';
 
 export interface TokenStoreState {
   selectedToken?: Asset;
   tokens: Asset[];
+  mas: Asset;
   refreshBalances: () => void;
 }
 
 export const useTokenStore = create<TokenStoreState>((set, get) => ({
   tokens: supportedTokens,
+  mas: MasToken,
 
   refreshBalances: async () => {
     const { connectedAccount } = useAccountStore.getState();
@@ -22,7 +24,7 @@ export const useTokenStore = create<TokenStoreState>((set, get) => ({
       return;
     }
 
-    const { tokens: supportedTokens } = get();
+    const { tokens: supportedTokens, mas } = get();
 
     if (!supportedTokens.length) {
       return;
@@ -44,6 +46,9 @@ export const useTokenStore = create<TokenStoreState>((set, get) => ({
         return token;
       }),
     );
-    set({ tokens });
+
+    mas.balance = await connectedAccount.balance(false);
+
+    set({ tokens, mas });
   },
 }));

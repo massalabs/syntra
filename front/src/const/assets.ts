@@ -29,3 +29,13 @@ export const supportedTokens: Asset[] = [
     chainId: 0,
   },
 ];
+
+export const MasToken = {
+  name: 'MAS',
+  address: '',
+  symbol: 'MAS',
+  decimals: 9,
+  balance: 0n,
+  allowance: 0n,
+  chainId: 0,
+};

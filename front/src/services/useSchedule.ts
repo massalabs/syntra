@@ -19,7 +19,7 @@ export default function useSchedule() {
   const { callSmartContract } = useWriteSmartContract(connectedAccount!);
 
   async function createSchedule() {
-    const { amount, interval, recipient } = scheduleInfo;
+    const { amount, interval, recipient, asset, occurrences } = scheduleInfo;
     scheduleInfo.spender = connectedAccount!.address;
 
     if (!amount || !interval || !recipient || !connectedAccount) {
@@ -44,6 +44,8 @@ export default function useSchedule() {
       throw new Error('Invalid recipient address');
     }
 
+    const totalAmount = amount * occurrences;
+
     await callSmartContract(
       'startScheduleSend',
       schedulerAddress,
@@ -55,8 +57,7 @@ export default function useSchedule() {
         pending: 'Creating new schedule...',
         error: 'Failed to create schedule',
       },
-      // no :/
-      Mas.fromString('10'),
+      Mas.fromString('1') + (asset.address === '' ? totalAmount : 0n),
     );
 
     getBySpender(connectedAccount.address);

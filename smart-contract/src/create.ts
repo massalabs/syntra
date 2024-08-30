@@ -10,7 +10,9 @@ export async function create(contractAddress: string, schedule: Schedule) {
   const operation = await contract.call(
     'startScheduleSend',
     new Args().addSerializable(schedule).serialize(),
-    { coins: parseMas('1') + (schedule.isVesting ? totalAmount : 0n) },
+    {
+      coins: parseMas('1') + (schedule.tokenAddress === '' ? totalAmount : 0n),
+    },
   );
 
   await operation.waitSpeculativeExecution();

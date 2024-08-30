@@ -1,9 +1,10 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { NumericInput, RecipientAddressInput, Recurrence } from '@/components';
 import {
   Button,
   formatAmount,
   toast,
+  Tooltip,
   useAccountStore,
 } from '@massalabs/react-ui-kit';
 import { ConnectButton } from '@/components/ConnectWalletPopup/ConnectButton';
@@ -16,6 +17,7 @@ import { InputLabel } from '@/components/InputLabel';
 import LogoSyntra from '../assets/logo-syntra.svg';
 import { arrowButton, commonButton } from '@/styles/buttons';
 import { parseUnits } from '@massalabs/massa-web3';
+import { FiInfo } from 'react-icons/fi';
 
 export default function HomePage() {
   const { connectedAccount } = useAccountStore();
@@ -23,9 +25,12 @@ export default function HomePage() {
     useSchedule();
   const { increaseAllowance } = useToken();
   const scheduleTableRef = useRef<HTMLDivElement>(null);
+  const [isVesting, setVesting] = useState<boolean>(scheduleInfo.isVesting);
 
   const balance = scheduleInfo.asset.balance ?? 0n;
   const insufficientBalance = balance < scheduleInfo.amount;
+
+  const isMasToken = scheduleInfo.asset.address === '';
 
   const disableAllowanceButton =
     !connectedAccount ||
@@ -33,13 +38,15 @@ export default function HomePage() {
     !scheduleInfo.asset ||
     (scheduleInfo.asset.allowance ?? 0) >=
       scheduleInfo.amount * scheduleInfo.occurrences ||
-    insufficientBalance;
+    insufficientBalance ||
+    isMasToken;
 
   const disableCreateScheduleButton =
     !connectedAccount ||
     !scheduleInfo.amount ||
-    (scheduleInfo.asset.allowance ?? 0) <
-      scheduleInfo.amount * scheduleInfo.occurrences;
+    ((scheduleInfo.asset.allowance ?? 0) <
+      scheduleInfo.amount * scheduleInfo.occurrences &&
+      !isMasToken);
 
   const scrollToList = () => {
     if (scheduleTableRef.current) {
@@ -56,6 +63,25 @@ export default function HomePage() {
     }
   };
 
+  const handleModeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const isChecked = e.target.checked;
+    const value = e.target.value;
+
+    setScheduleInfo('amount', 0n);
+    if (isChecked) {
+      const isVesting = value === 'vesting';
+      setVesting(isVesting);
+      setScheduleInfo('isVesting', isVesting);
+    }
+  };
+
+  const tipsModeDesc = `Once spending approval is given to the scheduler contract,
+   tokens are sent to the recipient address at the specified interval. 
+  You are not required to old the total amount of tokens (amount * nbOccurences) in your wallet.`;
+
+  const vestingModeDesc = `Using vesting mode will require to lock the total amount of tokens (amount * nbOccurences)
+   in the scheduler contract.`;
+
   return (
     <>
       <div className="main h-screen">
@@ -68,8 +94,37 @@ export default function HomePage() {
           <div className="flex flex-col justify-center items-center gap-10 h-full">
             <section className="max-w-2xl w-full mx-auto rounded-2xl shadow-lg p-7 bg-white -mt-40">
               <Card customClass="bg-transparent grid grid-flow-row gap-4 ">
+                <div className="flex justify-left items-center gap-4">
+                  <InputLabel label="Mode:" />
+                  <div className="flex items-center gap-10 mb-2 mx-4">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        value="tips"
+                        checked={!isVesting}
+                        onChange={(e) => handleModeChange(e)}
+                      />
+                      <p className="text-sm text-gray-700">Tips</p>
+                      <Tooltip customClass="py-2" body={tipsModeDesc}>
+                        <FiInfo className="mr-1" size={12} />
+                      </Tooltip>
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        value="vesting"
+                        checked={isVesting}
+                        onChange={(e) => handleModeChange(e)}
+                      />
+                      <p className="text-sm text-gray-700">Vesting</p>
+                      <Tooltip customClass="py-2" body={vestingModeDesc}>
+                        <FiInfo className="mr-1" size={12} />
+                      </Tooltip>
+                    </label>
+                  </div>
+                </div>
                 <div className="grid grid-cols-6 gap-2">
-                  <div className=" col-span-4">
+                  <div className="col-span-4">
                     <InputLabel label={'Amount'} />
                     <NumericInput
                       placeholder="Enter your amount"
@@ -91,11 +146,7 @@ export default function HomePage() {
 
                   <div className="col-span-2">
                     <InputLabel label="Token" />
-                    <SelectAsset
-                      onSelectAsset={(asset) => {
-                        if (asset.address) setScheduleInfo('asset', asset);
-                      }}
-                    />
+                    <SelectAsset isVesting={isVesting} />
                   </div>
                 </div>
 
