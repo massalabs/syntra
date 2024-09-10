@@ -4,6 +4,7 @@ import { formatAmount, toast } from '@massalabs/react-ui-kit';
 import React, { useState } from 'react';
 import CheckBox from './CheckBox';
 import useSchedule from '@/services/useSchedule';
+import { MasToken, supportedTokens } from '../const/assets';
 
 interface ScheduleTableProps {
   schedules: Schedule[];
@@ -52,7 +53,13 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules }) => {
               ID
             </th>
             <th className="px-6 py-6 text-left text-xs font-medium uppercase tracking-wider">
-              Token Address
+              OperationId
+            </th>
+            <th className="px-6 py-6 text-left text-xs font-medium uppercase tracking-wider">
+              Mode
+            </th>
+            <th className="px-6 py-6 text-left text-xs font-medium uppercase tracking-wider">
+              Token
             </th>
             <th className="px-6 py-6 text-left text-xs font-medium uppercase tracking-wider">
               Spender
@@ -81,51 +88,67 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules }) => {
           </tr>
         </thead>
         <tbody className="text-sm divide-y divide-zinc-300">
-          {schedules.map((schedule) => (
-            <tr key={schedule.id.toString()}>
-              <td className="px-6 py-4 whitespace-nowrap ">
-                <CheckBox
-                  isSelected={selected.includes(schedule.id)}
-                  onSelect={handleSelect}
-                  id={schedule.id}
-                />
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap ">
-                {schedule.id.toString()}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap ">
-                {truncateAddress(schedule.tokenAddress)}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap ">
-                {truncateAddress(schedule.spender)}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap ">
-                {truncateAddress(schedule.recipient)}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap ">
-                {formatAmount(schedule.amount, 18).preview}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap ">
-                {schedule.interval.toString()}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap ">
-                {schedule.occurrences.toString()}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap ">
-                {schedule.remaining.toString()}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap ">
-                {schedule.tolerance.toString()}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap ">
-                {schedule.history.map((h, index) => (
-                  <div key={index}>
-                    Period: {h.period.toString()}, Thread: {h.thread.toString()}
-                  </div>
-                ))}
-              </td>
-            </tr>
-          ))}
+          {schedules.map((schedule) => {
+            const asset =
+              supportedTokens.find(
+                (token) => token.address === schedule.tokenAddress,
+              ) || MasToken;
+
+            return (
+              <tr key={schedule.id.toString()}>
+                <td className="px-6 py-4 whitespace-nowrap ">
+                  <CheckBox
+                    isSelected={selected.includes(schedule.id)}
+                    onSelect={handleSelect}
+                    id={schedule.id}
+                  />
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap ">
+                  {schedule.id.toString()}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap ">
+                  {truncateAddress(schedule.operationId)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap ">
+                  {schedule.isVesting ? 'Vesting' : 'Tips'}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap ">
+                  {schedule.tokenAddress != ''
+                    ? truncateAddress(schedule.tokenAddress)
+                    : 'MAS'}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap ">
+                  {truncateAddress(schedule.spender)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap ">
+                  {truncateAddress(schedule.recipient)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap ">
+                  {formatAmount(schedule.amount, asset.decimals).preview}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap ">
+                  {schedule.interval.toString()}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap ">
+                  {schedule.occurrences.toString()}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap ">
+                  {schedule.remaining.toString()}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap ">
+                  {schedule.tolerance.toString()}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap ">
+                  {schedule.history.map((h, index) => (
+                    <div key={index}>
+                      Period: {h.period.toString()}, Thread:{' '}
+                      {h.thread.toString()}
+                    </div>
+                  ))}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
