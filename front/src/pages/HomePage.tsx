@@ -103,6 +103,7 @@ export default function HomePage() {
                         value="tips"
                         checked={!isVesting}
                         onChange={(e) => handleModeChange(e)}
+                        className="text-primary focus:outline-none ring-primary"
                       />
                       <p className="text-sm text-gray-700">Tips</p>
                       <Tooltip customClass="py-2" body={tipsModeDesc}>
@@ -115,6 +116,7 @@ export default function HomePage() {
                         value="vesting"
                         checked={isVesting}
                         onChange={(e) => handleModeChange(e)}
+                        className="text-primary focus:outline-none ring-primary"
                       />
                       <p className="text-sm text-gray-700">Vesting</p>
                       <Tooltip customClass="py-2" body={vestingModeDesc}>

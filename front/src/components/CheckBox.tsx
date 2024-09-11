@@ -19,7 +19,7 @@ const CheckBox: React.FC<CheckBoxProps> = ({
           <div className="flex items-center">
             <input
               checked={isSelected}
-              onClick={() => onSelect(id)}
+              onChange={() => onSelect(id)}
               type="checkbox"
               className="cursor-pointer size-4 rounded border-gray-300 text-primary focus:ring-primary"
             />
