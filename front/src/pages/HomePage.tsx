@@ -18,6 +18,7 @@ import LogoSyntra from '../assets/logo-syntra.svg';
 import { arrowButton, commonButton } from '@/styles/buttons';
 import { parseUnits } from '@massalabs/massa-web3';
 import { FiInfo } from 'react-icons/fi';
+import { isValidAddress } from '../utils/address';
 
 export default function HomePage() {
   const { connectedAccount } = useAccountStore();
@@ -32,7 +33,10 @@ export default function HomePage() {
 
   const isMasToken = scheduleInfo.asset.address === '';
 
+  const isValidRecipient = isValidAddress(scheduleInfo.recipient);
+
   const disableAllowanceButton =
+    !isValidRecipient ||
     !connectedAccount ||
     scheduleInfo.amount === 0n ||
     !scheduleInfo.asset ||
@@ -42,6 +46,7 @@ export default function HomePage() {
     isMasToken;
 
   const disableCreateScheduleButton =
+    !isValidRecipient ||
     !connectedAccount ||
     !scheduleInfo.amount ||
     ((scheduleInfo.asset.allowance ?? 0) <
