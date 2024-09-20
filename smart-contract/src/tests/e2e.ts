@@ -68,16 +68,14 @@ export async function run(isMas: boolean) {
   );
 
   const schedule = new Schedule(
-    0n,
     isMas ? true : false,
     isMas ? '' : tokenAddress,
     spender,
     recipient,
     isMas ? parseMas('1') : parseUnits('1', tokenDecimals),
-    10n,
-    4n,
-    4n,
-    3n,
+    10n, // interval
+    4n, // occurrences
+    3n, // tolerance
   );
 
   if (!isMas) {
@@ -117,27 +115,27 @@ export async function run(isMas: boolean) {
   );
 
   let stop = false;
-  let currentOccurrence: bigint | undefined;
+  let taskIndex: bigint | undefined;
   const allEvents: SCEvent[] = [];
   const onData = async (events: SCEvent[]) => {
     allEvents.push(...events);
 
     // regex to match the event and extract the remaining occurrences (2 group)
-    const transferRegex = /Transfer:(\d+),(\d+),(\d+),(\d+)/;
+    const transferRegex = /Transfer:(\d+),(\d+),(\d+),(\d+),(\d+)/;
 
     events.forEach((e) => {
       const match = e.data.match(transferRegex);
       if (match) {
-        currentOccurrence = schedule.occurrences - BigInt(match[2]);
+        taskIndex = BigInt(match[2]);
       }
     });
-    if (!currentOccurrence) {
+    if (!taskIndex) {
       return;
     }
     separator();
 
     console.log(
-      `Iteration ${currentOccurrence.toString()}: current period: ${await client.fetchPeriod()}`,
+      `Iteration ${taskIndex.toString()}: current period: ${await client.fetchPeriod()}`,
     );
 
     const schedules = await getSchedulesBySpender(schedulerAddress, spender);
@@ -153,6 +151,7 @@ export async function run(isMas: boolean) {
 
     console.table(allEvents.map((e) => e.data));
 
+    const currentOccurrence = taskIndex + 1n;
     // Test balances
     if (isMas) {
       const spenderBalance = await client.getBalance(spender, false);
@@ -223,7 +222,7 @@ export async function run(isMas: boolean) {
     await scheduler.wait(periodsToMilliseconds(0.5));
   }
   stopPolling();
-  if (currentOccurrence !== schedule.occurrences) {
+  if (taskIndex !== schedule.occurrences - 1n) {
     throw new Error('Wrong number of occurrences');
   }
 }

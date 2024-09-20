@@ -5,7 +5,11 @@ import {
 } from '@massalabs/massa-web3';
 
 export class Schedule implements ISerializable<Schedule> {
+  public id = 0n;
   public operationId = '';
+  public remaining = 1n;
+  public history: Transfer[] = [];
+
   /**
    * Creates a new Schedule instance.
    *
@@ -22,7 +26,6 @@ export class Schedule implements ISerializable<Schedule> {
    * @param history - The history of transfers. Default is an empty array.
    */
   constructor(
-    public id: bigint = 0n,
     public isVesting: boolean = false,
     public tokenAddress: string = '',
     public spender: string = '',
@@ -30,9 +33,7 @@ export class Schedule implements ISerializable<Schedule> {
     public amount: bigint = 1n,
     public interval: bigint = 1n,
     public occurrences: bigint = 1n,
-    public remaining: bigint = 1n,
     public tolerance: bigint = 1n,
-    public history: Transfer[] = [],
   ) {}
 
   serialize(): Uint8Array {
@@ -73,10 +74,17 @@ export class Schedule implements ISerializable<Schedule> {
 }
 
 export class Transfer implements ISerializable<Transfer> {
-  constructor(public period: bigint = 0n, public thread: number = 0) {}
+  constructor(
+    public period: bigint = 0n,
+    public thread: number = 0,
+    public taskIndex: bigint = 0n,
+  ) {}
 
   serialize(): Uint8Array {
-    const args = new Args().addU64(this.period).addU8(BigInt(this.thread));
+    const args = new Args()
+      .addU64(this.period)
+      .addU8(BigInt(this.thread))
+      .addU64(this.taskIndex);
     return new Uint8Array(args.serialize());
   }
 
@@ -85,6 +93,7 @@ export class Transfer implements ISerializable<Transfer> {
 
     this.period = args.nextU64();
     this.thread = Number(args.nextU8());
+    this.taskIndex = args.nextU64();
 
     return { instance: this, offset: args.getOffset() };
   }

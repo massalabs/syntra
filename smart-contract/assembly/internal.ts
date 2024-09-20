@@ -18,6 +18,7 @@ import {
 } from '@massalabs/as-types';
 
 const MAX_GAS_ASYNC_FT = 10_000_000;
+export const ASC_FEE = 1_000_000;
 
 // Token helpers
 export function checkAllowance(
@@ -26,7 +27,9 @@ export function checkAllowance(
   amount: u256,
 ): void {
   const coin = new TokenWrapper(new Address(tokenAddress));
+
   const allowance = coin.allowance(new Address(spender), Context.callee());
+
   assert(
     allowance >= amount,
     `Not enough allowance, actual ${allowance}, required ${amount}`,
@@ -47,27 +50,8 @@ export function sendFT(schedule: Schedule): void {
 
 // Autonomous smart contract feature
 
-// The function asyncSend will be trigger by autonomous smart contract feature.
-export function asyncSend(binaryArgs: StaticArray<u8>): void {
-  // deserialize params
-  const args = new Args(binaryArgs);
-  const spender = args.next<string>().expect('spender is missing or invalid');
-  const id = args.next<u64>().expect('id is missing or invalid');
-
-  // read storage
-  const key = getScheduleKey(spender, id);
-  assert(Storage.has(key), `Schedule ${id.toString()} not found or canceled`);
-
-  const schedule = new Args(Storage.get(key))
-    .nextSerializable<Schedule>()
-    .unwrap();
-
-  // assert ASC or that the caller is the spender
-  assert(
-    Context.callee() === Context.caller() ||
-      Context.caller() === new Address(schedule.spender),
-    'Unauthorized',
-  );
+export function processTask(schedule: Schedule, taskIndex: u64): void {
+  assert(schedule.remaining > 0, 'No remaining transfers');
 
   // send token
   if (schedule.tokenAddress.length) {
@@ -81,42 +65,49 @@ export function asyncSend(binaryArgs: StaticArray<u8>): void {
   schedule.remaining -= 1;
   const period = Context.currentPeriod();
   const thread = Context.currentThread();
-  schedule.history.push(new Transfer(period));
+  schedule.history.push(new Transfer(period, thread, taskIndex));
 
   updateSchedule(schedule);
 
   // event
-  generateEvent(schedule.createTransferEvent(period, thread));
+  generateEvent(schedule.createTransferEvent(taskIndex, period, thread));
 }
 
 export function scheduleAllSend(schedule: Schedule): void {
-  for (let n: u64 = 1; n <= schedule.occurrences; n++) {
+  // schedule the rest of the tasks asynchronously
+  for (let taskIndex: u64 = 1; taskIndex < schedule.occurrences; taskIndex++) {
     const validityStartPeriod =
-      Context.currentPeriod() + schedule.interval * n - schedule.tolerance;
-    const validityStartThread = Context.currentThread();
+      Context.currentPeriod() +
+      schedule.interval * taskIndex -
+      schedule.tolerance;
     const validityEndPeriod =
-      Context.currentPeriod() + schedule.interval * n + schedule.tolerance + 1; // +1 because validity-end is exclusive
-    const validityEndThread = Context.currentThread();
+      Context.currentPeriod() +
+      schedule.interval * taskIndex +
+      schedule.tolerance +
+      1; // +1 because validity-end is exclusive
+
     sendMessage(
       Context.callee(),
-      'asyncSend',
+      'selfTrigger',
       validityStartPeriod,
-      validityStartThread,
+      0,
       validityEndPeriod,
-      validityEndThread,
+      31,
       MAX_GAS_ASYNC_FT,
-      1_000_000,
+      ASC_FEE,
       // no need to transfer coins, as function is on the same contract
       0,
-      new Args().add(schedule.spender).add(schedule.id).serialize(),
+      new Args()
+        .add(schedule.spender)
+        .add(schedule.id)
+        .add(taskIndex)
+        .serialize(),
     );
     generateEvent(
       schedule.createDispatchEvent(
-        n,
+        taskIndex,
         validityStartPeriod,
-        validityStartThread,
         validityEndPeriod,
-        validityEndThread,
       ),
     );
   }
@@ -212,7 +203,13 @@ export function readSchedulesByRecipient(recipient: string): StaticArray<u8> {
   return new Args().addSerializableObjectArray(schedules).serialize();
 }
 
-export function readSchedule(spender: string, id: u64): StaticArray<u8> {
+export function getScheduleData(spender: string, id: u64): StaticArray<u8> {
   const key = getScheduleKey(spender, id);
+  assert(Storage.has(key), `Schedule ${id.toString()} not found or canceled`);
   return Storage.get(key);
+}
+
+export function getSchedule(spender: string, id: u64): Schedule {
+  const data = getScheduleData(spender, id);
+  return new Args(data).nextSerializable<Schedule>().unwrap();
 }

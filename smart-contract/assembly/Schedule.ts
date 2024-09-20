@@ -119,9 +119,10 @@ export class Schedule implements Serializable {
     return new Result(args.offset);
   }
 
-  public createTransferEvent(period: u64, thread: u8): string {
+  public createTransferEvent(taskIndex: u64, period: u64, thread: u8): string {
     return createEvent('Transfer', [
       this.id.toString(),
+      taskIndex.toString(),
       this.remaining.toString(),
       period.toString(),
       thread.toString(),
@@ -131,7 +132,7 @@ export class Schedule implements Serializable {
   public createCreationEvent(): string {
     return createEvent('Create', [
       this.id.toString(),
-      this.remaining.toString(),
+      this.occurrences.toString(),
     ]);
   }
 
@@ -142,26 +143,30 @@ export class Schedule implements Serializable {
   public createDispatchEvent(
     n: u64,
     validityStartPeriod: u64,
-    validityStartThread: u8,
     validityEndPeriod: u64,
-    validityEndThread: u8,
   ): string {
     return createEvent('Dispatch', [
       this.id.toString(),
       n.toString(),
       validityStartPeriod.toString(),
-      validityStartThread.toString(),
       validityEndPeriod.toString(),
-      validityEndThread.toString(),
     ]);
   }
 }
 
 export class Transfer implements Serializable {
-  constructor(public period: u64 = 0, public thread: u8 = 0) {}
+  constructor(
+    public period: u64 = 0,
+    public thread: u8 = 0,
+    public taskIndex: u64 = 0,
+  ) {}
 
   serialize(): StaticArray<u8> {
-    return new Args().add(this.period).add(this.thread).serialize();
+    return new Args()
+      .add(this.period)
+      .add(this.thread)
+      .add(this.taskIndex)
+      .serialize();
   }
 
   deserialize(data: StaticArray<u8>, offset: i32): Result<i32> {
@@ -174,9 +179,14 @@ export class Transfer implements Serializable {
     if (resultThread.isErr()) {
       return new Result(0, "Can't deserialize thread.");
     }
+    const resultIndex = args.nextU64();
+    if (resultIndex.isErr()) {
+      return new Result(0, "Can't deserialize taskIndex.");
+    }
 
     this.period = resultPeriod.unwrap();
     this.thread = resultThread.unwrap();
+    this.taskIndex = resultIndex.unwrap();
 
     return new Result(args.offset);
   }
