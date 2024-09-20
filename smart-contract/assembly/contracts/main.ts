@@ -1,4 +1,3 @@
-// The entry file of your WebAssembly module.
 import {
   Address,
   balance,
@@ -18,7 +17,9 @@ import {
   readSchedulesByRecipient,
   removeSchedule,
   idCounterKey,
-  readSchedule,
+  getScheduleData,
+  getSchedule as _getSchedule,
+  processTask,
 } from '../internal';
 import { setOwner } from '@massalabs/sc-standards/assembly/contracts/utils/ownership';
 import { refundMas } from '../refund';
@@ -27,24 +28,10 @@ export {
   setOwner,
 } from '@massalabs/sc-standards/assembly/contracts/utils/ownership';
 
-export { asyncSend } from '../internal';
-
-/**
- * This function is meant to be called only one time: when the contract is deployed.
- *
- * @param binaryArgs - Arguments serialized with Args
- */
-export function constructor(_: StaticArray<u8>): StaticArray<u8> {
-  // This line is important. It ensures that this function can't be called in the future.
-  // If you remove this check, someone could call your constructor function and reset your smart contract.
-  if (!Context.isDeployingContract()) {
-    return [];
-  }
-
+export function constructor(_: StaticArray<u8>): void {
+  assert(Context.isDeployingContract());
   setOwner(new Args().add(Context.caller()).serialize());
-
   Storage.set(idCounterKey, u64ToBytes(0));
-  return [];
 }
 
 // Write
@@ -91,7 +78,12 @@ export function startScheduleSend(binaryArgs: StaticArray<u8>): void {
   }
 
   pushSchedule(schedule);
+
+  // process the first task synchronously
+  processTask(schedule, 0);
+
   scheduleAllSend(schedule);
+
   generateEvent(schedule.createCreationEvent());
 
   refundMas(schedule, initBal);
@@ -113,6 +105,68 @@ export function cancelSchedules(binaryArgs: StaticArray<u8>): void {
     removeSchedule(spender, ids[i]);
   }
   // TODO - implement refund ?
+}
+
+export function selfTrigger(binaryArgs: StaticArray<u8>): void {
+  assert(
+    Context.callee() === Context.caller(),
+    'The caller must be the contract itself',
+  );
+  const args = new Args(binaryArgs);
+  const spender = args.next<string>().expect('spender is missing or invalid');
+  const id = args.next<u64>().expect('id is missing or invalid');
+  const taskIndex = args
+    .next<u64>()
+    .expect('schedule task index is missing or invalid');
+  const schedule = _getSchedule(spender, id);
+  processTask(schedule, taskIndex);
+}
+
+export function manualTrigger(binaryArgs: StaticArray<u8>): void {
+  const args = new Args(binaryArgs);
+  const spender = args.next<string>().expect('spender is missing or invalid');
+  const id = args.next<u64>().expect('id is missing or invalid');
+
+  const schedule = _getSchedule(spender, id);
+  assert(
+    Context.caller() === new Address(schedule.spender) ||
+      (schedule.isVesting &&
+        Context.caller() === new Address(schedule.recipient)),
+    'Manual trigger should be called by the spender or the recipient for vesting schedules',
+  );
+
+  let missingTaskIndex: u64 = 0;
+  // find the first not processed task
+  while (missingTaskIndex < schedule.occurrences) {
+    let found = false;
+    for (let i = 0; i < schedule.history.length; i++) {
+      // last processed task
+      const task = schedule.history[i];
+      if (task.taskIndex === missingTaskIndex) {
+        // task has been processed
+        missingTaskIndex++;
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      break;
+    }
+  }
+
+  // check if the next task is ready to process at the current period
+  // The period we can consider the task is actually missed
+  const expectedTaskPeriod =
+    schedule.history[0].period +
+    schedule.interval * missingTaskIndex +
+    schedule.tolerance;
+
+  assert(
+    Context.currentPeriod() > expectedTaskPeriod,
+    'Next task is not ready yet',
+  );
+
+  processTask(schedule, missingTaskIndex);
 }
 
 // Read
@@ -146,5 +200,5 @@ export function getSchedule(binaryArgs: StaticArray<u8>): StaticArray<u8> {
     .expect('Spender address is missing or invalid');
   const id = args.nextU64().expect('Id is missing or invalid');
 
-  return readSchedule(spender, id);
+  return getScheduleData(spender, id);
 }
