@@ -19,7 +19,7 @@ export default function useSchedule() {
   const { callSmartContract } = useWriteSmartContract(connectedAccount!);
 
   async function createSchedule() {
-    const { amount, interval, recipient, asset, occurrences } = scheduleInfo;
+    const { amount, interval, recipient, occurrences } = scheduleInfo;
     scheduleInfo.spender = connectedAccount!.address;
 
     if (!amount || !interval || !recipient || !connectedAccount) {
@@ -57,7 +57,7 @@ export default function useSchedule() {
         pending: 'Creating new schedule...',
         error: 'Failed to create schedule',
       },
-      Mas.fromString('1') + (asset.address === '' ? totalAmount : 0n),
+      Mas.fromString('1') + (scheduleInfo.isVesting ? totalAmount : 0n),
     );
 
     getBySpender(connectedAccount.address);
@@ -78,12 +78,28 @@ export default function useSchedule() {
         pending: 'Cancelling schedules...',
         error: 'Failed to cancel schedules',
       },
-      Mas.fromString('1'),
-      Mas.fromString('0.01'),
     );
 
     getBySpender(connectedAccount.address);
   }
+
+  async function manualTrigger(spender: string, id: bigint) {
+    if (!connectedAccount) throw new Error('Connected account is missing');
+
+    await callSmartContract(
+      'manualTrigger',
+      schedulerAddress,
+      new Args().addString(spender).addU64(id).serialize(),
+      {
+        success: 'Scheduled task successfully triggered',
+        pending: 'Triggering missed task...',
+        error: 'Failed to trigger scheduled task',
+      },
+    );
+
+    getBySpender(spender);
+  }
+
   return {
     scheduleInfo,
     spenderSchedules,
@@ -92,5 +108,6 @@ export default function useSchedule() {
     getByRecipient,
     setScheduleInfo,
     cancelSchedules,
+    manualTrigger,
   };
 }

@@ -6,25 +6,27 @@ import {
 } from '@massalabs/massa-web3';
 
 export class Schedule implements ISerializable<Schedule> {
+  public id: bigint = 0n;
   public operationId = '';
+  public history: Transfer[] = [];
+  public remaining: bigint = 0n;
 
   /**
    * Creates a new Schedule instance.
    *
-   * @param id - The unique identifier for the schedule. Default is 0n.
-   * @param isVesting - The boolean value indicating if the schedule is a vesting schedule. Default is false.
-   * @param tokenAddress - The address of the token to be transferred. Default is an empty string.
-   * @param spender - The address of the spender. Default is an empty string.
-   * @param recipient - The address of the recipient. Default is an empty string.
-   * @param amount - The amount of tokens to be transferred. Default is 1n.
+   * @param id - The unique identifier for the schedule.
+   * @param isVesting - The boolean value indicating if the schedule is a vesting schedule.
+   * @param tokenAddress - The address of the token to be transferred. Leave empty for MAS schedule.
+   * @param spender - The address of the spender.
+   * @param recipient - The address of the recipient.
+   * @param amount - The amount of tokens to be transferred.
    * @param interval - The interval between transfers in periods.
    * @param occurrences - The number of occurrences for the transfer.
    * @param remaining - The number of remaining transfers.
    * @param tolerance - Validity window in periods.
-   * @param history - The history of transfers. Default is an empty array.
+   * @param history - The history of transfers.
    */
   constructor(
-    public id: bigint = 0n,
     public isVesting: boolean = false,
     public tokenAddress: string = '',
     public spender: string = '',
@@ -32,9 +34,7 @@ export class Schedule implements ISerializable<Schedule> {
     public amount: bigint = 1n,
     public interval: bigint = 1n,
     public occurrences: bigint = 1n,
-    public remaining: bigint = 1n,
     public tolerance: bigint = 1n,
-    public history: Transfer[] = [],
   ) {}
 
   serialize(): Uint8Array {
@@ -75,7 +75,6 @@ export class Schedule implements ISerializable<Schedule> {
 
   static fromScheduleInfo(info: ScheduleInfo): Schedule {
     return new Schedule(
-      0n,
       info.isVesting,
       info.asset.address,
       info.spender,
@@ -83,17 +82,23 @@ export class Schedule implements ISerializable<Schedule> {
       info.amount,
       info.interval,
       info.occurrences,
-      info.occurrences,
       info.tolerance,
     );
   }
 }
 
 export class Transfer implements ISerializable<Transfer> {
-  constructor(public period: bigint = 0n, public thread: number = 0) {}
+  constructor(
+    public period: bigint = 0n,
+    public thread: number = 0,
+    public taskIndex: bigint = 0n,
+  ) {}
 
   serialize(): Uint8Array {
-    const args = new Args().addU64(this.period).addU8(BigInt(this.thread));
+    const args = new Args()
+      .addU64(this.period)
+      .addU8(BigInt(this.thread))
+      .addU64(this.taskIndex);
     return new Uint8Array(args.serialize());
   }
 
@@ -102,6 +107,7 @@ export class Transfer implements ISerializable<Transfer> {
 
     this.period = args.nextU64();
     this.thread = Number(args.nextU8());
+    this.taskIndex = args.nextU64();
 
     return { instance: this, offset: args.getOffset() };
   }

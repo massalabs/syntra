@@ -2,12 +2,12 @@ import React from 'react';
 
 type CheckBoxProps = {
   isSelected: boolean;
-  onSelect: (id: bigint) => void;
+  onChange: (id: bigint, checked: boolean) => void;
   id: bigint;
 };
 
 const CheckBox: React.FC<CheckBoxProps> = ({
-  onSelect,
+  onChange,
   id,
   isSelected,
 }: CheckBoxProps) => {
@@ -19,7 +19,7 @@ const CheckBox: React.FC<CheckBoxProps> = ({
           <div className="flex items-center">
             <input
               checked={isSelected}
-              onClick={() => onSelect(id)}
+              onChange={(val) => onChange(id, val.target.checked)}
               type="checkbox"
               className="cursor-pointer size-4 rounded border-gray-300 text-primary focus:ring-primary"
             />

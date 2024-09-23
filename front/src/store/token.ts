@@ -2,10 +2,10 @@
 
 import { create } from 'zustand';
 import { useAccountStore } from '@massalabs/react-ui-kit';
-import { CHAIN_ID, MRC20 } from '@massalabs/massa-web3';
-import { config } from '@/const/config';
+import { MRC20 } from '@massalabs/massa-web3';
 import { MasToken, supportedTokens } from '@/const/assets';
 import { Asset } from '@massalabs/react-ui-kit/src/lib/token/models/AssetModel';
+import { useSchedulerStore } from './scheduler';
 
 export interface TokenStoreState {
   selectedToken?: Asset;
@@ -20,6 +20,13 @@ export const useTokenStore = create<TokenStoreState>((set, get) => ({
 
   refreshBalances: async () => {
     const { connectedAccount } = useAccountStore.getState();
+
+    const {
+      address: schedulerAddress,
+      scheduleInfo,
+      setScheduleInfo,
+    } = useSchedulerStore.getState();
+
     if (!connectedAccount) {
       return;
     }
@@ -34,15 +41,14 @@ export const useTokenStore = create<TokenStoreState>((set, get) => ({
       supportedTokens.map(async (token) => {
         const mrc20 = new MRC20(connectedAccount, token.address);
         const [allowance, balance] = await Promise.all([
-          mrc20.allowance(
-            connectedAccount.address,
-            // TODO: Fix ui-kit chain id
-            config[CHAIN_ID.Buildnet.toString()].SchedulerContract,
-          ),
+          mrc20.allowance(connectedAccount.address, schedulerAddress),
           mrc20.balanceOf(connectedAccount.address),
         ]);
         token.allowance = allowance;
         token.balance = balance;
+        if (token.address === scheduleInfo.asset.address) {
+          setScheduleInfo('asset', token);
+        }
         return token;
       }),
     );

@@ -20,18 +20,21 @@ import { parseUnits } from '@massalabs/massa-web3';
 import { FiInfo } from 'react-icons/fi';
 import { isValidAddress } from '../utils/address';
 import { useSearchParams } from 'react-router-dom';
+import { useTokenStore } from '../store/token';
 
 export default function HomePage() {
   const { connectedAccount } = useAccountStore();
   const { scheduleInfo, setScheduleInfo, createSchedule, spenderSchedules } =
     useSchedule();
   const { increaseAllowance } = useToken();
+  const { tokens } = useTokenStore();
+
   const scheduleTableRef = useRef<HTMLDivElement>(null);
   const [isVesting, setVesting] = useState<boolean>(scheduleInfo.isVesting);
 
-  const balance = scheduleInfo.asset.balance ?? 0n;
-  const insufficientBalance = balance < scheduleInfo.amount;
-
+  const selectedToken = tokens.find(
+    (token) => token.address === scheduleInfo.asset.address,
+  );
   const isMasToken = scheduleInfo.asset.address === '';
 
   const [searchParams] = useSearchParams();
@@ -42,12 +45,15 @@ export default function HomePage() {
 
   const isValidRecipient = isValidAddress(scheduleInfo.recipient);
 
+  const balance = selectedToken?.balance ?? 0n;
+  const insufficientBalance = balance < scheduleInfo.amount;
+
   const disableAllowanceButton =
     !isValidRecipient ||
     !connectedAccount ||
     scheduleInfo.amount === 0n ||
     !scheduleInfo.asset ||
-    (scheduleInfo.asset.allowance ?? 0) >=
+    (selectedToken?.allowance ?? 0) >=
       scheduleInfo.amount * scheduleInfo.occurrences ||
     insufficientBalance ||
     isMasToken;
@@ -56,7 +62,7 @@ export default function HomePage() {
     !isValidRecipient ||
     !connectedAccount ||
     !scheduleInfo.amount ||
-    ((scheduleInfo.asset.allowance ?? 0) <
+    ((selectedToken?.allowance ?? 0) <
       scheduleInfo.amount * scheduleInfo.occurrences &&
       !isMasToken);
 
@@ -151,7 +157,7 @@ export default function HomePage() {
                         formatAmount(
                           scheduleInfo.amount,
                           scheduleInfo.asset.decimals,
-                        ).preview
+                        ).full
                       }
                     />
                   </div>

@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import CheckBox from './CheckBox';
 import useSchedule from '@/services/useSchedule';
 import { MasToken, supportedTokens } from '../const/assets';
+import ScheduleHistory from './scheduleHistory';
 
 interface ScheduleTableProps {
   schedules: Schedule[];
@@ -14,10 +15,19 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules }) => {
   const [selected, setSelected] = useState<bigint[]>([]);
   const { cancelSchedules } = useSchedule();
 
-  const handleSelect = (id: bigint) => {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
-    );
+  const handleCheckbox = (id: bigint, checked: boolean) => {
+    const isSelected = selected.includes(id);
+
+    if (!checked && isSelected) {
+      // remove from selected
+      setSelected(selected.filter((item) => item !== id));
+      return;
+    }
+    if (checked && !isSelected) {
+      // add to selected
+      setSelected([...selected, id]);
+      return;
+    }
   };
 
   const handleCancel = async () => {
@@ -83,7 +93,7 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules }) => {
               Tolerance
             </th>
             <th className="px-6 py-6 text-left text-xs font-medium uppercase tracking-wider">
-              History
+              Execution history
             </th>
           </tr>
         </thead>
@@ -99,7 +109,7 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules }) => {
                 <td className="px-6 py-4 whitespace-nowrap ">
                   <CheckBox
                     isSelected={selected.includes(schedule.id)}
-                    onSelect={handleSelect}
+                    onChange={handleCheckbox}
                     id={schedule.id}
                   />
                 </td>
@@ -139,12 +149,7 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules }) => {
                   {schedule.tolerance.toString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap ">
-                  {schedule.history.map((h, index) => (
-                    <div key={index}>
-                      Period: {h.period.toString()}, Thread:{' '}
-                      {h.thread.toString()}
-                    </div>
-                  ))}
+                  <ScheduleHistory schedule={schedule} />
                 </td>
               </tr>
             );
