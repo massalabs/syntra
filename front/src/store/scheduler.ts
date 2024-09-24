@@ -41,8 +41,8 @@ interface SchedulerStoreState {
 const defaultScheduleInfo: ScheduleInfo = {
   isVesting: false,
   amount: 0n,
-  interval: 10n,
-  recipient: 'AU1dvPZNjcTQfNQQuysWyxLLhEzw4kB9cGW2RMMVAQGrkzZHqWGD',
+  interval: 5400n,
+  recipient: '',
   spender: '',
   asset: supportedTokens[0],
   occurrences: 4n,
