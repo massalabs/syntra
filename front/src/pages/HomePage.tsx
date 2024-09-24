@@ -19,6 +19,7 @@ import { arrowButton, commonButton } from '@/styles/buttons';
 import { parseUnits } from '@massalabs/massa-web3';
 import { FiInfo } from 'react-icons/fi';
 import { isValidAddress } from '../utils/address';
+import { useSearchParams } from 'react-router-dom';
 
 export default function HomePage() {
   const { connectedAccount } = useAccountStore();
@@ -32,6 +33,12 @@ export default function HomePage() {
   const insufficientBalance = balance < scheduleInfo.amount;
 
   const isMasToken = scheduleInfo.asset.address === '';
+
+  const [searchParams] = useSearchParams();
+  const recipientQuery = searchParams.get('recipient');
+  if (recipientQuery && scheduleInfo.recipient == '') {
+    setScheduleInfo('recipient', recipientQuery);
+  }
 
   const isValidRecipient = isValidAddress(scheduleInfo.recipient);
 

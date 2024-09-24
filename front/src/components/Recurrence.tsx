@@ -20,7 +20,7 @@ export function Recurrence({
 }: {
   onRecurrenceChange: (value: bigint) => void;
 }) {
-  const [unitIndex, setUnitIndex] = useState(0);
+  const [unitIndex, setUnitIndex] = useState(4);
   const [numUnits, setNumUnits] = useState(1);
 
   const selectedUnit = recurrenceUnits[unitIndex];
