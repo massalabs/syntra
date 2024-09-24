@@ -30,7 +30,7 @@ export function ConnectButton() {
         <Button
           variant="secondary"
           disabled={isFetching}
-          customClass="h-[54px]"
+          customClass="h-[54px] dark:text-gray"
           onClick={() => setOpen(true)}
         >
           {Intl.t('connect-wallet.title')}
