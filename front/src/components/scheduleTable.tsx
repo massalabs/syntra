@@ -104,6 +104,13 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules }) => {
                 (token) => token.address === schedule.tokenAddress,
               ) || MasToken;
 
+            const formatedAmount = formatAmount(
+              schedule.amount,
+              asset.decimals,
+            );
+
+            const isMas = schedule.tokenAddress === '';
+
             return (
               <tr key={schedule.id.toString()}>
                 <td className="px-6 py-4 whitespace-nowrap ">
@@ -117,24 +124,63 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules }) => {
                   {schedule.id.toString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap ">
-                  {truncateAddress(schedule.operationId)}
+                  <span
+                    title={schedule.operationId}
+                    className="hover:text-blue-500 cursor-pointer"
+                    onClick={() => {
+                      navigator.clipboard.writeText(schedule.operationId);
+                      toast.success('Operation ID copied to clipboard');
+                    }}
+                  >
+                    {truncateAddress(schedule.operationId)}
+                  </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap ">
                   {schedule.isVesting ? 'Vesting' : 'Tips'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap ">
-                  {schedule.tokenAddress != ''
-                    ? truncateAddress(schedule.tokenAddress)
-                    : 'MAS'}
+                  <span
+                    title={isMas ? 'MAS' : schedule.tokenAddress}
+                    className={
+                      isMas ? '' : 'hover:text-blue-500 cursor-pointer'
+                    }
+                    onClick={() => {
+                      if (isMas) return;
+                      navigator.clipboard.writeText(schedule.tokenAddress);
+                      toast.success('Token address copied to clipboard');
+                    }}
+                  >
+                    {isMas ? 'MAS' : truncateAddress(schedule.tokenAddress)}
+                  </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap ">
-                  {truncateAddress(schedule.spender)}
+                  <span
+                    title={schedule.spender}
+                    className="hover:text-blue-500 cursor-pointer"
+                    onClick={() => {
+                      navigator.clipboard.writeText(schedule.spender);
+                      toast.success('Spender address copied to clipboard');
+                    }}
+                  >
+                    {truncateAddress(schedule.spender)}
+                  </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap ">
-                  {truncateAddress(schedule.recipient)}
+                  <span
+                    title={schedule.recipient}
+                    className="hover:text-blue-500 cursor-pointer"
+                    onClick={() => {
+                      navigator.clipboard.writeText(schedule.recipient);
+                      toast.success('Recipient address copied to clipboard');
+                    }}
+                  >
+                    {truncateAddress(schedule.recipient)}
+                  </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap ">
-                  {formatAmount(schedule.amount, asset.decimals).preview}
+                  <span title={formatedAmount.full}>
+                    {formatedAmount.preview}
+                  </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap ">
                   {schedule.interval.toString()}
