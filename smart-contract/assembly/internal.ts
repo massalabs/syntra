@@ -170,7 +170,10 @@ export function removeSchedule(spender: string, id: u64): void {
     .nextSerializable<Schedule>()
     .unwrap();
 
-  assert(!schedule.isVesting, 'Vesting schedules cannot be canceled');
+  assert(
+    !schedule.isVesting || !schedule.remaining,
+    'Vesting schedules cannot be canceled',
+  );
 
   Storage.del(scheduleKey);
   const recipientKey = getRecipientKey(schedule.recipient, id);
