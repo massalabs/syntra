@@ -69,10 +69,7 @@ export default function useSchedule() {
     await callSmartContract(
       'cancelSchedules',
       schedulerAddress,
-      new Args()
-        .addString(connectedAccount.address)
-        .addArray(ids, ArrayTypes.U64)
-        .serialize(),
+      new Args().addArray(ids, ArrayTypes.U64).serialize(),
       {
         success: 'Schedules successfully canceled',
         pending: 'Cancelling schedules...',
