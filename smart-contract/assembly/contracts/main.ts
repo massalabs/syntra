@@ -93,13 +93,10 @@ export function startScheduleSend(binaryArgs: StaticArray<u8>): void {
 // and the async call try to read the schedule will fail.
 export function cancelSchedules(binaryArgs: StaticArray<u8>): void {
   const args = new Args(binaryArgs);
-  const spender = args
-    .nextString()
-    .expect('Spender address is missing or invalid');
 
   const ids = args.next<u64[]>().expect('Ids are missing or invalid');
 
-  assert(Context.caller() === new Address(spender), 'Unauthorized');
+  const spender = Context.caller().toString();
 
   for (let i = 0; i < ids.length; i++) {
     removeSchedule(spender, ids[i]);

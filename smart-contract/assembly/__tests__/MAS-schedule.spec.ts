@@ -194,19 +194,18 @@ describe('Mas schedule tests', () => {
 describe('cancelSchedules', () => {
   throws('fail: cancel Mas schedule', () => {
     createMasSchedule();
-    cancelSchedules(new Args().add(spender1).add([getIdCounter()]).serialize());
+    cancelSchedules(new Args().add([getIdCounter()]).serialize());
   });
 
   throws('fail: unauthorized', () => {
     const schedueleId = getIdCounter() + 1;
     createMasSchedule();
     switchUser(spender2);
-    cancelSchedules(new Args().add(spender1).add([schedueleId]).serialize());
+    cancelSchedules(new Args().add([schedueleId]).serialize());
   });
 
   throws('fail: scheduele not fount', () => {
     createMasSchedule();
-    switchUser(spender2);
-    cancelSchedules(new Args().add(spender1).add([6666666]).serialize());
+    cancelSchedules(new Args().add([<u64>6666666]).serialize());
   });
 });
