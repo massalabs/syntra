@@ -204,12 +204,7 @@ describe('cancelSchedules', () => {
     createSchedule();
     createSchedule();
 
-    cancelSchedules(
-      new Args()
-        .add(spender1)
-        .add([schedueleId, schedueleId + 1])
-        .serialize(),
-    );
+    cancelSchedules(new Args().add([schedueleId, schedueleId + 1]).serialize());
 
     const schedulesSer = getSchedulesBySpender(
       new Args().add(spender1).serialize(),
@@ -239,13 +234,12 @@ describe('cancelSchedules', () => {
     const schedueleId = getIdCounter() + 1;
     createSchedule();
     switchUser(spender2);
-    cancelSchedules(new Args().add(spender1).add([schedueleId]).serialize());
+    cancelSchedules(new Args().add([schedueleId]).serialize());
   });
 
   throws('fail: scheduele not fount', () => {
     createSchedule();
-    switchUser(spender2);
-    cancelSchedules(new Args().add(spender1).add([6666666]).serialize());
+    cancelSchedules(new Args().add([<u64>6666666]).serialize());
   });
 
   test('multiple create, cancel the first one', () => {
@@ -253,7 +247,7 @@ describe('cancelSchedules', () => {
     createSchedule();
     createSchedule(); // second schedule
 
-    cancelSchedules(new Args().add(spender1).add([schedueleId]).serialize());
+    cancelSchedules(new Args().add([schedueleId]).serialize());
 
     const schedules = new Args(
       getSchedulesBySpender(new Args().add(spender1).serialize()),
