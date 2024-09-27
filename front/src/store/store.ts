@@ -1,4 +1,4 @@
-import { toast, useAccountStore } from '@massalabs/react-ui-kit';
+import { formatAmount, toast, useAccountStore } from '@massalabs/react-ui-kit';
 import { useTokenStore } from './token';
 import { useSchedulerStore } from './scheduler';
 import { config } from '@/const/config';
@@ -50,13 +50,24 @@ export const initPollEvent = async (connectedAccount: Provider) => {
       smartContractAddress: schedulerAddress,
       start: lastSlot,
     },
-    (data) => {
+    async (data) => {
       for (const event of data) {
         const match = event.data.match(/Transfer:([^]+)/);
         if (match) {
-          toast.success(event.data);
-          getBySpender(connectedAccount.address);
-          refreshBalances();
+          const schedules = await getBySpender(connectedAccount.address);
+          if (schedules) {
+            const info = event.data.split(',');
+            const id = info[0].split(':')[1];
+            const schedule = schedules.find((s) => s.id === BigInt(id));
+            if (schedule) {
+              toast.success(
+                `Transfer: ${schedule.recipient} received  ${
+                  formatAmount(schedule.amount).preview
+                } MAS`,
+              );
+              refreshBalances();
+            }
+          }
         }
       }
     },
