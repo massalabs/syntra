@@ -27,7 +27,7 @@ interface SchedulerStoreState {
     value: bigint | string | Asset | boolean,
   ) => void;
 
-  getBySpender: (spender: string) => Promise<void>;
+  getBySpender: (spender: string) => Promise<Schedule[] | void>;
   getByRecipient: (recipient: string) => Promise<void>;
   eventPollerStop: () => void;
   setEventPollerStop: (stop: () => void) => void;
@@ -88,6 +88,7 @@ export const useSchedulerStore = create<SchedulerStoreState>((set, get) => ({
 
     const schedules = new Args(res.value).nextSerializableObjectArray(Schedule);
     set({ spenderSchedules: schedules });
+    return schedules;
   },
 
   getByRecipient: async (recipient: string) => {
