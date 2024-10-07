@@ -1,10 +1,9 @@
 import { formatAmount, toast, useAccountStore } from '@massalabs/react-ui-kit';
 import { useTokenStore } from './token';
 import { useSchedulerStore } from './scheduler';
-import { config } from '@/const/config';
-import { CHAIN_ID, EventPoller, Provider } from '@massalabs/massa-web3';
-
-const chainId = CHAIN_ID.Buildnet.toString();
+import { EventPoller, Provider } from '@massalabs/massa-web3';
+import { schedulerAddress } from '../const/contracts';
+import { Schedule } from '../serializable/Schedule';
 
 export async function initApp() {
   const { connectedAccount } = useAccountStore.getState();
@@ -25,7 +24,7 @@ export const initSchedules = async (connectedAccount: Provider) => {
   useSchedulerStore
     .getState()
     // Todo fix chain id never initialized in ui-kit
-    .setSchedulerAddress(config[chainId].SchedulerContract);
+    .setSchedulerAddress(schedulerAddress);
   useSchedulerStore.getState().getBySpender(connectedAccount.address);
 };
 
@@ -50,26 +49,27 @@ export const initPollEvent = async (connectedAccount: Provider) => {
       smartContractAddress: schedulerAddress,
       start: lastSlot,
     },
-    async (data) => {
-      for (const event of data) {
-        const match = event.data.match(/Transfer:([^]+)/);
-        if (match) {
-          const schedules = await getBySpender(connectedAccount.address);
-          if (schedules) {
-            const info = event.data.split(',');
-            const id = info[0].split(':')[1];
-            const schedule = schedules.find((s) => s.id === BigInt(id));
-            if (schedule) {
-              toast.success(
-                `Transfer: ${schedule.recipient} received  ${
-                  formatAmount(schedule.amount).preview
-                } MAS`,
-              );
-              refreshBalances();
+    (data) => {
+      getBySpender(connectedAccount.address).then((schedules: Schedule[]) => {
+        if (schedules?.length) {
+          for (const event of data) {
+            const match = event.data?.match(/Transfer:([^]+)/);
+            if (match) {
+              const info = event.data.split(',');
+              const id = info[0].split(':')[1];
+              const schedule = schedules.find((s) => s.id === BigInt(id));
+              if (schedule) {
+                toast.success(
+                  `Transfer: ${schedule.recipient} received  ${
+                    formatAmount(schedule.amount).preview
+                  } MAS`,
+                );
+                refreshBalances();
+              }
             }
           }
         }
-      }
+      });
     },
   );
 

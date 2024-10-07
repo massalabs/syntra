@@ -27,7 +27,7 @@ interface SchedulerStoreState {
     value: bigint | string | Asset | boolean,
   ) => void;
 
-  getBySpender: (spender: string) => Promise<Schedule[] | void>;
+  getBySpender: (spender: string) => Promise<Schedule[]>;
   getByRecipient: (recipient: string) => Promise<void>;
   eventPollerStop: () => void;
   setEventPollerStop: (stop: () => void) => void;
@@ -72,11 +72,11 @@ export const useSchedulerStore = create<SchedulerStoreState>((set, get) => ({
       scheduleInfo: { ...state.scheduleInfo, [key]: value },
     })),
 
-  getBySpender: async (spender: string) => {
+  getBySpender: async (spender: string): Promise<Schedule[]> => {
     const { connectedAccount } = useAccountStore.getState();
     if (!connectedAccount) {
       console.error('You must be connected to an account');
-      return;
+      return [];
     }
 
     const res = await connectedAccount.readSC({
