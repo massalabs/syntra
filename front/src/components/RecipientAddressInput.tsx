@@ -1,6 +1,7 @@
-import { Input } from '@massalabs/react-ui-kit';
+import { Input, useAccountStore } from '@massalabs/react-ui-kit';
 import { useState } from 'react';
 import { isValidAddress } from '../utils/address';
+import { InputLabel } from './InputLabel';
 
 interface RecipientAddressInputProps {
   value: string;
@@ -13,6 +14,7 @@ export function RecipientAddressInput({
   onAddressChange,
 }: RecipientAddressInputProps) {
   const [error, setError] = useState<string>('');
+  const { connectedAccount } = useAccountStore();
   function onChange(e: React.ChangeEvent<HTMLInputElement>) {
     onAddressChange(e.target.value);
     setError('');
@@ -27,15 +29,22 @@ export function RecipientAddressInput({
     if (!isValidAddress(value)) {
       setError('Invalid address');
     }
+
+    if (value === connectedAccount?.address) {
+      setError('Spender can not be the same as recipient');
+    }
   }
 
   return (
-    <Input
-      error={error}
-      value={value}
-      onChange={onChange}
-      onBlur={onBlur}
-      customClass="border-none p-5 mb-0 h-14 focus:ring-1 focus:ring-primary focus:outline-none"
-    />
+    <>
+      <InputLabel label="Recipient Address" />
+      <Input
+        error={error}
+        value={value}
+        onChange={onChange}
+        onBlur={onBlur}
+        customClass="border-slate-200 h-14 focus:ring-1 focus:ring-primary focus:outline-none"
+      />
+    </>
   );
 }

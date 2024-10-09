@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Dropdown } from '@massalabs/react-ui-kit';
 import Intl from '@/i18n/i18n';
-import { NumericInput } from './NumericInput';
 import { InputLabel } from './InputLabel';
+import { NumericInput } from './NumericInput';
 
 const periodInMilliseconds = 16 * 1000; // 16 seconds
 

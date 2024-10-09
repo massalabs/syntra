@@ -20,15 +20,6 @@ export const supportedTokens: Asset[] = [
     allowance: 0n,
     chainId: 0,
   },
-  {
-    name: 'Massa Tips',
-    address: 'AS1R8zaZaGZ7Xcc3NeZ41KCzkUjcurFKn7LKhquMKEKrYFZDxfxr',
-    symbol: 'TIPS',
-    decimals: 18,
-    balance: 0n,
-    allowance: 0n,
-    chainId: 0,
-  },
 ];
 
 // mainnet
