@@ -15,7 +15,7 @@ export function ConnectButton() {
       <Button
         disabled={isFetching}
         variant="secondary"
-        customClass="h-[54px] text-primary"
+        customClass="h-[54px] text-primary relative"
         onClick={() => setOpen(true)}
       >
         {truncateAddress(connectedAccount?.address)}
@@ -30,7 +30,7 @@ export function ConnectButton() {
         <Button
           variant="secondary"
           disabled={isFetching}
-          customClass="h-[54px] dark:text-gray"
+          customClass="h-[54px] dark:text-gray relative"
           onClick={() => setOpen(true)}
         >
           {Intl.t('connect-wallet.title')}
@@ -53,7 +53,7 @@ export function ConnectButton() {
 // TODO: To move in ui-kit
 function PingAnimation() {
   return (
-    <span className="absolute flex h-3 w-3 top-0 right-0 -mr-1 -mt-1">
+    <span className="absolute flex h-3 w-3 top-0 right-0 -mr-2 -mt-2">
       <span
         className="animate-ping absolute inline-flex h-full w-full
                     rounded-full bg-s-error opacity-75 "
