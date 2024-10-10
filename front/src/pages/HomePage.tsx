@@ -1,5 +1,4 @@
 import { useRef } from 'react';
-import { useAccountStore } from '@massalabs/react-ui-kit';
 import useSchedule from '@/services/useSchedule';
 import ScheduleTable from '@/components/ScheduleTable';
 import { useSearchParams } from 'react-router-dom';

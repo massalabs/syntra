@@ -5,7 +5,7 @@ import { formatAmount, toast } from '@massalabs/react-ui-kit';
 import CheckBox from './CheckBox';
 import useSchedule from '@/services/useSchedule';
 import { MasToken, supportedTokens } from '../const/assets';
-import ScheduleHistory from './ScheduleHistory';
+import ScheduleHistory from '@/components/ScheduleHistory';
 
 interface ScheduleTableProps {
   schedules: Schedule[];
