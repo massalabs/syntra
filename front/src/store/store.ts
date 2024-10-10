@@ -1,36 +1,35 @@
-import { formatAmount, toast, useAccountStore } from '@massalabs/react-ui-kit';
-import { useTokenStore } from './token';
-import { useSchedulerStore } from './scheduler';
-import { EventPoller, Provider } from '@massalabs/massa-web3';
+import { EventPoller, Provider, SCEvent } from '@massalabs/massa-web3';
 import { schedulerAddress } from '../const/contracts';
 import { Schedule } from '../serializable/Schedule';
+import { supportedTokens } from '../const/assets';
+import { truncateAddress } from '@/utils/address';
+import { useAccountStore, formatAmount, toast } from '@massalabs/react-ui-kit';
+import { useSchedulerStore } from './scheduler';
+import { useTokenStore } from './token';
 
 export async function initApp() {
   const { connectedAccount } = useAccountStore.getState();
-  if (!connectedAccount) {
-    return;
-  }
-  initTokens();
-  initSchedules(connectedAccount);
-  initPollEvent(connectedAccount);
+  if (!connectedAccount) return;
+
+  await Promise.all([
+    initTokens(),
+    initSchedules(connectedAccount),
+    initPollEvent(connectedAccount),
+  ]);
 }
 
-export async function initTokens() {
+async function initTokens() {
   const { refreshBalances } = useTokenStore.getState();
-  refreshBalances();
+  await refreshBalances();
 }
 
-export const initSchedules = async (connectedAccount: Provider) => {
-  useSchedulerStore
-    .getState()
-    // Todo fix chain id never initialized in ui-kit
-    .setSchedulerAddress(schedulerAddress);
-  useSchedulerStore.getState().getBySpender(connectedAccount.address);
-};
+async function initSchedules(connectedAccount: Provider) {
+  const { setSchedulerAddress, getBySpender } = useSchedulerStore.getState();
+  setSchedulerAddress(schedulerAddress);
+  await getBySpender(connectedAccount.address);
+}
 
-// Todo - For now this will poll every transfer. We need to filter by spender
-// Except if we want to showcase all transfers and make nice animation on each transfer
-export const initPollEvent = async (connectedAccount: Provider) => {
+async function initPollEvent(connectedAccount: Provider) {
   const {
     getBySpender,
     address: schedulerAddress,
@@ -40,38 +39,53 @@ export const initPollEvent = async (connectedAccount: Provider) => {
 
   if (eventPollerStop) eventPollerStop();
 
-  const { refreshBalances } = useTokenStore.getState();
   const { lastSlot } = await connectedAccount.getNodeStatus();
 
   const { stopPolling } = EventPoller.start(
     connectedAccount,
-    {
-      smartContractAddress: schedulerAddress,
-      start: lastSlot,
-    },
-    (data) => {
-      getBySpender(connectedAccount.address).then((schedules: Schedule[]) => {
-        if (schedules?.length) {
-          for (const event of data) {
-            const match = event.data?.match(/Transfer:([^]+)/);
-            if (match) {
-              const info = event.data.split(',');
-              const id = info[0].split(':')[1];
-              const schedule = schedules.find((s) => s.id === BigInt(id));
-              if (schedule) {
-                toast.success(
-                  `Transfer: ${schedule.recipient} received  ${
-                    formatAmount(schedule.amount).preview
-                  } MAS`,
-                );
-                refreshBalances();
-              }
-            }
-          }
-        }
-      });
+    { smartContractAddress: schedulerAddress, start: lastSlot },
+    async (data) => {
+      const schedules = await getBySpender(connectedAccount.address);
+      if (!schedules?.length) return;
+
+      handleTransferEvents(data, schedules);
     },
   );
 
   setEventPollerStop(stopPolling);
-};
+}
+
+function handleTransferEvents(data: SCEvent[], schedules: Schedule[]) {
+  const { refreshBalances } = useTokenStore.getState();
+
+  for (const event of data) {
+    const match = event.data?.match(/Transfer:([^]+)/);
+    if (!match) continue;
+
+    const [id] = event.data.split(',');
+    const scheduleId = id.split(':')[1];
+    const schedule = schedules.find((s) => s.id === BigInt(scheduleId));
+
+    if (schedule) {
+      const { decimals, symbol } = getTokenInfo(schedule.tokenAddress);
+      const formattedAmount = formatAmount(schedule.amount, decimals).preview;
+
+      toast.success(
+        `Transfer: ${truncateAddress(
+          schedule.recipient,
+        )} received ${formattedAmount} ${symbol}`,
+      );
+
+      refreshBalances();
+    }
+  }
+}
+
+function getTokenInfo(tokenAddress: string | null) {
+  if (!tokenAddress) return { decimals: 9, symbol: 'MAS' };
+
+  const token = supportedTokens.find((t) => t.address === tokenAddress);
+  return token
+    ? { decimals: token.decimals, symbol: token.symbol }
+    : { decimals: 9, symbol: 'MAS' };
+}
