@@ -6,11 +6,13 @@ import { formatAmount } from '@massalabs/react-ui-kit';
 type SelectAmountProps = {
   onValueChange: (amount: string) => void;
   scheduleInfo: ScheduleInfo;
+  disabled: boolean;
 };
 
 export function SelectAmount({
   scheduleInfo,
   onValueChange,
+  disabled,
 }: SelectAmountProps) {
   return (
     <>
@@ -24,6 +26,7 @@ export function SelectAmount({
         value={
           formatAmount(scheduleInfo.amount, scheduleInfo.asset.decimals).full
         }
+        disabled={disabled}
       />
     </>
   );

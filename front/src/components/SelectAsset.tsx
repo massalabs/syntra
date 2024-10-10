@@ -7,8 +7,10 @@ import { InputLabel } from './InputLabel';
 
 export default function SelectAsset({
   isVesting,
+  disabled,
 }: {
   isVesting: boolean;
+  disabled: boolean;
 }): JSX.Element {
   const tokens = isVesting ? [MasToken] : supportedTokens;
   const [selectedAsset, setSelectedAsset] = useState<Asset>(tokens[0]);
@@ -20,7 +22,13 @@ export default function SelectAsset({
   }
 
   return (
-    <>
+    <div
+      className={
+        disabled
+          ? 'filter grayscale opacity-50 cursor-not-allowed pointer-events-none'
+          : ''
+      }
+    >
       <InputLabel label="Token" />
       <AssetSelector
         selectedAsset={selectedAsset}
@@ -28,6 +36,6 @@ export default function SelectAsset({
         assets={tokens}
         isAssetsLoading={false}
       />
-    </>
+    </div>
   );
 }

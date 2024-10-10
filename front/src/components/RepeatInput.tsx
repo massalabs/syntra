@@ -4,9 +4,11 @@ import { NumericInput } from './NumericInput';
 export function RepeatInput({
   onValueChange,
   occurrences,
+  disabled,
 }: {
   onValueChange: (repeat: string) => void;
   occurrences: string;
+  disabled?: boolean;
 }) {
   return (
     <>
@@ -15,6 +17,7 @@ export function RepeatInput({
         placeholder="Enter amount"
         value={occurrences}
         onValueChange={onValueChange}
+        disabled={disabled}
       />
     </>
   );

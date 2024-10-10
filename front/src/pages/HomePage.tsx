@@ -8,7 +8,6 @@ import { ScheduleForm } from '@/components/ScheduleForm';
 import { NavBar } from '@/components/NavBar';
 
 export default function HomePage() {
-  const { connectedAccount } = useAccountStore();
   const { scheduleInfo, setScheduleInfo, spenderSchedules } = useSchedule();
   const scheduleTableRef = useRef<HTMLDivElement>(null);
 
@@ -29,12 +28,10 @@ export default function HomePage() {
     <div className="">
       <div className="main h-screen">
         <NavBar />
-        {connectedAccount && (
-          <div className="flex flex-col justify-center items-center gap-10 h-full">
-            <ScheduleForm />
-            <ArrowButton onClick={scrollToList} />
-          </div>
-        )}
+        <div className="flex flex-col justify-center items-center gap-10 h-full">
+          <ScheduleForm />
+          <ArrowButton onClick={scrollToList} />
+        </div>
       </div>
       <div ref={scheduleTableRef} className="h-screen bg-white">
         <ScheduleTable schedules={spenderSchedules} />

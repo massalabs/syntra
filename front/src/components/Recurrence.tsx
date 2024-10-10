@@ -17,8 +17,10 @@ const recurrenceUnits = [
 
 export function Recurrence({
   onRecurrenceChange,
+  disabled,
 }: {
   onRecurrenceChange: (value: bigint) => void;
+  disabled?: boolean;
 }) {
   const [unitIndex, setUnitIndex] = useState(4);
   const [numUnits, setNumUnits] = useState(1);
@@ -58,17 +60,26 @@ export function Recurrence({
           value={numUnits.toString()}
           placeholder={'0'}
           onValueChange={handleNumUnitsChange}
+          disabled={disabled}
         />
       </div>
       <div className="col-span-3">
         <InputLabel label="Unit" />
-        <Dropdown
-          select={unitIndex}
-          options={recurrenceUnits.map((unit, index) => ({
-            item: unit.name,
-            onClick: () => handleUnitChange(index),
-          }))}
-        />
+        <div
+          className={
+            disabled
+              ? 'filter grayscale opacity-50 cursor-not-allowed pointer-events-none'
+              : ''
+          }
+        >
+          <Dropdown
+            select={unitIndex}
+            options={recurrenceUnits.map((unit, index) => ({
+              item: unit.name,
+              onClick: () => handleUnitChange(index),
+            }))}
+          />
+        </div>
       </div>
     </div>
   );

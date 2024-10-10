@@ -71,6 +71,7 @@ export function ScheduleForm() {
           handleModeChange={handleModeChange}
           tipsModeDesc={tipsModeDesc}
           vestingModeDesc={vestingModeDesc}
+          disabled={!connectedAccount}
         />
 
         <div className="grid grid-cols-6 gap-2">
@@ -83,10 +84,11 @@ export function ScheduleForm() {
                   parseUnits(amount, scheduleInfo.asset.decimals),
                 );
               }}
+              disabled={!connectedAccount}
             />
           </div>
           <div className="col-span-2">
-            <SelectAsset isVesting={isVesting} />
+            <SelectAsset isVesting={isVesting} disabled={!connectedAccount} />
           </div>
         </div>
 
@@ -96,6 +98,7 @@ export function ScheduleForm() {
             onAddressChange={(address) => {
               setScheduleInfo('recipient', address);
             }}
+            disabled={!connectedAccount}
           />
         </div>
 
@@ -105,6 +108,7 @@ export function ScheduleForm() {
               onRecurrenceChange={(value: bigint) => {
                 setScheduleInfo('interval', BigInt(value));
               }}
+              disabled={!connectedAccount}
             />
           </div>
 
@@ -114,6 +118,7 @@ export function ScheduleForm() {
               onValueChange={(value: string) => {
                 setScheduleInfo('occurrences', BigInt(value));
               }}
+              disabled={!connectedAccount}
             />
           </div>
         </div>

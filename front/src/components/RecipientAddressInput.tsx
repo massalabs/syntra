@@ -6,12 +6,13 @@ import { InputLabel } from './InputLabel';
 interface RecipientAddressInputProps {
   value: string;
   onAddressChange: (address: string) => void;
-  error?: string;
+  disabled?: boolean;
 }
 
 export function RecipientAddressInput({
   value,
   onAddressChange,
+  disabled,
 }: RecipientAddressInputProps) {
   const [error, setError] = useState<string>('');
   const { connectedAccount } = useAccountStore();
@@ -43,7 +44,11 @@ export function RecipientAddressInput({
         value={value}
         onChange={onChange}
         onBlur={onBlur}
-        customClass="border-slate-200 h-14 focus:ring-1 focus:ring-primary focus:outline-none"
+        disabled={disabled}
+        customClass="
+          border-slate-200 h-14 focus:ring-1 
+          focus:ring-primary focus:outline-none 
+          disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
       />
     </>
   );
