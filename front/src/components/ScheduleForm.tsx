@@ -42,6 +42,7 @@ export function ScheduleForm() {
     isAllowanceSufficient,
     insufficientBalance,
     isMasToken,
+    isVesting,
   ].some(Boolean);
 
   const disableCreateScheduleButton = [
