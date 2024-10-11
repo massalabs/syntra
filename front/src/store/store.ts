@@ -1,11 +1,11 @@
 import { EventPoller, Provider, SCEvent } from '@massalabs/massa-web3';
 import { schedulerAddress } from '../const/contracts';
 import { Schedule } from '../serializable/Schedule';
-import { supportedTokens } from '../const/assets';
 import { truncateAddress } from '@/utils/address';
 import { useAccountStore, formatAmount, toast } from '@massalabs/react-ui-kit';
 import { useSchedulerStore } from './scheduler';
 import { useTokenStore } from './token';
+import { getTokenInfo } from '@/utils/assets';
 
 export async function initApp() {
   const { connectedAccount } = useAccountStore.getState();
@@ -79,13 +79,4 @@ function handleTransferEvents(data: SCEvent[], schedules: Schedule[]) {
       refreshBalances();
     }
   }
-}
-
-function getTokenInfo(tokenAddress: string | null) {
-  if (!tokenAddress) return { decimals: 9, symbol: 'MAS' };
-
-  const token = supportedTokens.find((t) => t.address === tokenAddress);
-  return token
-    ? { decimals: token.decimals, symbol: token.symbol }
-    : { decimals: 9, symbol: 'MAS' };
 }

@@ -6,15 +6,17 @@ import CheckBox from './CheckBox';
 import useSchedule from '@/services/useSchedule';
 import { MasToken, supportedTokens } from '../const/assets';
 import ScheduleHistory from '@/components/ScheduleHistory';
+import { getTokenInfo } from '@/utils/assets';
 
 interface ScheduleTableProps {
   schedules: Schedule[];
 }
 
-const CopyableAddress: React.FC<{ address: string; label: string }> = ({
-  address,
-  label,
-}) => (
+const CopyableAddress: React.FC<{
+  address: string;
+  label: string;
+  value: string;
+}> = ({ value, address, label }) => (
   <span
     title={address}
     className="hover:text-blue-500 cursor-pointer"
@@ -23,7 +25,7 @@ const CopyableAddress: React.FC<{ address: string; label: string }> = ({
       toast.success(`${label} copied to clipboard`);
     }}
   >
-    {truncateAddress(address)}
+    {value}
   </span>
 );
 
@@ -47,7 +49,7 @@ const TableHeader: React.FC = () => (
       ].map((header, index) => (
         <th
           key={index}
-          className="px-6 py-6 text-left text-xs font-medium uppercase"
+          className="px-4 py-6 text-left text-xs font-medium uppercase"
         >
           {header}
         </th>
@@ -75,55 +77,59 @@ const TableRow: React.FC<TableRowProps> = ({
 
   return (
     <tr>
-      <td className="px-6 py-4">
+      <td className="text-center px-2 py-4">
         <CheckBox
           isSelected={isSelected}
           onChange={onCheckboxChange}
           id={schedule.id}
         />
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">{schedule.id.toString()}</td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        <CopyableAddress address={schedule.operationId} label="Operation ID" />
+      <td className="text-center px-2 py-4">{schedule.id.toString()}</td>
+      <td className="text-center px-2 py-4">
+        <CopyableAddress
+          address={schedule.operationId}
+          label="Operation ID"
+          value={truncateAddress(schedule.operationId)}
+        />
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="text-center px-2 py-4">
         {schedule.isVesting ? 'Vesting' : 'Tips'}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="text-center px-2 py-4">
         {isMas ? (
           'MAS'
         ) : (
           <CopyableAddress
-            address={schedule.tokenAddress}
             label="Token address"
+            address={asset.address}
+            value={getTokenInfo(asset.address).symbol}
           />
         )}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        <CopyableAddress address={schedule.spender} label="Spender address" />
+      <td className="text-center px-2 py-4">
+        <CopyableAddress
+          address={schedule.spender}
+          label="Spender address"
+          value={truncateAddress(schedule.spender)}
+        />
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="text-center px-2 py-4">
         <CopyableAddress
           address={schedule.recipient}
           label="Recipient address"
+          value={truncateAddress(schedule.recipient)}
         />
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="text-center px-2 py-4">
         <span title={formattedAmount.full}>{formattedAmount.preview}</span>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        {schedule.interval.toString()}
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="text-center px-2 py-4">{schedule.interval.toString()}</td>
+      <td className="text-center px-2 py-4">
         {schedule.occurrences.toString()}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        {schedule.remaining.toString()}
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        {schedule.tolerance.toString()}
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="text-center px-2 py-4">{schedule.remaining.toString()}</td>
+      <td className="text-center px-2 py-4">{schedule.tolerance.toString()}</td>
+      <td className="text-center px-2 py-4">
         <ScheduleHistory schedule={schedule} />
       </td>
     </tr>
@@ -172,7 +178,7 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules }) => {
         <SelectedInfo count={selected.length} onCancel={handleCancel} />
       )}
 
-      <table className="min-w-full overflow-hidden rounded-2xl shadow-lg bg-secondary">
+      <table className="overflow-hidden rounded-2xl shadow-lg bg-secondary w-full">
         <TableHeader />
         <tbody className="text-sm divide-y divide-zinc-300">
           {schedules.map((schedule) => (
