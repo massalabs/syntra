@@ -1,4 +1,4 @@
-import useToken from '@/services/useToken';
+import useToken from '@/hooks/useToken';
 import { ScheduleInfo } from '@/store/scheduler';
 import { commonButton } from '@/styles/buttons';
 import { Button, formatAmount } from '@massalabs/react-ui-kit';

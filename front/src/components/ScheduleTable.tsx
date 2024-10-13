@@ -3,10 +3,11 @@ import { Schedule } from '@/serializable/Schedule';
 import { truncateAddress } from '@/utils/address';
 import { formatAmount, toast } from '@massalabs/react-ui-kit';
 import CheckBox from './CheckBox';
-import useSchedule from '@/services/useSchedule';
+import useSchedule from '@/hooks/useSchedule';
 import { MasToken, supportedTokens } from '../const/assets';
 import ScheduleHistory from '@/components/ScheduleHistory';
 import { getTokenInfo } from '@/utils/assets';
+import { getRecurrenceFromPeriods } from './Recurrence';
 
 interface ScheduleTableProps {
   schedules: Schedule[];
@@ -31,29 +32,23 @@ const CopyableAddress: React.FC<{
 
 const TableHeader: React.FC = () => (
   <thead>
-    <tr className="bg-primary text-white">
-      {[
-        '',
-        'ID',
-        'OperationId',
-        'Mode',
-        'Token',
-        'Spender',
-        'Recipient',
-        'Amount',
-        'Interval',
-        'Occurrences',
-        'Remaining',
-        'Tolerance',
-        'Execution history',
-      ].map((header, index) => (
-        <th
-          key={index}
-          className="px-4 py-6 text-left text-xs font-medium uppercase"
-        >
-          {header}
-        </th>
-      ))}
+    <tr className="bg-primary text-white text-sm py-5">
+      <th className="font-normal px-4 py-5"></th>
+      <th className="font-normal hidden xl:table-cell px-4 py-5">
+        OperationId
+      </th>
+      <th className="font-normal hidden lg:table-cell px-4 py-5">Mode</th>
+      <th className="font-normal px-4 py-5">Token</th>
+      <th className="font-normal px-4 py-5">Recipient</th>
+      <th className="font-normal px-4 py-5">Amount</th>
+      <th className="font-normal hidden md:table-cell px-4 py-5">Interval</th>
+      <th className="font-normal hidden md:table-cell px-4 py-5">
+        Occurrences
+      </th>
+      <th className="font-normal px-4 py-5">Remaining</th>
+      <th className="font-normal hidden px-4 py-5 lg:table-cell">
+        Execution history
+      </th>
     </tr>
   </thead>
 );
@@ -74,28 +69,26 @@ const TableRow: React.FC<TableRowProps> = ({
     MasToken;
   const formattedAmount = formatAmount(schedule.amount, asset.decimals);
   const isMas = schedule.tokenAddress === '';
-
   return (
     <tr>
-      <td className="text-center px-2 py-4">
+      <td className=" text-center px-6 py-6">
         <CheckBox
           isSelected={isSelected}
           onChange={onCheckboxChange}
           id={schedule.id}
         />
       </td>
-      <td className="text-center px-2 py-4">{schedule.id.toString()}</td>
-      <td className="text-center px-2 py-4">
+      <td className="text-center hidden xl:table-cell">
         <CopyableAddress
           address={schedule.operationId}
           label="Operation ID"
           value={truncateAddress(schedule.operationId)}
         />
       </td>
-      <td className="text-center px-2 py-4">
+      <td className="text-center px-6 py-6 hidden lg:table-cell">
         {schedule.isVesting ? 'Vesting' : 'Tips'}
       </td>
-      <td className="text-center px-2 py-4">
+      <td className="text-center ">
         {isMas ? (
           'MAS'
         ) : (
@@ -106,30 +99,24 @@ const TableRow: React.FC<TableRowProps> = ({
           />
         )}
       </td>
-      <td className="text-center px-2 py-4">
-        <CopyableAddress
-          address={schedule.spender}
-          label="Spender address"
-          value={truncateAddress(schedule.spender)}
-        />
-      </td>
-      <td className="text-center px-2 py-4">
+      <td className="text-center px-6 py-6">
         <CopyableAddress
           address={schedule.recipient}
           label="Recipient address"
           value={truncateAddress(schedule.recipient)}
         />
       </td>
-      <td className="text-center px-2 py-4">
+      <td className="text-center ">
         <span title={formattedAmount.full}>{formattedAmount.preview}</span>
       </td>
-      <td className="text-center px-2 py-4">{schedule.interval.toString()}</td>
-      <td className="text-center px-2 py-4">
+      <td className="text-center px-6 py-6 hidden md:table-cell">
+        {getRecurrenceFromPeriods(schedule.interval).unit}
+      </td>
+      <td className="text-center px-6 py-6 hidden md:table-cell">
         {schedule.occurrences.toString()}
       </td>
-      <td className="text-center px-2 py-4">{schedule.remaining.toString()}</td>
-      <td className="text-center px-2 py-4">{schedule.tolerance.toString()}</td>
-      <td className="text-center px-2 py-4">
+      <td className="text-center px-6 py-6">{schedule.remaining.toString()}</td>
+      <td className="text-center hidden lg:table-cell">
         <ScheduleHistory schedule={schedule} />
       </td>
     </tr>

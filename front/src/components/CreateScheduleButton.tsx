@@ -1,4 +1,4 @@
-import useSchedule from '@/services/useSchedule';
+import useSchedule from '@/hooks/useSchedule';
 import { commonButton } from '@/styles/buttons';
 import { Button, toast } from '@massalabs/react-ui-kit';
 

@@ -6,7 +6,7 @@ import { Recurrence } from './Recurrence';
 import { SelectAmount } from './SelectAmount';
 import SelectAsset from './SelectAsset';
 import { SelectMode } from './SelectMode';
-import useSchedule from '@/services/useSchedule';
+import useSchedule from '@/hooks/useSchedule';
 import { useTokenStore } from '@/store/token';
 import { isValidAddress } from '@/utils/address';
 import { useState } from 'react';

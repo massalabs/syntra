@@ -1,11 +1,12 @@
 import { useRef } from 'react';
-import useSchedule from '@/services/useSchedule';
+import useSchedule from '@/hooks/useSchedule';
 import ScheduleTable from '@/components/ScheduleTable';
 import { useSearchParams } from 'react-router-dom';
 import { ArrowButton } from '@/components/ArrowButton';
 import { ScheduleForm } from '@/components/ScheduleForm';
 import { NavBar } from '@/components/NavBar';
-
+// TODO: Add network and check if the user is connected to the right network
+// TODO: Remove or fix event
 export default function HomePage() {
   const { scheduleInfo, setScheduleInfo, spenderSchedules } = useSchedule();
   const scheduleTableRef = useRef<HTMLDivElement>(null);
