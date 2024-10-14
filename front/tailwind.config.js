@@ -5,6 +5,13 @@ export default {
     './src/**/*.{js,ts,jsx,tsx}',
     './node_modules/@massalabs/react-ui-kit/src/**/*.{js,ts,jsx,tsx}',
   ],
+  theme: {
+    extend: {
+      fontFamily: {
+        caveat: ['Caveat', 'cursive'],
+      },
+    },
+  },
   presets: [require('./src/themes/default.js')],
   plugins: [require('@tailwindcss/forms')],
 };

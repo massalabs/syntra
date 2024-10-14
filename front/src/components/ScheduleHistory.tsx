@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Schedule } from '../serializable/Schedule';
 import { useAccountStore } from '@massalabs/react-ui-kit';
-import useSchedule from '../services/useSchedule';
+import useSchedule from '../hooks/useSchedule';
 
 interface ScheduleHistoryProps {
   schedule: Schedule;

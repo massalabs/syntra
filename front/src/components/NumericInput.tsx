@@ -9,11 +9,11 @@ type NumericInputProps = {
   onValueChange: (e: string) => void;
   asset?: Asset;
   error?: string;
+  disabled?: boolean;
 };
 
-// TODO: To add in ui-kit
 export function NumericInput(props: NumericInputProps) {
-  const { value, placeholder, asset, onValueChange, error } = props;
+  let { value, placeholder, asset, onValueChange, error, disabled } = props;
 
   const [amountError, setAmountError] = useState('');
 
@@ -31,7 +31,11 @@ export function NumericInput(props: NumericInputProps) {
   return (
     <div>
       <Money
-        customClass="border-none focus:ring-1 focus:ring-primary focus:outline-none h-14"
+        customClass={`border-slate-200 focus:ring-1 focus:ring-primary focus:outline-none h-14 ${
+          disabled
+            ? 'cursor-not-allowed opacity-50 focus:ring-0 pointer-events-none'
+            : ''
+        }`}
         value={value}
         onValueChange={(o) => onValueChange(o.value)}
         placeholder={placeholder}

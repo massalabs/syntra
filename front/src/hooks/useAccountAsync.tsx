@@ -9,7 +9,12 @@ type SavedAccount = {
 };
 
 const useAccountSync = () => {
-  const { connectedAccount, setConnectedAccount } = useAccountStore();
+  const {
+    connectedAccount,
+    setConnectedAccount,
+    setCurrentWallet,
+    setWallets,
+  } = useAccountStore();
 
   const [savedAccount, setSavedAccount] = useLocalStorage<SavedAccount>(
     'saved-account',
@@ -36,17 +41,25 @@ const useAccountSync = () => {
     if (connectedAccount) return;
 
     getWallets().then((wallets) => {
+      setWallets(wallets);
       for (const wallet of wallets) {
         wallet.accounts().then((accounts) => {
           const acc = accounts.find((a) => a.address === address);
           if (acc) {
             setConnectedAccount(acc);
+            setCurrentWallet(wallet);
             return;
           }
         });
       }
     });
-  }, [savedAccount, connectedAccount, setConnectedAccount]);
+  }, [
+    savedAccount,
+    connectedAccount,
+    setConnectedAccount,
+    setCurrentWallet,
+    setWallets,
+  ]);
 };
 
 export default useAccountSync;

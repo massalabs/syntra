@@ -3,7 +3,7 @@ import { Args, Slot } from '@massalabs/massa-web3';
 
 import { Asset } from '@massalabs/react-ui-kit/src/lib/token/models/AssetModel';
 import { Schedule } from '@/serializable/Schedule';
-import { supportedTokens } from '@/const/assets';
+import { MasToken } from '@/const/assets';
 import { useAccountStore } from '@massalabs/react-ui-kit';
 
 export type ScheduleInfo = {
@@ -44,7 +44,7 @@ const defaultScheduleInfo: ScheduleInfo = {
   interval: 5400n,
   recipient: '',
   spender: '',
-  asset: supportedTokens[0],
+  asset: MasToken,
   occurrences: 4n,
   tolerance: 3n,
 };
