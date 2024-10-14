@@ -6,26 +6,32 @@ import { useAccountStore, formatAmount, toast } from '@massalabs/react-ui-kit';
 import { useSchedulerStore } from './scheduler';
 import { useTokenStore } from './token';
 import { getTokenInfo } from '@/utils/assets';
+import { useNetworkStore } from './network';
 
 export async function initApp() {
   const { connectedAccount } = useAccountStore.getState();
   if (!connectedAccount) return;
 
-  await Promise.all([
-    initTokens(),
-    initSchedules(connectedAccount),
-    initPollEvent(connectedAccount),
-  ]);
+  await initTokens();
+  await initSchedules(connectedAccount);
+  await initPollEvent(connectedAccount);
 }
 
 async function initTokens() {
-  const { refreshBalances } = useTokenStore.getState();
-  await refreshBalances();
+  const { init } = useTokenStore.getState();
+  await init();
 }
 
 async function initSchedules(connectedAccount: Provider) {
-  const { setSchedulerAddress, getBySpender } = useSchedulerStore.getState();
-  setSchedulerAddress(schedulerAddress);
+  const { tokens } = useTokenStore.getState();
+  const { setSchedulerAddress, getBySpender, scheduleInfo, setScheduleInfo } =
+    useSchedulerStore.getState();
+  const { network } = useNetworkStore.getState();
+  setSchedulerAddress(schedulerAddress[network]);
+
+  scheduleInfo.asset = tokens[0];
+  setScheduleInfo('asset', tokens[0]);
+
   await getBySpender(connectedAccount.address);
 }
 
@@ -57,6 +63,7 @@ async function initPollEvent(connectedAccount: Provider) {
 
 function handleTransferEvents(data: SCEvent[], schedules: Schedule[]) {
   const { refreshBalances } = useTokenStore.getState();
+  const { tokens } = useTokenStore.getState();
 
   for (const event of data) {
     const match = event.data?.match(/Transfer:([^]+)/);
@@ -67,7 +74,7 @@ function handleTransferEvents(data: SCEvent[], schedules: Schedule[]) {
     const schedule = schedules.find((s) => s.id === BigInt(scheduleId));
 
     if (schedule) {
-      const { decimals, symbol } = getTokenInfo(schedule.tokenAddress);
+      const { decimals, symbol } = getTokenInfo(schedule.tokenAddress, tokens);
       const formattedAmount = formatAmount(schedule.amount, decimals).preview;
 
       toast.success(

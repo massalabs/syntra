@@ -4,10 +4,10 @@ import { truncateAddress } from '@/utils/address';
 import { formatAmount, toast } from '@massalabs/react-ui-kit';
 import CheckBox from './CheckBox';
 import useSchedule from '@/hooks/useSchedule';
-import { MasToken, supportedTokens } from '../const/assets';
+import { MasToken } from '../const/assets';
 import ScheduleHistory from '@/components/ScheduleHistory';
-import { getTokenInfo } from '@/utils/assets';
 import { getRecurrenceFromPeriods } from './Recurrence';
+import { useTokenStore } from '@/store/token';
 
 interface ScheduleTableProps {
   schedules: Schedule[];
@@ -64,9 +64,9 @@ const TableRow: React.FC<TableRowProps> = ({
   isSelected,
   onCheckboxChange,
 }) => {
+  const { tokens } = useTokenStore();
   const asset =
-    supportedTokens.find((token) => token.address === schedule.tokenAddress) ||
-    MasToken;
+    tokens.find((token) => token.address === schedule.tokenAddress) || MasToken;
   const formattedAmount = formatAmount(schedule.amount, asset.decimals);
   const isMas = schedule.tokenAddress === '';
   return (
@@ -95,7 +95,7 @@ const TableRow: React.FC<TableRowProps> = ({
           <CopyableAddress
             label="Token address"
             address={asset.address}
-            value={getTokenInfo(asset.address).symbol}
+            value={asset.symbol}
           />
         )}
       </td>

@@ -14,12 +14,15 @@ import { AllowanceButton } from './AllowanceButton';
 import { tipsModeDesc, vestingModeDesc } from '@/const/tooltips';
 import { RepeatInput } from './RepeatInput';
 import { CreateScheduleButton } from './CreateScheduleButton';
+import { useNetworkStore } from '@/store/network';
 
 export function ScheduleForm() {
-  const { connectedAccount } = useAccountStore();
+  const { connectedAccount, network: walletNetwork } = useAccountStore();
   const { scheduleInfo, setScheduleInfo } = useSchedule();
   const { tokens } = useTokenStore();
   const [isVesting, setVesting] = useState<boolean>(scheduleInfo.isVesting);
+
+  const { network } = useNetworkStore();
 
   const selectedToken = tokens.find(
     (token) => token.address === scheduleInfo.asset.address,
@@ -52,6 +55,9 @@ export function ScheduleForm() {
     !isAllowanceSufficient && !isMasToken,
   ].some(Boolean);
 
+  const isRightNetwork = network === walletNetwork;
+  const formDisabled = !connectedAccount || !isRightNetwork;
+
   const handleModeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const isChecked = e.target.checked;
     const value = e.target.value;
@@ -66,13 +72,18 @@ export function ScheduleForm() {
 
   return (
     <section className="max-w-2xl w-full mx-auto rounded-2xl shadow-lg p-7 bg-white -mt-40">
+      {walletNetwork && !isRightNetwork && (
+        <p className="text-red-500 text-center p-6">
+          Please switch your wallet to {network}
+        </p>
+      )}
       <Card customClass="bg-transparent grid grid-flow-row gap-4">
         <SelectMode
           isVesting={isVesting}
           handleModeChange={handleModeChange}
           tipsModeDesc={tipsModeDesc}
           vestingModeDesc={vestingModeDesc}
-          disabled={!connectedAccount}
+          disabled={formDisabled}
         />
 
         <div className="grid grid-cols-6 gap-2">
@@ -85,11 +96,11 @@ export function ScheduleForm() {
                   parseUnits(amount, scheduleInfo.asset.decimals),
                 );
               }}
-              disabled={!connectedAccount}
+              disabled={formDisabled}
             />
           </div>
           <div className="col-span-2">
-            <SelectAsset isVesting={isVesting} disabled={!connectedAccount} />
+            <SelectAsset isVesting={isVesting} disabled={formDisabled} />
           </div>
         </div>
 
@@ -99,7 +110,7 @@ export function ScheduleForm() {
             onAddressChange={(address) => {
               setScheduleInfo('recipient', address);
             }}
-            disabled={!connectedAccount}
+            disabled={formDisabled}
           />
         </div>
 
@@ -109,7 +120,7 @@ export function ScheduleForm() {
               onRecurrenceChange={(value: bigint) => {
                 setScheduleInfo('interval', BigInt(value));
               }}
-              disabled={!connectedAccount}
+              disabled={formDisabled}
             />
           </div>
 
@@ -119,7 +130,7 @@ export function ScheduleForm() {
               onValueChange={(value: string) => {
                 setScheduleInfo('occurrences', BigInt(value));
               }}
-              disabled={!connectedAccount}
+              disabled={formDisabled}
             />
           </div>
         </div>

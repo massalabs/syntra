@@ -1,9 +1,10 @@
-import { MasToken, supportedTokens } from '@/const/assets';
+import { MasToken } from '@/const/assets';
+import { Asset } from '@massalabs/react-ui-kit/src/lib/token/models/AssetModel';
 
-export function getTokenInfo(tokenAddress: string | null) {
+export function getTokenInfo(tokenAddress: string | null, tokens: Asset[]) {
   if (!tokenAddress) return MasToken;
 
-  const token = supportedTokens.find((t) => t.address === tokenAddress);
+  const token = tokens.find((t) => t.address === tokenAddress);
 
   if (!token) {
     return {

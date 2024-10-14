@@ -6,17 +6,26 @@ import { MRC20 } from '@massalabs/massa-web3';
 import { MasToken, supportedTokens } from '@/const/assets';
 import { Asset } from '@massalabs/react-ui-kit/src/lib/token/models/AssetModel';
 import { useSchedulerStore } from './scheduler';
+import { useNetworkStore } from './network';
 
 export interface TokenStoreState {
   selectedToken?: Asset;
   tokens: Asset[];
   mas: Asset;
+  init: () => void;
   refreshBalances: () => void;
 }
 
 export const useTokenStore = create<TokenStoreState>((set, get) => ({
-  tokens: supportedTokens,
+  tokens: [],
   mas: MasToken,
+
+  init: async () => {
+    const { network } = useNetworkStore.getState();
+    set({ tokens: supportedTokens[network] });
+    const { refreshBalances } = get();
+    refreshBalances();
+  },
 
   refreshBalances: async () => {
     const { connectedAccount } = useAccountStore.getState();
@@ -31,14 +40,14 @@ export const useTokenStore = create<TokenStoreState>((set, get) => ({
       return;
     }
 
-    const { tokens: supportedTokens, mas } = get();
+    const { tokens: sTokens, mas } = get();
 
-    if (!supportedTokens.length) {
+    if (!sTokens.length) {
       return;
     }
 
     const tokens = await Promise.all(
-      supportedTokens.map(async (token) => {
+      sTokens.map(async (token) => {
         const mrc20 = new MRC20(connectedAccount, token.address);
         const [allowance, balance] = await Promise.all([
           mrc20.allowance(connectedAccount.address, schedulerAddress),
