@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Asset } from '@massalabs/react-ui-kit/src/lib/token/models/AssetModel';
 import { AssetSelector } from '@massalabs/react-ui-kit/src/lib/token/AssetSelector';
 import useSchedule from '../hooks/useSchedule';
@@ -13,9 +13,17 @@ export default function SelectAsset({
   disabled: boolean;
 }): JSX.Element {
   const { tokens: supportedTokens, mas } = useTokenStore.getState();
-  const tokens = isVesting ? [mas] : supportedTokens;
+  const tokens = useMemo(
+    () => (isVesting ? [mas] : supportedTokens),
+    [isVesting, mas, supportedTokens],
+  );
   const [selectedAsset, setSelectedAsset] = useState<Asset>(tokens[0]);
   const { setScheduleInfo } = useSchedule();
+
+  useEffect(() => {
+    if (tokens.length === 0) return;
+    setScheduleInfo('asset', tokens[0]);
+  }, [setScheduleInfo, tokens]);
 
   function onAssetChange(asset: Asset) {
     setSelectedAsset(asset);

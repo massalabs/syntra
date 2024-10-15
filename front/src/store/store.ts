@@ -23,14 +23,9 @@ async function initTokens() {
 }
 
 async function initSchedules(connectedAccount: Provider) {
-  const { tokens } = useTokenStore.getState();
-  const { setSchedulerAddress, getBySpender, scheduleInfo, setScheduleInfo } =
-    useSchedulerStore.getState();
+  const { setSchedulerAddress, getBySpender } = useSchedulerStore.getState();
   const { network } = useNetworkStore.getState();
   setSchedulerAddress(schedulerAddress[network]);
-
-  scheduleInfo.asset = tokens[0];
-  setScheduleInfo('asset', tokens[0]);
 
   await getBySpender(connectedAccount.address);
 }
