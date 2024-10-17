@@ -28,4 +28,11 @@ export async function deploy(file: string, args: Args, coins: bigint) {
   const contractAddress = contract.address.toString();
 
   console.log('Contract deployed at: ', contractAddress);
+
+  const events = await client.getEvents({
+    smartContractAddress: contractAddress,
+    isFinal: true,
+  });
+
+  return { contractAddress, events, contract };
 }
