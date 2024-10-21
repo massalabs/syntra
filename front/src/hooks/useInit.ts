@@ -7,16 +7,15 @@ import useAccountSync from './useAccountSync';
 
 export const useInit = () => {
   const { eventPollerStop } = useSchedulerStore();
-  const { setSavedAccount } = useAccountSync();
   const { connectedAccount, network: walletNetwork } = useAccountStore();
-
   const { network: dappNetwork } = useNetworkStore();
+  useAccountSync();
 
   useEffect(() => {
     if (connectedAccount) {
       initApp();
     }
-  }, [connectedAccount, setSavedAccount]);
+  }, [connectedAccount]);
 
   useEffect(() => {
     return () => {
