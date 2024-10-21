@@ -32,6 +32,7 @@ export default function useToken() {
       },
       Mas.fromString('0.01'),
     );
+
     refreshBalances();
   }
 

@@ -10,10 +10,7 @@ export default function useSchedule() {
   const { connectedAccount } = useAccountStore();
   const {
     scheduleInfo,
-    setScheduleInfo,
     getBySpender,
-    getByRecipient,
-    spenderSchedules,
     address: schedulerAddress,
   } = useSchedulerStore();
   const { callSmartContract } = useWriteSmartContract(connectedAccount!);
@@ -98,12 +95,7 @@ export default function useSchedule() {
   }
 
   return {
-    scheduleInfo,
-    spenderSchedules,
-    getBySpender,
     createSchedule,
-    getByRecipient,
-    setScheduleInfo,
     cancelSchedules,
     manualTrigger,
   };

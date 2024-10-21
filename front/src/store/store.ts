@@ -6,27 +6,31 @@ import { useAccountStore, formatAmount, toast } from '@massalabs/react-ui-kit';
 import { useSchedulerStore } from './scheduler';
 import { useTokenStore } from './token';
 import { getTokenInfo } from '@/utils/assets';
-import { useNetworkStore } from './network';
+import { AvailableNetwork, useNetworkStore } from './network';
+import { supportedTokens } from '@/const/assets';
 
 export async function initApp() {
   const { connectedAccount } = useAccountStore.getState();
   if (!connectedAccount) return;
+  const { network } = useNetworkStore.getState();
 
-  await initTokens();
-  await initSchedules(connectedAccount);
+  await initTokens(network);
+  await initSchedules(connectedAccount, network);
   await initPollEvent(connectedAccount);
 }
 
-async function initTokens() {
-  const { init } = useTokenStore.getState();
-  await init();
+async function initTokens(network: AvailableNetwork) {
+  const { setTokens, refreshBalances } = useTokenStore.getState();
+  setTokens(supportedTokens[network]);
+  refreshBalances();
 }
 
-async function initSchedules(connectedAccount: Provider) {
+async function initSchedules(
+  connectedAccount: Provider,
+  network: AvailableNetwork,
+) {
   const { setSchedulerAddress, getBySpender } = useSchedulerStore.getState();
-  const { network } = useNetworkStore.getState();
   setSchedulerAddress(schedulerAddress[network]);
-
   await getBySpender(connectedAccount.address);
 }
 

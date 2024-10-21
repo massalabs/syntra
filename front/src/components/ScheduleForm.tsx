@@ -6,7 +6,6 @@ import { Recurrence } from './Recurrence';
 import { SelectAmount } from './SelectAmount';
 import SelectAsset from './SelectAsset';
 import { SelectMode } from './SelectMode';
-import useSchedule from '@/hooks/useSchedule';
 import { useTokenStore } from '@/store/token';
 import { isValidAddress } from '@/utils/address';
 import { useState } from 'react';
@@ -15,10 +14,11 @@ import { tipsModeDesc, vestingModeDesc } from '@/const/tooltips';
 import { RepeatInput } from './RepeatInput';
 import { CreateScheduleButton } from './CreateScheduleButton';
 import { useNetworkStore } from '@/store/network';
+import { useSchedulerStore } from '@/store/scheduler';
 
 export function ScheduleForm() {
   const { connectedAccount, network: walletNetwork } = useAccountStore();
-  const { scheduleInfo, setScheduleInfo } = useSchedule();
+  const { scheduleInfo, setScheduleInfo } = useSchedulerStore();
   const { tokens } = useTokenStore();
   const [isVesting, setVesting] = useState<boolean>(scheduleInfo.isVesting);
 

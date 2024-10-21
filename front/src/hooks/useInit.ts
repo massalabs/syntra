@@ -3,16 +3,20 @@ import { toast, useAccountStore } from '@massalabs/react-ui-kit';
 import { initApp } from '@/store/store';
 import { useSchedulerStore } from '@/store/scheduler';
 import { useNetworkStore } from '@/store/network';
+import useAccountSync from './useAccountSync';
 
 export const useInit = () => {
-  const { connectedAccount } = useAccountStore();
   const { eventPollerStop } = useSchedulerStore();
+  const { setSavedAccount } = useAccountSync();
+  const { connectedAccount, network: walletNetwork } = useAccountStore();
+
+  const { network: dappNetwork } = useNetworkStore();
 
   useEffect(() => {
     if (connectedAccount) {
       initApp();
     }
-  }, [connectedAccount]);
+  }, [connectedAccount, setSavedAccount]);
 
   useEffect(() => {
     return () => {
@@ -22,13 +26,9 @@ export const useInit = () => {
     };
   }, [eventPollerStop]);
 
-  const { network: n } = useAccountStore();
-  const { network } = useNetworkStore();
-
   useEffect(() => {
-    if (!n) return;
-    if (n !== network) {
-      toast.error(`Please switch to ${network} network`);
-    }
-  }, [network, n]);
+    if (!walletNetwork) return;
+    if (walletNetwork !== dappNetwork)
+      toast.error(`Please switch to ${dappNetwork} network`);
+  }, [dappNetwork, walletNetwork]);
 };

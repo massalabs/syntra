@@ -28,7 +28,7 @@ interface SchedulerStoreState {
   ) => void;
 
   getBySpender: (spender: string) => Promise<Schedule[]>;
-  getByRecipient: (recipient: string) => Promise<void>;
+  getByRecipient: (recipient: string) => Promise<Schedule[]>;
   eventPollerStop: () => void;
   setEventPollerStop: (stop: () => void) => void;
 
@@ -74,10 +74,7 @@ export const useSchedulerStore = create<SchedulerStoreState>((set, get) => ({
 
   getBySpender: async (spender: string): Promise<Schedule[]> => {
     const { connectedAccount } = useAccountStore.getState();
-    if (!connectedAccount) {
-      console.error('You must be connected to an account');
-      return [];
-    }
+    if (!connectedAccount) return [];
 
     const res = await connectedAccount.readSC({
       func: 'getSchedulesBySpender',
@@ -93,17 +90,18 @@ export const useSchedulerStore = create<SchedulerStoreState>((set, get) => ({
 
   getByRecipient: async (recipient: string) => {
     const { connectedAccount } = useAccountStore.getState();
-    if (!connectedAccount) {
-      console.error('You must be connected to an account');
-      return;
-    }
+    if (!connectedAccount) return [];
 
-    await connectedAccount.readSC({
+    const res = await connectedAccount.readSC({
       func: 'getScheduleByRecipient',
       target: get().address,
       parameter: new Args().addString(recipient).serialize(),
       caller: connectedAccount.address,
     });
+
+    const schedules = new Args(res.value).nextSerializableObjectArray(Schedule);
+    set({ spenderSchedules: schedules });
+    return schedules;
   },
 
   setEventPollerStop: (stop: () => void) => {

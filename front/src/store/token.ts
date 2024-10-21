@@ -12,7 +12,7 @@ export interface TokenStoreState {
   selectedToken?: Asset;
   tokens: Asset[];
   mas: Asset;
-  init: () => void;
+  setTokens: (tokens: Asset[]) => void;
   refreshBalances: () => void;
 }
 
@@ -27,18 +27,21 @@ export const useTokenStore = create<TokenStoreState>((set, get) => ({
     refreshBalances();
   },
 
+  setTokens: (tokens: Asset[]) => {
+    set({ tokens });
+  },
+
   refreshBalances: async () => {
     const { connectedAccount } = useAccountStore.getState();
+    if (!connectedAccount) {
+      return;
+    }
 
     const {
       address: schedulerAddress,
       scheduleInfo,
       setScheduleInfo,
     } = useSchedulerStore.getState();
-
-    if (!connectedAccount) {
-      return;
-    }
 
     const { tokens: sTokens, mas } = get();
 

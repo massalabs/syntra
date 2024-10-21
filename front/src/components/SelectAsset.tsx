@@ -1,9 +1,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Asset } from '@massalabs/react-ui-kit/src/lib/token/models/AssetModel';
 import { AssetSelector } from '@massalabs/react-ui-kit/src/lib/token/AssetSelector';
-import useSchedule from '../hooks/useSchedule';
 import { InputLabel } from './InputLabel';
 import { useTokenStore } from '@/store/token';
+import { useSchedulerStore } from '@/store/scheduler';
 
 export default function SelectAsset({
   isVesting,
@@ -18,7 +18,7 @@ export default function SelectAsset({
     [isVesting, mas, supportedTokens],
   );
   const [selectedAsset, setSelectedAsset] = useState<Asset>(tokens[0]);
-  const { setScheduleInfo } = useSchedule();
+  const { setScheduleInfo } = useSchedulerStore();
 
   useEffect(() => {
     if (tokens.length === 0) return;
