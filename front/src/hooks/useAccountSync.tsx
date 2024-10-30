@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useAccountStore } from '@massalabs/react-ui-kit/src/lib/ConnectMassaWallets';
 import { useLocalStorage } from '@massalabs/react-ui-kit/src/lib/util/hooks/useLocalStorage';
-import { getWallets } from '../../../../wallet-provider';
+import { getWallets } from '@massalabs/wallet-provider';
 
 type SavedAccount = {
   address: string;
