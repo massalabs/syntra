@@ -1,0 +1,59 @@
+import { useSchedulerStore } from '@/store/scheduler';
+import { redButton } from '@/styles/buttons';
+import { Button } from '@massalabs/react-ui-kit';
+import ScheduleTable from './ScheduleTable';
+
+export function ScheduleTablesSection() {
+  const { userPayments, userReceive, showUserPayments, setShowUserPayments } =
+    useSchedulerStore();
+
+  const schedules = showUserPayments ? userPayments : userReceive;
+
+  return (
+    <div className="flex flex-col w-full">
+      <div className="flex w-full justify-center mt-12">
+        <SwitchTableButton
+          isActive={showUserPayments}
+          onClick={() => setShowUserPayments(true)}
+          label="Payed"
+          className="rounded-r-none"
+        />
+        <SwitchTableButton
+          isActive={!showUserPayments}
+          onClick={() => setShowUserPayments(false)}
+          label="Received"
+          className="rounded-l-none"
+        />
+      </div>
+
+      <div className={`min-w-full `}>
+        <ScheduleTable schedules={schedules} />
+      </div>
+    </div>
+  );
+}
+
+interface SwitchTableButtonProps {
+  isActive: boolean;
+  onClick: () => void;
+  label: string;
+  className?: string;
+}
+
+const SwitchTableButton: React.FC<SwitchTableButtonProps> = ({
+  isActive,
+  onClick,
+  label,
+  className,
+}) => {
+  return (
+    <Button
+      className={` ${
+        isActive ? redButton : ''
+      } w-96 hover:bg-opacity-100 hover:shadow-none ${className}`}
+      onClick={onClick}
+    >
+      {label}
+    </Button>
+  );
+};

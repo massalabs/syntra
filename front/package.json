@@ -17,9 +17,9 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "@massalabs/massa-web3": "^5.0.0-next",
+    "@massalabs/massa-web3": "^5.0.0",
     "@massalabs/react-ui-kit": "^0.1.1-dev",
-    "@massalabs/wallet-provider": "^3.0.0-next",
+    "@massalabs/wallet-provider": "^3.0.0",
     "copy-to-clipboard": "^3.3.3",
     "currency.js": "^2.0.4",
     "delay": "^6.0.0",

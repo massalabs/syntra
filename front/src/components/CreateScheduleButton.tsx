@@ -1,5 +1,5 @@
 import useSchedule from '@/hooks/useSchedule';
-import { commonButton } from '@/styles/buttons';
+import { redButton } from '@/styles/buttons';
 import { Button, toast } from '@massalabs/react-ui-kit';
 
 export function CreateScheduleButton({ disabled }: { disabled: boolean }) {
@@ -16,7 +16,7 @@ export function CreateScheduleButton({ disabled }: { disabled: boolean }) {
 
   return (
     <Button
-      customClass={`bg-primary text-white ${commonButton}`}
+      customClass={redButton}
       onClick={handleCreateSchedule}
       disabled={disabled}
       variant="secondary"

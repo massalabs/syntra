@@ -18,7 +18,7 @@ const useAccountSync = () => {
     connectedAccount,
     setConnectedAccount,
     setCurrentWallet,
-    setWallets,
+    setCurrentNetwork,
   } = useAccountStore();
 
   const [savedAccount, setSavedAccount] = useLocalStorage<SavedAccount>(
@@ -43,17 +43,17 @@ const useAccountSync = () => {
 
     const result = await findMatchingAccount(savedAccount.address);
     if (result) {
-      const { account, wallet, wallets } = result;
-      setConnectedAccount(account);
+      const { account, wallet } = result;
       setCurrentWallet(wallet);
-      setWallets(wallets);
+      setConnectedAccount(account);
+      setCurrentNetwork();
     }
   }, [
-    savedAccount,
+    savedAccount.address,
     findMatchingAccount,
     setConnectedAccount,
     setCurrentWallet,
-    setWallets,
+    setCurrentNetwork,
   ]);
 
   useEffect(() => {

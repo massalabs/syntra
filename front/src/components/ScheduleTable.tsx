@@ -8,6 +8,7 @@ import { MasToken } from '../const/assets';
 import ScheduleHistory from '@/components/ScheduleHistory';
 import { getRecurrenceFromPeriods } from './Recurrence';
 import { useTokenStore } from '@/store/token';
+import { useSchedulerStore } from '@/store/scheduler';
 
 interface ScheduleTableProps {
   schedules: Schedule[];
@@ -30,28 +31,30 @@ const CopyableAddress: React.FC<{
   </span>
 );
 
-const TableHeader: React.FC = () => (
-  <thead>
-    <tr className="bg-primary text-white text-sm py-5">
-      <th className="font-normal px-4 py-5"></th>
-      <th className="font-normal hidden xl:table-cell px-4 py-5">
-        OperationId
-      </th>
-      <th className="font-normal hidden lg:table-cell px-4 py-5">Mode</th>
-      <th className="font-normal px-4 py-5">Token</th>
-      <th className="font-normal px-4 py-5">Recipient</th>
-      <th className="font-normal px-4 py-5">Amount</th>
-      <th className="font-normal hidden md:table-cell px-4 py-5">Interval</th>
-      <th className="font-normal hidden md:table-cell px-4 py-5">
-        Occurrences
-      </th>
-      <th className="font-normal px-4 py-5">Remaining</th>
-      <th className="font-normal hidden px-4 py-5 lg:table-cell">
-        Execution history
-      </th>
-    </tr>
-  </thead>
-);
+const TableHeader: React.FC = () => {
+  return (
+    <thead>
+      <tr className="bg-primary text-white text-sm py-5">
+        <th className="font-normal px-4 py-5"></th>
+        <th className="font-normal hidden xl:table-cell px-4 py-5">
+          OperationId
+        </th>
+        <th className="font-normal hidden lg:table-cell px-4 py-5">Mode</th>
+        <th className="font-normal px-4 py-5">Spender</th>
+        <th className="font-normal px-4 py-5">Recipient</th>
+        <th className="font-normal px-4 py-5">Amount</th>
+        <th className="font-normal hidden md:table-cell px-4 py-5">Interval</th>
+        <th className="font-normal hidden md:table-cell px-4 py-5">
+          Occurrences
+        </th>
+        <th className="font-normal px-4 py-5">Remaining</th>
+        <th className="font-normal hidden px-4 py-5 lg:table-cell">
+          Execution history
+        </th>
+      </tr>
+    </thead>
+  );
+};
 
 interface TableRowProps {
   schedule: Schedule;
@@ -65,18 +68,22 @@ const TableRow: React.FC<TableRowProps> = ({
   onCheckboxChange,
 }) => {
   const { tokens } = useTokenStore();
+  const { showUserPayments } = useSchedulerStore();
   const asset =
     tokens.find((token) => token.address === schedule.tokenAddress) || MasToken;
   const formattedAmount = formatAmount(schedule.amount, asset.decimals);
   const isMas = schedule.tokenAddress === '';
+
   return (
     <tr>
       <td className=" text-center px-6 py-6">
-        <CheckBox
-          isSelected={isSelected}
-          onChange={onCheckboxChange}
-          id={schedule.id}
-        />
+        {showUserPayments && (
+          <CheckBox
+            isSelected={isSelected}
+            onChange={onCheckboxChange}
+            id={schedule.id}
+          />
+        )}
       </td>
       <td className="text-center hidden xl:table-cell">
         <CopyableAddress
@@ -88,26 +95,33 @@ const TableRow: React.FC<TableRowProps> = ({
       <td className="text-center px-6 py-6 hidden lg:table-cell">
         {schedule.isVesting ? 'Vesting' : 'Tips'}
       </td>
-      <td className="text-center ">
-        {isMas ? (
-          'MAS'
-        ) : (
-          <CopyableAddress
-            label="Token address"
-            address={asset.address}
-            value={asset.symbol}
-          />
-        )}
+      <td className="text-center px-6 py-6">
+        <CopyableAddress
+          address={schedule.spender}
+          label={'Spender'}
+          value={truncateAddress(schedule.spender)}
+        />
       </td>
       <td className="text-center px-6 py-6">
         <CopyableAddress
           address={schedule.recipient}
-          label="Recipient address"
+          label={'Recipient'}
           value={truncateAddress(schedule.recipient)}
         />
       </td>
       <td className="text-center ">
         <span title={formattedAmount.full}>{formattedAmount.preview}</span>
+        <span>
+          {isMas ? (
+            ' MAS'
+          ) : (
+            <CopyableAddress
+              label="Token address"
+              address={asset.address}
+              value={asset.symbol}
+            />
+          )}
+        </span>
       </td>
       <td className="text-center px-6 py-6 hidden md:table-cell">
         {getRecurrenceFromPeriods(schedule.interval).unit}
@@ -116,7 +130,7 @@ const TableRow: React.FC<TableRowProps> = ({
         {schedule.occurrences.toString()}
       </td>
       <td className="text-center px-6 py-6">{schedule.remaining.toString()}</td>
-      <td className="text-center hidden lg:table-cell">
+      <td className="text-center hidden lg:table-cell py-4">
         <ScheduleHistory schedule={schedule} />
       </td>
     </tr>

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { toast, useAccountStore } from '@massalabs/react-ui-kit';
 import { initApp } from '@/store/store';
 import { useSchedulerStore } from '@/store/scheduler';
-import { useNetworkStore } from '@/store/network';
+import { AvailableNetwork, useNetworkStore } from '@/store/network';
 import useAccountSync from './useAccountSync';
 
 export const useInit = () => {
@@ -12,10 +12,10 @@ export const useInit = () => {
   useAccountSync();
 
   useEffect(() => {
-    if (connectedAccount) {
-      initApp();
+    if (connectedAccount && walletNetwork) {
+      initApp(connectedAccount, walletNetwork as AvailableNetwork);
     }
-  }, [connectedAccount]);
+  }, [connectedAccount, walletNetwork]);
 
   useEffect(() => {
     return () => {
