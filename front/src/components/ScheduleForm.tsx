@@ -13,16 +13,15 @@ import { AllowanceButton } from './AllowanceButton';
 import { tipsModeDesc, vestingModeDesc } from '@/const/tooltips';
 import { RepeatInput } from './RepeatInput';
 import { CreateScheduleButton } from './CreateScheduleButton';
-import { useNetworkStore } from '@/store/network';
+
 import { useSchedulerStore } from '@/store/scheduler';
+import { dappNetwork } from '@/const/network';
 
 export function ScheduleForm() {
   const { connectedAccount, network: walletNetwork } = useAccountStore();
   const { scheduleInfo, setScheduleInfo } = useSchedulerStore();
   const { tokens } = useTokenStore();
   const [isVesting, setVesting] = useState<boolean>(scheduleInfo.isVesting);
-
-  const { network } = useNetworkStore();
 
   const selectedToken = tokens.find(
     (token) => token.address === scheduleInfo.asset.address,
@@ -55,7 +54,7 @@ export function ScheduleForm() {
     !isAllowanceSufficient && !isMasToken,
   ].some(Boolean);
 
-  const isRightNetwork = network === walletNetwork;
+  const isRightNetwork = dappNetwork === walletNetwork?.name;
   const formDisabled = !connectedAccount || !isRightNetwork;
 
   const handleModeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,13 +69,25 @@ export function ScheduleForm() {
     }
   };
 
+  function renderError() {
+    if (!connectedAccount) {
+      return (
+        <p className="text-red-500 text-center p-6 font-Poppins font-bold text-xl">
+          Please connect your wallet
+        </p>
+      );
+    }
+    if (!isRightNetwork) {
+      return (
+        <p className="text-red-500 text-center p-6 font-Poppins font-bold text-xl">
+          Please switch your wallet to {dappNetwork}
+        </p>
+      );
+    }
+  }
   return (
     <section className="max-w-2xl w-full mx-auto rounded-2xl shadow-lg p-7 bg-white -mt-40">
-      {walletNetwork && !isRightNetwork && (
-        <p className="text-red-500 text-center p-6">
-          Please switch your wallet to {network}
-        </p>
-      )}
+      {renderError()}
       <Card customClass="bg-transparent grid grid-flow-row gap-4">
         <SelectMode
           isVesting={isVesting}

@@ -1,19 +1,27 @@
 import { useEffect } from 'react';
 import { toast, useAccountStore } from '@massalabs/react-ui-kit';
-import { initApp } from '@/store/store';
+import { initApp, resetApp } from '@/store/store';
 import { useSchedulerStore } from '@/store/scheduler';
-import { AvailableNetwork, useNetworkStore } from '@/store/network';
 import useAccountSync from './useAccountSync';
+import { dappNetwork } from '@/const/network';
 
 export const useInit = () => {
   const { eventPollerStop } = useSchedulerStore();
   const { connectedAccount, network: walletNetwork } = useAccountStore();
-  const { network: dappNetwork } = useNetworkStore();
+
   useAccountSync();
 
   useEffect(() => {
+    if (!connectedAccount) {
+      resetApp();
+    }
+
     if (connectedAccount && walletNetwork) {
-      initApp(connectedAccount, walletNetwork as AvailableNetwork);
+      if (walletNetwork.name !== dappNetwork) {
+        toast.error(`Please switch to ${dappNetwork} network`);
+        return;
+      }
+      initApp(connectedAccount, walletNetwork.name);
     }
   }, [connectedAccount, walletNetwork]);
 
@@ -24,10 +32,4 @@ export const useInit = () => {
       }
     };
   }, [eventPollerStop]);
-
-  useEffect(() => {
-    if (!walletNetwork) return;
-    if (walletNetwork !== dappNetwork)
-      toast.error(`Please switch to ${dappNetwork} network`);
-  }, [dappNetwork, walletNetwork]);
 };

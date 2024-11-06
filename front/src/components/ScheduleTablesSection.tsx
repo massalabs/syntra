@@ -48,8 +48,8 @@ const SwitchTableButton: React.FC<SwitchTableButtonProps> = ({
 }) => {
   return (
     <Button
-      className={` ${
-        isActive ? redButton : ''
+      className={`${
+        isActive ? redButton : 'bg-gray-400'
       } w-96 hover:bg-opacity-100 hover:shadow-none ${className}`}
       onClick={onClick}
     >

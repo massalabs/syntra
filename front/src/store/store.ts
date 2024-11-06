@@ -6,49 +6,43 @@ import { formatAmount, toast } from '@massalabs/react-ui-kit';
 import { useSchedulerStore } from './scheduler';
 import { useTokenStore } from './token';
 import { getTokenInfo } from '@/utils/assets';
-import { AvailableNetwork, useNetworkStore } from './network';
 import { supportedTokens } from '@/const/assets';
+import { AvailableNetwork, dappNetwork } from '@/const/network';
+
+export async function resetApp() {
+  const { setUserPayments, setUserReceive } = useSchedulerStore.getState();
+  setUserPayments([]);
+  setUserReceive([]);
+}
 
 export async function initApp(
   connectedAccount: Provider,
   walletNetwork: AvailableNetwork,
 ) {
-  const { network: appNetwork } = useNetworkStore.getState();
-
-  await initSchedules(connectedAccount, walletNetwork, appNetwork);
-  await initTokens(walletNetwork, appNetwork);
+  await initSchedules(connectedAccount, walletNetwork);
+  await initTokens(walletNetwork);
   await initPollEvent(connectedAccount);
 }
 
-async function initTokens(
-  network: AvailableNetwork,
-  appNetwork: AvailableNetwork,
-) {
+async function initTokens(network: AvailableNetwork) {
   const { setTokens, refreshBalances } = useTokenStore.getState();
-  setTokens(supportedTokens[network]);
-  if (network !== appNetwork) return;
+  setTokens(supportedTokens[dappNetwork]);
+  if (network !== dappNetwork) return;
   refreshBalances();
 }
 
 export async function initSchedules(
   connectedAccount: Provider,
   walletNetwork: AvailableNetwork,
-  appNetwork: AvailableNetwork,
 ) {
-  const {
-    setSchedulerAddress,
-    getUserPayments,
-    getUserReceive,
-    setUserPayments,
-    setUserReceive,
-  } = useSchedulerStore.getState();
-  if (appNetwork !== walletNetwork) {
-    setUserPayments([]);
-    setUserReceive([]);
+  const { setSchedulerAddress, getUserPayments, getUserReceive } =
+    useSchedulerStore.getState();
+  if (dappNetwork !== walletNetwork) {
+    resetApp();
     return;
   }
 
-  setSchedulerAddress(schedulerAddress[appNetwork]);
+  setSchedulerAddress(schedulerAddress[dappNetwork]);
   await getUserPayments(connectedAccount.address);
   await getUserReceive(connectedAccount.address);
 }
