@@ -2,41 +2,54 @@ import { EventPoller, Provider, SCEvent } from '@massalabs/massa-web3';
 import { schedulerAddress } from '../const/contracts';
 import { Schedule } from '../serializable/Schedule';
 import { truncateAddress } from '@/utils/address';
-import { useAccountStore, formatAmount, toast } from '@massalabs/react-ui-kit';
+import { formatAmount, toast } from '@massalabs/react-ui-kit';
 import { useSchedulerStore } from './scheduler';
 import { useTokenStore } from './token';
 import { getTokenInfo } from '@/utils/assets';
-import { AvailableNetwork, useNetworkStore } from './network';
 import { supportedTokens } from '@/const/assets';
+import { AvailableNetwork, dappNetwork } from '@/const/network';
 
-export async function initApp() {
-  const { connectedAccount } = useAccountStore.getState();
-  if (!connectedAccount) return;
-  const { network } = useNetworkStore.getState();
+export async function resetApp() {
+  const { setUserPayments, setUserReceive } = useSchedulerStore.getState();
+  setUserPayments([]);
+  setUserReceive([]);
+}
 
-  await initTokens(network);
-  await initSchedules(connectedAccount, network);
+export async function initApp(
+  connectedAccount: Provider,
+  walletNetwork: AvailableNetwork,
+) {
+  await initSchedules(connectedAccount, walletNetwork);
+  await initTokens(walletNetwork);
   await initPollEvent(connectedAccount);
 }
 
 async function initTokens(network: AvailableNetwork) {
   const { setTokens, refreshBalances } = useTokenStore.getState();
-  setTokens(supportedTokens[network]);
+  setTokens(supportedTokens[dappNetwork]);
+  if (network !== dappNetwork) return;
   refreshBalances();
 }
 
-async function initSchedules(
+export async function initSchedules(
   connectedAccount: Provider,
-  network: AvailableNetwork,
+  walletNetwork: AvailableNetwork,
 ) {
-  const { setSchedulerAddress, getBySpender } = useSchedulerStore.getState();
-  setSchedulerAddress(schedulerAddress[network]);
-  await getBySpender(connectedAccount.address);
+  const { setSchedulerAddress, getUserPayments, getUserReceive } =
+    useSchedulerStore.getState();
+  if (dappNetwork !== walletNetwork) {
+    resetApp();
+    return;
+  }
+
+  setSchedulerAddress(schedulerAddress[dappNetwork]);
+  await getUserPayments(connectedAccount.address);
+  await getUserReceive(connectedAccount.address);
 }
 
 async function initPollEvent(connectedAccount: Provider) {
   const {
-    getBySpender,
+    getUserPayments,
     address: schedulerAddress,
     setEventPollerStop,
     eventPollerStop,
@@ -50,7 +63,7 @@ async function initPollEvent(connectedAccount: Provider) {
     connectedAccount,
     { smartContractAddress: schedulerAddress, start: lastSlot },
     async (data) => {
-      const schedules = await getBySpender(connectedAccount.address);
+      const schedules = await getUserPayments(connectedAccount.address);
       if (!schedules?.length) return;
 
       handleTransferEvents(data, schedules);

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useAccountStore } from '@massalabs/react-ui-kit/src/lib/ConnectMassaWallets';
 import { useLocalStorage } from '@massalabs/react-ui-kit/src/lib/util/hooks/useLocalStorage';
-import { getWallets } from '../../../../wallet-provider';
+import { getWallets } from '@massalabs/wallet-provider';
 
 type SavedAccount = {
   address: string;
@@ -14,19 +14,14 @@ const EMPTY_ACCOUNT: SavedAccount = {
 };
 
 const useAccountSync = () => {
-  const {
-    connectedAccount,
-    setConnectedAccount,
-    setCurrentWallet,
-    setWallets,
-  } = useAccountStore();
+  const { connectedAccount, setCurrentWallet } = useAccountStore();
 
   const [savedAccount, setSavedAccount] = useLocalStorage<SavedAccount>(
     'saved-account',
     EMPTY_ACCOUNT,
   );
 
-  const findMatchingAccount = useCallback(async (address: string) => {
+  const getStoredAccount = useCallback(async (address: string) => {
     const wallets = await getWallets();
     for (const wallet of wallets) {
       const accounts = await wallet.accounts();
@@ -35,26 +30,16 @@ const useAccountSync = () => {
         return { account: matchingAccount, wallet, wallets };
       }
     }
-    return null;
   }, []);
 
   const setAccountFromSaved = useCallback(async () => {
     if (!savedAccount.address) return;
 
-    const result = await findMatchingAccount(savedAccount.address);
-    if (result) {
-      const { account, wallet, wallets } = result;
-      setConnectedAccount(account);
-      setCurrentWallet(wallet);
-      setWallets(wallets);
+    const stored = await getStoredAccount(savedAccount.address);
+    if (stored) {
+      setCurrentWallet(stored.wallet, stored.account);
     }
-  }, [
-    savedAccount,
-    findMatchingAccount,
-    setConnectedAccount,
-    setCurrentWallet,
-    setWallets,
-  ]);
+  }, [savedAccount.address, getStoredAccount, setCurrentWallet]);
 
   useEffect(() => {
     const shouldUpdateSavedAccount =

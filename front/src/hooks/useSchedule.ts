@@ -10,7 +10,7 @@ export default function useSchedule() {
   const { connectedAccount } = useAccountStore();
   const {
     scheduleInfo,
-    getBySpender,
+    getUserPayments,
     address: schedulerAddress,
   } = useSchedulerStore();
   const { callSmartContract } = useWriteSmartContract(connectedAccount!);
@@ -57,7 +57,7 @@ export default function useSchedule() {
       Mas.fromString('1') + (scheduleInfo.isVesting ? totalAmount : 0n),
     );
 
-    getBySpender(connectedAccount.address);
+    getUserPayments(connectedAccount.address);
   }
 
   async function cancelSchedules(ids: bigint[]) {
@@ -74,7 +74,7 @@ export default function useSchedule() {
       },
     );
 
-    getBySpender(connectedAccount.address);
+    getUserPayments(connectedAccount.address);
   }
 
   async function manualTrigger(spender: string, id: bigint) {
@@ -91,7 +91,7 @@ export default function useSchedule() {
       },
     );
 
-    getBySpender(spender);
+    getUserPayments(spender);
   }
 
   return {

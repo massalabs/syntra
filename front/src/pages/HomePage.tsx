@@ -1,16 +1,14 @@
 import { useRef } from 'react';
-import ScheduleTable from '@/components/ScheduleTable';
 import { useSearchParams } from 'react-router-dom';
 import { ArrowButton } from '@/components/ArrowButton';
 import { ScheduleForm } from '@/components/ScheduleForm';
 import { NavBar } from '@/components/NavBar';
 import { useSchedulerStore } from '@/store/scheduler';
+import { ScheduleTablesSection } from '@/components/ScheduleTablesSection';
 
 export default function HomePage() {
-  const { scheduleInfo, setScheduleInfo, spenderSchedules } =
-    useSchedulerStore();
+  const { scheduleInfo, setScheduleInfo } = useSchedulerStore();
   const scheduleTableRef = useRef<HTMLDivElement>(null);
-
   const [searchParams] = useSearchParams();
   const recipientQuery = searchParams.get('recipient');
 
@@ -33,8 +31,8 @@ export default function HomePage() {
           <ArrowButton onClick={scrollToList} />
         </div>
       </div>
-      <div ref={scheduleTableRef} className="h-screen bg-white">
-        <ScheduleTable schedules={spenderSchedules} />
+      <div ref={scheduleTableRef} className="h-screen  bg-white">
+        <ScheduleTablesSection />
       </div>
     </div>
   );

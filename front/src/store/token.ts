@@ -6,7 +6,7 @@ import { MRC20 } from '@massalabs/massa-web3';
 import { MasToken, supportedTokens } from '@/const/assets';
 import { Asset } from '@massalabs/react-ui-kit/src/lib/token/models/AssetModel';
 import { useSchedulerStore } from './scheduler';
-import { useNetworkStore } from './network';
+import { dappNetwork } from '@/const/network';
 
 export interface TokenStoreState {
   selectedToken?: Asset;
@@ -21,8 +21,7 @@ export const useTokenStore = create<TokenStoreState>((set, get) => ({
   mas: MasToken,
 
   init: async () => {
-    const { network } = useNetworkStore.getState();
-    set({ tokens: supportedTokens[network] });
+    set({ tokens: supportedTokens[dappNetwork] });
     const { refreshBalances } = get();
     refreshBalances();
   },

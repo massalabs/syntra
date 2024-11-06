@@ -19,16 +19,20 @@ export type ScheduleInfo = {
 
 interface SchedulerStoreState {
   scheduleInfo: ScheduleInfo;
-  spenderSchedules: Schedule[];
+  userPayments: Schedule[];
+  userReceive: Schedule[];
   address: string;
+  showUserPayments: boolean;
   setSchedulerAddress: (address: string) => void;
   setScheduleInfo: (
     key: keyof ScheduleInfo,
     value: bigint | string | Asset | boolean,
   ) => void;
 
-  getBySpender: (spender: string) => Promise<Schedule[]>;
-  getByRecipient: (recipient: string) => Promise<Schedule[]>;
+  setUserPayments: (payments: Schedule[]) => void;
+  setUserReceive: (payments: Schedule[]) => void;
+  getUserPayments: (spender: string) => Promise<Schedule[]>;
+  getUserReceive: (recipient: string) => Promise<Schedule[]>;
   eventPollerStop: () => void;
   setEventPollerStop: (stop: () => void) => void;
 
@@ -36,6 +40,7 @@ interface SchedulerStoreState {
   setEventPollerStopOld: (timeout: NodeJS.Timeout) => void;
   lastEventSlotOld: Slot | undefined;
   setLastEventSlotOld: (slot: Slot) => void;
+  setShowUserPayments: (showUserPayments: boolean) => void;
 }
 
 const defaultScheduleInfo: ScheduleInfo = {
@@ -52,10 +57,12 @@ const defaultScheduleInfo: ScheduleInfo = {
 export const useSchedulerStore = create<SchedulerStoreState>((set, get) => ({
   address: '',
   scheduleInfo: defaultScheduleInfo,
-  spenderSchedules: [],
+  userPayments: [],
+  userReceive: [],
   eventPollerStop: () => {},
   eventPollerStopOld: setTimeout(() => {}, 0),
   lastEventSlotOld: undefined,
+  showUserPayments: true,
 
   setLastEventSlotOld: (slot) => {
     set({ lastEventSlotOld: slot });
@@ -72,39 +79,53 @@ export const useSchedulerStore = create<SchedulerStoreState>((set, get) => ({
       scheduleInfo: { ...state.scheduleInfo, [key]: value },
     })),
 
-  getBySpender: async (spender: string): Promise<Schedule[]> => {
+  getUserPayments: async (userAddress: string): Promise<Schedule[]> => {
     const { connectedAccount } = useAccountStore.getState();
     if (!connectedAccount) return [];
 
     const res = await connectedAccount.readSC({
       func: 'getSchedulesBySpender',
       target: get().address,
-      parameter: new Args().addString(spender).serialize(),
+      parameter: new Args().addString(userAddress).serialize(),
       caller: connectedAccount.address,
     });
 
-    const schedules = new Args(res.value).nextSerializableObjectArray(Schedule);
-    set({ spenderSchedules: schedules });
-    return schedules;
+    const payments = new Args(res.value).nextSerializableObjectArray(Schedule);
+    set({ userPayments: payments });
+
+    return payments;
   },
 
-  getByRecipient: async (recipient: string) => {
+  getUserReceive: async (userAddress: string): Promise<Schedule[]> => {
     const { connectedAccount } = useAccountStore.getState();
     if (!connectedAccount) return [];
 
     const res = await connectedAccount.readSC({
       func: 'getScheduleByRecipient',
       target: get().address,
-      parameter: new Args().addString(recipient).serialize(),
+      parameter: new Args().addString(userAddress).serialize(),
       caller: connectedAccount.address,
     });
 
-    const schedules = new Args(res.value).nextSerializableObjectArray(Schedule);
-    set({ spenderSchedules: schedules });
-    return schedules;
+    const payments = new Args(res.value).nextSerializableObjectArray(Schedule);
+    set({ userReceive: payments });
+
+    return payments;
+  },
+
+  setUserPayments: (payments: Schedule[]) => {
+    set({ userPayments: payments });
+  },
+
+  setUserReceive: (payments: Schedule[]) => {
+    set({ userReceive: payments });
   },
 
   setEventPollerStop: (stop: () => void) => {
     set({ eventPollerStop: stop });
+  },
+
+  setShowUserPayments: (showUserPayments: boolean) => {
+    set({ showUserPayments });
   },
 }));

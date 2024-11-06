@@ -17,9 +17,9 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "@massalabs/massa-web3": "^5.0.0-next",
-    "@massalabs/react-ui-kit": "^0.1.1-dev",
-    "@massalabs/wallet-provider": "^3.0.0-next",
+    "@massalabs/massa-web3": "^5.0.0",
+    "@massalabs/react-ui-kit": "^1.0.1-dev",
+    "@massalabs/wallet-provider": "^3.0.0",
     "copy-to-clipboard": "^3.3.3",
     "currency.js": "^2.0.4",
     "delay": "^6.0.0",
@@ -65,5 +65,9 @@
     "typescript": "^5.2.2",
     "vite": "^5.1.7",
     "vite-plugin-image-optimizer": "^1.1.8"
+  },
+  "overrides": {
+    "@massalabs/massa-web3": "^5.0.0",
+    "@massalabs/wallet-provider": "^3.0.0"
   }
 }

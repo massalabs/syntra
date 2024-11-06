@@ -50,12 +50,14 @@ module.exports = {
         'f-disabled-2': colorBeige,
       },
       dark: {
-        primary: colorGray,
+        primary: colorRed,
         secondary: colorGray,
         tertiary: colorBeige,
         brand: colorRed,
-        neutral: colorBeige,
+
+        neutral: colorDarkGray,
         info: colorGray,
+
         // states:
         's-success': colorRed,
         's-error': colorRed,
@@ -63,20 +65,20 @@ module.exports = {
         's-info': colorGray,
         's-info-1': colorGray,
         // components:
-        'c-default': colorBeige,
-        'c-hover': colorGray,
+        'c-default': colorDarkGray,
+        'c-hover': colorDarkGray,
         'c-pressed': colorGray,
         'c-disabled-1': colorGray,
         'c-disabled-2': colorBeige,
         'c-error': colorRed,
         // icons:
-        'i-primary': colorBeige,
-        'i-secondary': colorGray,
-        'i-tertiary': colorRed,
+        'i-primary': colorGray,
+        'i-secondary': colorBeige,
+        'i-tertiary': colorDarkGray,
         // fonts:
-        'f-primary': colorBeige,
-        'f-secondary': colorGray,
-        'f-tertiary': colorRed,
+        'f-primary': colorDarkGray,
+        'f-secondary': colorBeige,
+        'f-tertiary': colorGray,
         'f-disabled-1': colorGray,
         'f-disabled-2': colorBeige,
       },
