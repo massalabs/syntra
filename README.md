@@ -15,7 +15,7 @@ In Vesting Mode, the total amount for all payments must be paid upfront, and fun
 ## Getting Started
 
 Syntra is currently deployed on deWeb:
-https://syntra-app.massahub.network/
+https://syntra.massa.network/
 
 ## License
 
