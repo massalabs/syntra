@@ -1,4 +1,4 @@
-import { EventPoller, Provider, SCEvent } from '@massalabs/massa-web3';
+import { EventPoller, Provider, rpcTypes } from '@massalabs/massa-web3';
 import { schedulerAddress } from '../const/contracts';
 import { Schedule } from '../serializable/Schedule';
 import { truncateAddress } from '@/utils/address';
@@ -73,7 +73,7 @@ async function initPollEvent(connectedAccount: Provider) {
   setEventPollerStop(stopPolling);
 }
 
-function handleTransferEvents(data: SCEvent[], schedules: Schedule[]) {
+function handleTransferEvents(data: rpcTypes.OutputEvents, schedules: Schedule[]) {
   const { refreshBalances } = useTokenStore.getState();
   const { tokens } = useTokenStore.getState();
 
