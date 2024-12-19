@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Args, Slot } from '@massalabs/massa-web3';
+import { Args, rpcTypes } from '@massalabs/massa-web3';
 
 import { Asset } from '@massalabs/react-ui-kit/src/lib/token/models/AssetModel';
 import { Schedule } from '@/serializable/Schedule';
@@ -38,8 +38,8 @@ interface SchedulerStoreState {
 
   eventPollerStopOld: NodeJS.Timeout;
   setEventPollerStopOld: (timeout: NodeJS.Timeout) => void;
-  lastEventSlotOld: Slot | undefined;
-  setLastEventSlotOld: (slot: Slot) => void;
+  lastEventSlotOld: rpcTypes.Slot | undefined;
+  setLastEventSlotOld: (slot: rpcTypes.Slot) => void;
   setShowUserPayments: (showUserPayments: boolean) => void;
 }
 
