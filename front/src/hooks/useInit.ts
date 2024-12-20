@@ -7,7 +7,11 @@ import { dappNetwork } from '@/const/network';
 
 export const useInit = () => {
   const { eventPollerStop } = useSchedulerStore();
-  const { connectedAccount, network: walletNetwork } = useAccountStore();
+  const {
+    connectedAccount,
+    network: walletNetwork,
+    currentWallet,
+  } = useAccountStore();
 
   useAccountSync();
 
@@ -23,7 +27,7 @@ export const useInit = () => {
       }
       initApp(connectedAccount, walletNetwork.name);
     }
-  }, [connectedAccount, walletNetwork]);
+  }, [connectedAccount, walletNetwork, currentWallet]);
 
   useEffect(() => {
     return () => {
