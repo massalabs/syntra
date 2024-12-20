@@ -73,7 +73,10 @@ async function initPollEvent(connectedAccount: Provider) {
   setEventPollerStop(stopPolling);
 }
 
-function handleTransferEvents(data: rpcTypes.OutputEvents, schedules: Schedule[]) {
+function handleTransferEvents(
+  data: rpcTypes.OutputEvents,
+  schedules: Schedule[],
+) {
   const { refreshBalances } = useTokenStore.getState();
   const { tokens } = useTokenStore.getState();
 

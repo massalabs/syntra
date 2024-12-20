@@ -86,7 +86,7 @@ export function ScheduleForm() {
     }
   }
   return (
-    <section className="max-w-2xl w-full mx-auto rounded-2xl shadow-lg p-7 bg-white -mt-40">
+    <section className="max-w-2xl w-full mx-auto rounded-2xl shadow-lg p-7 bg-white">
       {renderError()}
       <Card customClass="bg-transparent grid grid-flow-row gap-4">
         <SelectMode
