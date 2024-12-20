@@ -19,9 +19,9 @@ export async function initApp(
   connectedAccount: Provider,
   walletNetwork: AvailableNetwork,
 ) {
-  await initSchedules(connectedAccount, walletNetwork);
   await initTokens(walletNetwork);
   await initPollEvent(connectedAccount);
+  await initSchedules(connectedAccount, walletNetwork);
 }
 
 async function initTokens(network: AvailableNetwork) {
