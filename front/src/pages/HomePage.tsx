@@ -6,12 +6,15 @@ import { ScheduleForm } from '@/components/ScheduleForm';
 import { NavBar } from '@/components/NavBar';
 import { useSchedulerStore } from '@/store/scheduler';
 import { ScheduleTablesSection } from '@/components/ScheduleTablesSection';
+import { Intro } from '@/components/Explanation';
+import { useLocalStorage } from '@massalabs/react-ui-kit/src/lib/util/hooks/useLocalStorage';
 
 export default function HomePage() {
   const { scheduleInfo, setScheduleInfo } = useSchedulerStore();
   const scheduleTableRef = useRef<HTMLDivElement>(null);
   const [searchParams] = useSearchParams();
   const recipientQuery = searchParams.get('recipient');
+  const [showIntro, setShowIntro] = useLocalStorage<boolean>('showIntro', true);
 
   if (recipientQuery && scheduleInfo.recipient == '') {
     setScheduleInfo('recipient', recipientQuery);
@@ -25,18 +28,9 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="main flex flex-col w-full">
+      <div className="main flex flex-col w-full h-screen">
         <NavBar />
-        <div className="p-6 bg-white text-center text-gray-800 bg-opacity-65 rounded-lg shadow-lg my-6 max-w-2xl mx-auto">
-          <p className="text-lg font-semibold">
-            Syntra is a cutting-edge dApp powered by Massa's autonomous smart
-            contracts, designed to simplify token scheduling like never before.
-          </p>
-          <p className="text-lg mt-2">
-            Whether you're tipping content creators or managing token vesting,
-            Syntra ensures seamless, automated transactions.
-          </p>
-        </div>
+        {showIntro && <Intro onClose={() => setShowIntro(false)} />}
         <div className="flex flex-col justify-center items-center gap-10 h-full">
           <ScheduleForm />
           <ArrowButton onClick={scrollToList} />

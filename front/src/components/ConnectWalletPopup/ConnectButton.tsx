@@ -8,8 +8,6 @@ export function ConnectButton() {
   const [open, setOpen] = useState(false);
   const { connectedAccount, isFetching } = useAccountStore();
 
-  const showPingAnimation = !connectedAccount;
-
   function ConnectedWallet() {
     return (
       <Button
@@ -19,7 +17,6 @@ export function ConnectButton() {
         onClick={() => setOpen(true)}
       >
         {truncateAddress(connectedAccount?.address)}
-        {showPingAnimation && <PingAnimation />}
       </Button>
     );
   }
@@ -34,30 +31,19 @@ export function ConnectButton() {
           onClick={() => setOpen(true)}
         >
           {Intl.t('connect-wallet.title')}
-          {showPingAnimation && <PingAnimation />}
         </Button>
       </>
     );
   }
   return (
     <>
-      <div className="top-10 right-10 shadow-md rounded-lg border-primary border ">
+      <div className="top-10 right-10 shadow-md rounded-lg border-primary border 
+                      hover:shadow-lg hover:-translate-y-0.5 transition-transform duration-200
+                      active:translate-y-0.5">
         {connectedAccount ? <ConnectedWallet /> : <NotConnectedWallet />}
       </div>
 
       {open && <ConnectWalletPopup setOpen={setOpen} />}
     </>
-  );
-}
-
-function PingAnimation() {
-  return (
-    <span className="absolute flex h-3 w-3 top-0 right-0 -mr-2 -mt-2">
-      <span
-        className="animate-ping absolute inline-flex h-full w-full
-                    rounded-full bg-s-error opacity-75 "
-      ></span>
-      <span className="relative inline-flex rounded-full h-3 w-3 bg-s-error"></span>
-    </span>
   );
 }

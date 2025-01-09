@@ -15,12 +15,13 @@ import { RepeatInput } from './RepeatInput';
 import { CreateScheduleButton } from './CreateScheduleButton';
 
 import { useSchedulerStore } from '@/store/scheduler';
-import { dappNetwork } from '@/const/network';
+import { useDappNetworkStore } from '@/store/network';
 
 export function ScheduleForm() {
   const { connectedAccount, network: walletNetwork } = useAccountStore();
   const { scheduleInfo, setScheduleInfo } = useSchedulerStore();
   const { tokens } = useTokenStore();
+  const { network: dappNetwork } = useDappNetworkStore();
   const [isVesting, setVesting] = useState<boolean>(scheduleInfo.isVesting);
 
   const selectedToken = tokens.find(

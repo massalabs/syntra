@@ -7,7 +7,7 @@ import { useSchedulerStore } from './scheduler';
 import { useTokenStore } from './token';
 import { getTokenInfo } from '@/utils/assets';
 import { supportedTokens } from '@/const/assets';
-import { AvailableNetwork, dappNetwork } from '@/const/network';
+import { AvailableNetwork, useDappNetworkStore } from './network';
 
 export async function resetApp() {
   const { setUserPayments, setUserReceive } = useSchedulerStore.getState();
@@ -26,6 +26,7 @@ export async function initApp(
 
 async function initTokens(network: AvailableNetwork) {
   const { setTokens, refreshBalances } = useTokenStore.getState();
+  const { network: dappNetwork } = useDappNetworkStore.getState();
   setTokens(supportedTokens[dappNetwork]);
   if (network !== dappNetwork) return;
   refreshBalances();
@@ -37,6 +38,8 @@ export async function initSchedules(
 ) {
   const { setSchedulerAddress, getUserPayments, getUserReceive } =
     useSchedulerStore.getState();
+  const { network: dappNetwork } = useDappNetworkStore.getState();
+
   if (dappNetwork !== walletNetwork) {
     resetApp();
     return;

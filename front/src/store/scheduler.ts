@@ -125,7 +125,7 @@ export const useSchedulerStore = create<SchedulerStoreState>((set, get) => ({
     set({ eventPollerStop: stop });
   },
 
-  setShowUserPayments: (showUserPayments: boolean) => {
-    set({ showUserPayments });
+  setShowUserPayments: (show: boolean) => {
+    set({ showUserPayments: show });
   },
 }));
