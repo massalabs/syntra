@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { nodePolyfills, PolyfillOptions } from 'vite-plugin-node-polyfills';
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
 import { visualizer } from 'rollup-plugin-visualizer';
+import webpackStatsPlugin from 'rollup-plugin-webpack-stats';
 
 // https://vitejs.dev/config/
 export default ({ mode }) => {
@@ -30,7 +31,7 @@ export default ({ mode }) => {
 
   return defineConfig({
     // eslint-disable-next-line new-cap
-    plugins: [nodePolyfillsFix(), react(), ViteImageOptimizer(), visualizer()],
+    plugins: [nodePolyfillsFix(), react(), ViteImageOptimizer(), visualizer(),webpackStatsPlugin()],
     server: {
       fs: {
         // to allow server ui kit asset like font files
@@ -42,6 +43,15 @@ export default ({ mode }) => {
     },
     build: {
       minify: 'terser',
+      rollupOptions: {
+        output: {
+          // Use a supported file pattern for Vite 5/Rollup 4
+          // @doc https://relative-ci.com/documentation/guides/vite-config
+          assetFileNames: 'assets/[name].[hash][extname]',
+          chunkFileNames: 'assets/[name].[hash].js',
+          entryFileNames: 'assets/[name].[hash].js',
+        },
+      },
     },
     resolve: {
       alias: {
