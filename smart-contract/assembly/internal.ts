@@ -103,13 +103,6 @@ export function scheduleAllSend(schedule: Schedule): void {
         .add(taskIndex)
         .serialize(),
     );
-    generateEvent(
-      schedule.createDispatchEvent(
-        taskIndex,
-        validityStartPeriod,
-        validityEndPeriod,
-      ),
-    );
   }
 }
 
