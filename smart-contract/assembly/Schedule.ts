@@ -139,19 +139,6 @@ export class Schedule implements Serializable {
   public createCancelEvent(): string {
     return createEvent('Cancel', [this.id.toString()]);
   }
-
-  public createDispatchEvent(
-    n: u64,
-    validityStartPeriod: u64,
-    validityEndPeriod: u64,
-  ): string {
-    return createEvent('Dispatch', [
-      this.id.toString(),
-      n.toString(),
-      validityStartPeriod.toString(),
-      validityEndPeriod.toString(),
-    ]);
-  }
 }
 
 export class Transfer implements Serializable {
