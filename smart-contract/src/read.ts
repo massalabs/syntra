@@ -1,13 +1,10 @@
-import { Args } from '@massalabs/massa-web3';
-import { getClientAndContract } from './utils';
+import { Args, Provider, SmartContract } from '@massalabs/massa-web3';
 import { Schedule } from './Schedule';
 
 export async function getSchedulesBySpender(
-  contractAddress: string,
+  contract: SmartContract,
   spender: string,
 ) {
-  const { contract } = await getClientAndContract(contractAddress);
-
   const result = await contract.read(
     'getSchedulesBySpender',
     new Args().addString(spender).serialize(),
@@ -17,15 +14,28 @@ export async function getSchedulesBySpender(
 }
 
 export async function getSchedulesByRecipient(
-  contractAddress: string,
-  spender: string,
+  contract: SmartContract,
+  recipient: string,
 ) {
-  const { contract } = await getClientAndContract(contractAddress);
-
   const result = await contract.read(
     'getSchedulesByRecipient',
-    new Args().addString(spender).serialize(),
+    new Args().addString(recipient).serialize(),
   );
 
   return new Args(result.value).nextSerializableObjectArray<Schedule>(Schedule);
+}
+
+export async function getAllSchedules(
+  provider: Provider,
+  contractAddress: string,
+) {
+  const keys = await provider.getStorageKeys(contractAddress, 'SCHEDULE');
+
+  const results = await provider.readStorage(contractAddress, keys);
+
+  const schedules = results
+    .filter((result) => result !== null)
+    .map((result) => new Args(result).nextSerializable(Schedule));
+
+  return schedules;
 }

@@ -3,8 +3,8 @@ import { Schedule } from './Schedule';
 import { getClientAndContract } from './utils';
 import { getSchedulesByRecipient } from './read';
 
-export async function asyncSend(contractAddress: string, schedule: Schedule) {
-  const { contract } = await getClientAndContract(contractAddress);
+export async function asyncSend(schedule: Schedule) {
+  const { contract } = await getClientAndContract();
 
   const args = new Args()
     .addString(schedule.spender)
@@ -32,6 +32,6 @@ const schedule = new Schedule(
   1n,
 );
 
-asyncSend('AS1jeJFmpd7hW63SjDfvJrXtA8x58Zd4wD7JoDtrZ5hgFrK451ib', schedule);
+asyncSend(schedule);
 
-console.log(await getSchedulesByRecipient(contractAddress, recipient));
+console.log(await getSchedulesByRecipient(contract, recipient));

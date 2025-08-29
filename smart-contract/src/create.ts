@@ -1,10 +1,8 @@
-import { Args, parseMas } from '@massalabs/massa-web3';
+import { Args, parseMas, SmartContract } from '@massalabs/massa-web3';
 import { Schedule } from './Schedule';
-import { getClientAndContract } from './utils';
 
-export async function create(contractAddress: string, schedule: Schedule) {
-  const { contract } = await getClientAndContract(contractAddress);
-
+export async function create(contract: SmartContract, schedule: Schedule) {
+  console.log('Creating', schedule);
   const totalAmount = schedule.amount * schedule.occurrences;
 
   const operation = await contract.call(
@@ -15,7 +13,5 @@ export async function create(contractAddress: string, schedule: Schedule) {
     },
   );
 
-  await operation.waitSpeculativeExecution();
-
-  return await operation.getSpeculativeEvents();
+  return operation.getSpeculativeEvents();
 }

@@ -1,10 +1,15 @@
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
-import { Account, SmartContract, Web3Provider } from '@massalabs/massa-web3';
-
+import {
+  Account,
+  SmartContract,
+  Web3Provider,
+  rpcTypes as t,
+} from '@massalabs/massa-web3';
 import * as dotenv from 'dotenv';
-import { SCOutputEvent } from '@massalabs/massa-web3/dist/esm/generated/client'; // TODO - Export it
+import { CONTRACT_ADDRESS, isMainnet } from './config';
+
 dotenv.config();
 
 export function getEnvVariable(key: string): string {
@@ -22,13 +27,15 @@ export function getScByteCode(folderName: string, fileName: string): Buffer {
   return readFileSync(path.join(__dirname, folderName, fileName));
 }
 
-export async function getClientAndContract(contractAddress: string) {
-  const provider = Web3Provider.buildnet(await Account.fromEnv());
+export async function getClientAndContract() {
   const account = await Account.fromEnv();
+  const provider = isMainnet
+    ? Web3Provider.mainnet(account)
+    : Web3Provider.buildnet(account);
   return {
     provider,
     account,
-    contract: new SmartContract(provider, contractAddress),
+    contract: new SmartContract(provider, CONTRACT_ADDRESS),
   };
 }
 
@@ -43,7 +50,7 @@ export function separator() {
   console.log('\n' + '-'.repeat(20) + '\n');
 }
 
-export function logEvents(events: SCOutputEvent[]) {
+export function logEvents(events: t.OutputEvents) {
   events.forEach((event) =>
     console.log(
       `Event${event.context.is_error ? ' (error)' : ''}:  ${event.data}`,
