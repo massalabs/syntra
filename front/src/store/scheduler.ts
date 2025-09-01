@@ -5,6 +5,8 @@ import { Asset } from '@massalabs/react-ui-kit/src/lib/token/models/AssetModel';
 import { Schedule } from '@/serializable/Schedule';
 import { MasToken } from '@/const/assets';
 import { useAccountStore } from '@massalabs/react-ui-kit';
+import { getAllContractAddresses } from '../const/contracts';
+import { useDappNetworkStore } from './network';
 
 export type ScheduleInfo = {
   amount: bigint;
@@ -17,22 +19,23 @@ export type ScheduleInfo = {
   tolerance: bigint;
 };
 
+export type ScheduleInstance = {
+  contract: string;
+  schedule: Schedule;
+};
+
 interface SchedulerStoreState {
   scheduleInfo: ScheduleInfo;
-  userPayments: Schedule[];
-  userReceive: Schedule[];
-  address: string;
+  userPayments: ScheduleInstance[];
+  userReceive: ScheduleInstance[];
   showUserPayments: boolean;
-  setSchedulerAddress: (address: string) => void;
   setScheduleInfo: (
     key: keyof ScheduleInfo,
     value: bigint | string | Asset | boolean,
   ) => void;
 
-  setUserPayments: (payments: Schedule[]) => void;
-  setUserReceive: (payments: Schedule[]) => void;
-  getUserPayments: (spender: string) => Promise<Schedule[]>;
-  getUserReceive: (recipient: string) => Promise<Schedule[]>;
+  setUserPayments: (payments: ScheduleInstance[]) => void;
+  setUserReceive: (payments: ScheduleInstance[]) => void;
   eventPollerStop: () => void;
   setEventPollerStop: (stop: () => void) => void;
 
@@ -41,6 +44,15 @@ interface SchedulerStoreState {
   lastEventSlotOld: rpcTypes.Slot | undefined;
   setLastEventSlotOld: (slot: rpcTypes.Slot) => void;
   setShowUserPayments: (showUserPayments: boolean) => void;
+
+  // New multi-contract methods
+  getAllUserPayments: (spender: string) => Promise<ScheduleInstance[]>;
+  getAllUserReceive: (recipient: string) => Promise<ScheduleInstance[]>;
+  getSchedulesByContract: (
+    contractAddress: string,
+    userAddress: string,
+    isSpender: boolean,
+  ) => Promise<Schedule[]>;
 }
 
 const defaultScheduleInfo: ScheduleInfo = {
@@ -55,7 +67,6 @@ const defaultScheduleInfo: ScheduleInfo = {
 };
 
 export const useSchedulerStore = create<SchedulerStoreState>((set, get) => ({
-  address: '',
   scheduleInfo: defaultScheduleInfo,
   userPayments: [],
   userReceive: [],
@@ -70,54 +81,17 @@ export const useSchedulerStore = create<SchedulerStoreState>((set, get) => ({
   setEventPollerStopOld: (timeout) => {
     set({ eventPollerStopOld: timeout });
   },
-  setSchedulerAddress: (address: string) => {
-    set({ address: address });
-  },
 
   setScheduleInfo: (key, value) =>
     set((state) => ({
       scheduleInfo: { ...state.scheduleInfo, [key]: value },
     })),
 
-  getUserPayments: async (userAddress: string): Promise<Schedule[]> => {
-    const { connectedAccount } = useAccountStore.getState();
-    if (!connectedAccount) return [];
-
-    const res = await connectedAccount.readSC({
-      func: 'getSchedulesBySpender',
-      target: get().address,
-      parameter: new Args().addString(userAddress).serialize(),
-      caller: connectedAccount.address,
-    });
-
-    const payments = new Args(res.value).nextSerializableObjectArray(Schedule);
-    set({ userPayments: payments });
-
-    return payments;
-  },
-
-  getUserReceive: async (userAddress: string): Promise<Schedule[]> => {
-    const { connectedAccount } = useAccountStore.getState();
-    if (!connectedAccount) return [];
-
-    const res = await connectedAccount.readSC({
-      func: 'getScheduleByRecipient',
-      target: get().address,
-      parameter: new Args().addString(userAddress).serialize(),
-      caller: connectedAccount.address,
-    });
-
-    const payments = new Args(res.value).nextSerializableObjectArray(Schedule);
-    set({ userReceive: payments });
-
-    return payments;
-  },
-
-  setUserPayments: (payments: Schedule[]) => {
+  setUserPayments: (payments: ScheduleInstance[]) => {
     set({ userPayments: payments });
   },
 
-  setUserReceive: (payments: Schedule[]) => {
+  setUserReceive: (payments: ScheduleInstance[]) => {
     set({ userReceive: payments });
   },
 
@@ -127,5 +101,107 @@ export const useSchedulerStore = create<SchedulerStoreState>((set, get) => ({
 
   setShowUserPayments: (show: boolean) => {
     set({ showUserPayments: show });
+  },
+
+  // New multi-contract methods
+  getAllUserPayments: async (spender: string): Promise<ScheduleInstance[]> => {
+    const { network } = useDappNetworkStore.getState();
+    const contractAddresses = getAllContractAddresses(network);
+
+    const allSchedules: ScheduleInstance[] = [];
+
+    for (const contractAddress of contractAddresses) {
+      try {
+        const schedules = await get().getSchedulesByContract(
+          contractAddress,
+          spender,
+          true,
+        );
+        allSchedules.push(
+          ...schedules.map((schedule) => ({
+            contract: contractAddress,
+            schedule,
+          })),
+        );
+      } catch (error) {
+        console.warn(
+          `Failed to fetch schedules from contract ${contractAddress}:`,
+          error,
+        );
+        // Continue with other contracts even if one fails
+      }
+    }
+
+    get().setUserPayments(allSchedules);
+
+    return allSchedules;
+  },
+
+  getAllUserReceive: async (recipient: string): Promise<ScheduleInstance[]> => {
+    const { network } = useDappNetworkStore.getState();
+    const contractAddresses = getAllContractAddresses(network);
+    const allSchedules: ScheduleInstance[] = [];
+
+    for (const contractAddress of contractAddresses) {
+      try {
+        const schedules = await get().getSchedulesByContract(
+          contractAddress,
+          recipient,
+          false,
+        );
+        allSchedules.push(
+          ...schedules.map((schedule) => ({
+            contract: contractAddress,
+            schedule,
+          })),
+        );
+      } catch (error) {
+        console.warn(
+          `Failed to fetch schedules from contract ${contractAddress}:`,
+          error,
+        );
+        // Continue with other contracts even if one fails
+      }
+    }
+
+    get().setUserReceive(allSchedules);
+
+    return allSchedules;
+  },
+
+  getSchedulesByContract: async (
+    contractAddress: string,
+    userAddress: string,
+    isSpender: boolean,
+  ): Promise<Schedule[]> => {
+    const { connectedAccount } = useAccountStore.getState();
+    if (!connectedAccount) return [];
+
+    const func = isSpender ? 'getSchedulesBySpender' : 'getScheduleByRecipient';
+
+    try {
+      const res = await connectedAccount.readSC({
+        func,
+        target: contractAddress,
+        parameter: new Args().addString(userAddress).serialize(),
+        caller: connectedAccount.address,
+      });
+
+      if (res.info.error) {
+        console.warn(
+          `Error calling ${func} on contract ${contractAddress}:`,
+          res.info.error,
+        );
+        return [];
+      }
+
+      return new Args(res.value).nextSerializableObjectArray(Schedule);
+    } catch (error) {
+      console.error(
+        `Error calling ${func} on contract ${contractAddress}:`,
+        error,
+      );
+      throw error;
+    }
   },
 }));

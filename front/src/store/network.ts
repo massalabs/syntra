@@ -3,10 +3,8 @@
 import { NetworkName } from '@massalabs/massa-web3';
 import { create } from 'zustand';
 
-export type AvailableNetwork = 'mainnet' | 'buildnet';
-
 export interface NetworkStoreState {
-  network: AvailableNetwork;
+  network: NetworkName;
   switchNetwork: () => void;
 }
 
@@ -23,6 +21,6 @@ export const useDappNetworkStore = create<NetworkStoreState>((set, get) => ({
   },
 
   getNetworkName: () => {
-    return get().network === NetworkName.Mainnet ? 'mainnet' : 'buildnet';
+    return get().network;
   },
 }));

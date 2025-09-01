@@ -19,9 +19,7 @@ export function NavBar() {
       </div>
       <div className="flex items-center relative gap-2">
         <SettingsButton onClick={() => setShowSettings((prev) => !prev)} />
-        {showSettings && (
-          <Settings onClose={() => setShowSettings(false)} />
-        )}
+        {showSettings && <Settings onClose={() => setShowSettings(false)} />}
         <ConnectButton />
       </div>
     </nav>
@@ -38,7 +36,7 @@ export function SettingsButton({ onClick }: SettingsButtonProps) {
       className="px-2 py-3 hover:rotate-180 transition-transform ease-linear duration-300 bg-transparent"
       onClick={onClick}
     >
-      <FiSettings size={15} className="hover sm:text-primary"  />
+      <FiSettings size={15} className="hover sm:text-primary" />
     </Button>
   );
 }
@@ -57,12 +55,17 @@ function Settings({ onClose }: SettingsProps) {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black opacity-50 z-10" onClick={onClose}></div>
+      <div
+        className="fixed inset-0 bg-black opacity-50 z-10"
+        onClick={onClose}
+      ></div>
       <div
         className="absolute top-10 -left-52 bg-white rounded-xl 
                    shadow-lg z-20 text-primary border border-slate-600 overflow-hidden"
       >
-        <div className="p-3 flex justify-center bg-primary text-white cursor-default select-none">Settings</div>
+        <div className="p-3 flex justify-center bg-primary text-white cursor-default select-none">
+          Settings
+        </div>
         <Button
           onClick={handleNetworkSwitch}
           className="p-5 rounded-none transition-colors duration-100 hover:bg-slate-100"

@@ -1,5 +1,9 @@
-import { EventPoller, Provider, rpcTypes } from '@massalabs/massa-web3';
-import { schedulerAddress } from '../const/contracts';
+import {
+  EventPoller,
+  NetworkName,
+  Provider,
+  rpcTypes,
+} from '@massalabs/massa-web3';
 import { Schedule } from '../serializable/Schedule';
 import { truncateAddress } from '@/utils/address';
 import { formatAmount, toast } from '@massalabs/react-ui-kit';
@@ -7,7 +11,8 @@ import { useSchedulerStore } from './scheduler';
 import { useTokenStore } from './token';
 import { getTokenInfo } from '@/utils/assets';
 import { supportedTokens } from '@/const/assets';
-import { AvailableNetwork, useDappNetworkStore } from './network';
+import { useDappNetworkStore } from './network';
+import { getAllContractAddresses } from '@/const/contracts';
 
 export async function resetApp() {
   const { setUserPayments, setUserReceive } = useSchedulerStore.getState();
@@ -17,26 +22,26 @@ export async function resetApp() {
 
 export async function initApp(
   connectedAccount: Provider,
-  walletNetwork: AvailableNetwork,
+  walletNetwork: NetworkName,
 ) {
   await initTokens(walletNetwork);
   await initPollEvent(connectedAccount);
   await initSchedules(connectedAccount, walletNetwork);
 }
 
-async function initTokens(network: AvailableNetwork) {
+async function initTokens(network: NetworkName) {
   const { setTokens, refreshBalances } = useTokenStore.getState();
   const { network: dappNetwork } = useDappNetworkStore.getState();
-  setTokens(supportedTokens[dappNetwork]);
+  setTokens(supportedTokens[dappNetwork as keyof typeof supportedTokens]);
   if (network !== dappNetwork) return;
   refreshBalances();
 }
 
 export async function initSchedules(
   connectedAccount: Provider,
-  walletNetwork: AvailableNetwork,
+  walletNetwork: NetworkName,
 ) {
-  const { setSchedulerAddress, getUserPayments, getUserReceive } =
+  const { getAllUserPayments, getAllUserReceive } =
     useSchedulerStore.getState();
   const { network: dappNetwork } = useDappNetworkStore.getState();
 
@@ -45,35 +50,44 @@ export async function initSchedules(
     return;
   }
 
-  setSchedulerAddress(schedulerAddress[dappNetwork]);
-  await getUserPayments(connectedAccount.address);
-  await getUserReceive(connectedAccount.address);
+  await getAllUserPayments(connectedAccount.address);
+  await getAllUserReceive(connectedAccount.address);
 }
 
 async function initPollEvent(connectedAccount: Provider) {
-  const {
-    getUserPayments,
-    address: schedulerAddress,
-    setEventPollerStop,
-    eventPollerStop,
-  } = useSchedulerStore.getState();
+  const { getAllUserPayments, setEventPollerStop, eventPollerStop } =
+    useSchedulerStore.getState();
+
+  const { network } = useDappNetworkStore.getState();
 
   if (eventPollerStop) eventPollerStop();
 
   const { lastSlot } = await connectedAccount.getNodeStatus();
 
-  const { stopPolling } = EventPoller.start(
-    connectedAccount,
-    { smartContractAddress: schedulerAddress, start: lastSlot },
-    async (data) => {
-      const schedules = await getUserPayments(connectedAccount.address);
-      if (!schedules?.length) return;
+  // Poll all contract addresses for events
+  const contractAddresses = getAllContractAddresses(network);
 
-      handleTransferEvents(data, schedules);
-    },
+  const eventPollers = contractAddresses.map((address) =>
+    EventPoller.start(
+      connectedAccount,
+      { smartContractAddress: address, start: lastSlot },
+      async (data) => {
+        const schedules = await getAllUserPayments(connectedAccount.address);
+        if (!schedules?.length) return;
+
+        handleTransferEvents(
+          data,
+          schedules.map((s) => s.schedule),
+        );
+      },
+    ),
   );
 
-  setEventPollerStop(stopPolling);
+  const stopAllPolling = () => {
+    eventPollers.forEach((poller) => poller.stopPolling());
+  };
+
+  setEventPollerStop(stopAllPolling);
 }
 
 function handleTransferEvents(

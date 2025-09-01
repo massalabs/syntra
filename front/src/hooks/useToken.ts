@@ -5,12 +5,15 @@ import {
 } from '@massalabs/react-ui-kit';
 import { useSchedulerStore } from '@/store/scheduler';
 import { useTokenStore } from '@/store/token';
+import { getActiveContract } from '../const/contracts';
+import { useDappNetworkStore } from '../store/network';
 
 export default function useToken() {
   const { connectedAccount } = useAccountStore();
-  const { scheduleInfo, address: schedulerAddress } = useSchedulerStore();
+  const { scheduleInfo } = useSchedulerStore();
   const { refreshBalances } = useTokenStore();
   const { callSmartContract } = useWriteSmartContract(connectedAccount!);
+  const { network } = useDappNetworkStore();
 
   async function increaseAllowance(amount: bigint) {
     if (!amount || !connectedAccount) {
@@ -20,6 +23,9 @@ export default function useToken() {
       console.error('Invalid amount');
       return;
     }
+
+    // Use the active contract for increasing allowance
+    const schedulerAddress = getActiveContract(network);
 
     await callSmartContract(
       'increaseAllowance',

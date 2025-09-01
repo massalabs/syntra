@@ -1,8 +1,7 @@
 {
   "address": "AS12tda7T9zfaoMEvodQY8h6o7BKS1ySLs9THDXkrXy9BxzEQXbTk",
   "node_url": "https://mainnet.massa.net/api/v2",
-  "metadatas":
-  {
+  "metadatas": {
     "TITLE": "Syntra",
     "DESCRIPTION": "Syntra mainnet",
     "KEYWORD1": "ASC"

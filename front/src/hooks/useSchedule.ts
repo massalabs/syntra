@@ -5,14 +5,13 @@ import {
   useAccountStore,
   useWriteSmartContract,
 } from '@massalabs/react-ui-kit';
+import { getActiveContract } from '@/const/contracts';
+import { useDappNetworkStore } from '../store/network';
 
 export default function useSchedule() {
   const { connectedAccount } = useAccountStore();
-  const {
-    scheduleInfo,
-    getUserPayments,
-    address: schedulerAddress,
-  } = useSchedulerStore();
+  const { scheduleInfo, getAllUserPayments } = useSchedulerStore();
+  const { network } = useDappNetworkStore();
   const { callSmartContract } = useWriteSmartContract(connectedAccount!);
 
   async function createSchedule() {
@@ -43,9 +42,12 @@ export default function useSchedule() {
 
     const totalAmount = amount * occurrences;
 
+    // Use the active contract for creating new schedules
+    const activeContract = getActiveContract(network);
+
     await callSmartContract(
       'startScheduleSend',
-      schedulerAddress,
+      activeContract,
       new Args()
         .addSerializable(Schedule.fromScheduleInfo(scheduleInfo))
         .serialize(),
@@ -57,32 +59,72 @@ export default function useSchedule() {
       Mas.fromString('1') + (scheduleInfo.isVesting ? totalAmount : 0n),
     );
 
-    getUserPayments(connectedAccount.address);
+    getAllUserPayments(connectedAccount.address);
   }
 
-  async function cancelSchedules(ids: bigint[]) {
+  async function cancelSchedules(
+    scheduleContracts: { contractAddress: string; id: bigint }[],
+  ) {
     if (!connectedAccount) throw new Error('Connected account is missing');
 
-    await callSmartContract(
-      'cancelSchedules',
-      schedulerAddress,
-      new Args().addArray(ids, ArrayTypes.U64).serialize(),
-      {
-        success: 'Schedules successfully canceled',
-        pending: 'Cancelling schedules...',
-        error: 'Failed to cancel schedules',
+    // Group schedules by contract address to batch calls efficiently
+    const schedulesByContract = scheduleContracts.reduce(
+      (acc, { contractAddress, id }) => {
+        if (!acc[contractAddress]) {
+          acc[contractAddress] = [];
+        }
+        acc[contractAddress].push(id);
+        return acc;
       },
+      {} as Record<string, bigint[]>,
     );
 
-    getUserPayments(connectedAccount.address);
+    // Cancel schedules on each contract
+    await Promise.allSettled(
+      Object.entries(schedulesByContract).map(
+        async ([contractAddress, ids]) => {
+          try {
+            await callSmartContract(
+              'cancelSchedules',
+              contractAddress,
+              new Args().addArray(ids, ArrayTypes.U64).serialize(),
+              {
+                success: `Schedules successfully canceled on contract ${contractAddress}`,
+                pending: `Cancelling schedules on contract ${contractAddress}...`,
+                error: `Failed to cancel schedules on contract ${contractAddress}`,
+              },
+            );
+            return { contractAddress, success: true, count: ids.length };
+          } catch (error) {
+            console.error(
+              `Failed to cancel schedules on contract ${contractAddress}:`,
+              error,
+            );
+            return {
+              contractAddress,
+              success: false,
+              count: ids.length,
+              error,
+            };
+          }
+        },
+      ),
+    );
+
+    // Refresh all user payments to show updated state
+    getAllUserPayments(connectedAccount.address);
   }
 
-  async function manualTrigger(spender: string, id: bigint) {
+  async function manualTrigger(
+    contractAddress: string,
+    spender: string,
+    id: bigint,
+  ) {
     if (!connectedAccount) throw new Error('Connected account is missing');
 
     await callSmartContract(
       'manualTrigger',
-      schedulerAddress,
+      contractAddress,
       new Args().addString(spender).addU64(id).serialize(),
       {
         success: 'Scheduled task successfully triggered',
@@ -91,7 +133,7 @@ export default function useSchedule() {
       },
     );
 
-    getUserPayments(spender);
+    getAllUserPayments(spender);
   }
 
   return {

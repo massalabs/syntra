@@ -7,6 +7,7 @@ import { MasToken, supportedTokens } from '@/const/assets';
 import { Asset } from '@massalabs/react-ui-kit/src/lib/token/models/AssetModel';
 import { useSchedulerStore } from './scheduler';
 import { useDappNetworkStore } from './network';
+import { getActiveContract } from '../const/contracts';
 
 export interface TokenStoreState {
   selectedToken?: Asset;
@@ -21,10 +22,9 @@ export const useTokenStore = create<TokenStoreState>((set, get) => ({
   mas: MasToken,
 
   init: async () => {
-    const network = useDappNetworkStore.getState().network;
-    set({ tokens: supportedTokens[network] });
-    const { refreshBalances } = get();
-    refreshBalances();
+    const { network } = useDappNetworkStore.getState();
+    set({ tokens: supportedTokens[network as keyof typeof supportedTokens] });
+    get().refreshBalances();
   },
 
   setTokens: (tokens: Asset[]) => {
@@ -37,11 +37,11 @@ export const useTokenStore = create<TokenStoreState>((set, get) => ({
       return;
     }
 
-    const {
-      address: schedulerAddress,
-      scheduleInfo,
-      setScheduleInfo,
-    } = useSchedulerStore.getState();
+    const { network } = useDappNetworkStore.getState();
+    // Use the active contract for increasing allowance
+    const schedulerAddress = getActiveContract(network);
+
+    const { scheduleInfo, setScheduleInfo } = useSchedulerStore.getState();
 
     const { tokens: sTokens, mas } = get();
 
@@ -52,12 +52,19 @@ export const useTokenStore = create<TokenStoreState>((set, get) => ({
     const tokens = await Promise.all(
       sTokens.map(async (token) => {
         const mrc20 = new MRC20(connectedAccount, token.address);
-        const [allowance, balance] = await Promise.all([
-          mrc20.allowance(connectedAccount.address, schedulerAddress),
-          mrc20.balanceOf(connectedAccount.address),
-        ]);
-        token.allowance = allowance;
-        token.balance = balance;
+        try {
+          const [allowance, balance] = await Promise.all([
+            mrc20.allowance(connectedAccount.address, schedulerAddress),
+            mrc20.balanceOf(connectedAccount.address),
+          ]);
+          token.allowance = allowance;
+          token.balance = balance;
+        } catch (error) {
+          console.warn(
+            `Error getting balance of token ${token.address}:`,
+            error,
+          );
+        }
         if (token.address === scheduleInfo.asset.address) {
           setScheduleInfo('asset', token);
         }
