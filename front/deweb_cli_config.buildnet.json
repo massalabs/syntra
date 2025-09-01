@@ -1,8 +1,7 @@
 {
   "address": "AS1iAUUQ3Ai6bmsg8Qt1s9bxQPV6daBE919uMa7CyWixP3z77RJV",
   "node_url": "https://buildnet.massa.net/api/v2",
-  "metadatas":
-  {
+  "metadatas": {
     "TITLE": "Syntra",
     "DESCRIPTION": "Syntra buildnet",
     "KEYWORD1": "ASC"

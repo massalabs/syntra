@@ -2,11 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Schedule } from '../serializable/Schedule';
 import { useAccountStore } from '@massalabs/react-ui-kit';
 import useSchedule from '../hooks/useSchedule';
-import { useSchedulerStore } from '@/store/scheduler';
-
-interface ScheduleHistoryProps {
-  schedule: Schedule;
-}
+import { ScheduleInstance, useSchedulerStore } from '@/store/scheduler';
 
 type HistoryItem = {
   period?: bigint;
@@ -16,7 +12,8 @@ type HistoryItem = {
   isReady: boolean;
 };
 
-const ScheduleHistory: React.FC<ScheduleHistoryProps> = ({ schedule }) => {
+const ScheduleHistory: React.FC<ScheduleInstance> = (scheduleInstance) => {
+  const { schedule } = scheduleInstance;
   const { connectedAccount } = useAccountStore();
   const { manualTrigger } = useSchedule();
   const { showUserPayments } = useSchedulerStore();
@@ -74,6 +71,7 @@ const ScheduleHistory: React.FC<ScheduleHistoryProps> = ({ schedule }) => {
           schedule={schedule}
           showUserPayments={showUserPayments}
           manualTrigger={manualTrigger}
+          contractAddress={scheduleInstance.contract}
         />
       ))}
     </div>
@@ -84,7 +82,8 @@ interface HistoryItemComponentProps {
   item: HistoryItem;
   schedule: Schedule;
   showUserPayments: boolean;
-  manualTrigger: (spender: string, id: bigint) => void;
+  manualTrigger: (contractAddress: string, spender: string, id: bigint) => void;
+  contractAddress: string;
 }
 
 const HistoryItemComponent: React.FC<HistoryItemComponentProps> = ({
@@ -92,6 +91,7 @@ const HistoryItemComponent: React.FC<HistoryItemComponentProps> = ({
   schedule,
   showUserPayments,
   manualTrigger,
+  contractAddress,
 }) => {
   if (item.processed) {
     return (
@@ -110,7 +110,9 @@ const HistoryItemComponent: React.FC<HistoryItemComponentProps> = ({
         {`${item.index + 1}: `}
         <button
           className="text-primary border-primary border-2 px-2 py-1 my-1 rounded-lg"
-          onClick={() => manualTrigger(schedule.spender, schedule.id)}
+          onClick={() =>
+            manualTrigger(contractAddress, schedule.spender, schedule.id)
+          }
         >
           Process task
         </button>

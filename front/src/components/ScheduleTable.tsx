@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Schedule } from '@/serializable/Schedule';
 import { truncateAddress } from '@/utils/address';
 import { formatAmount, toast } from '@massalabs/react-ui-kit';
 import CheckBox from './CheckBox';
@@ -8,10 +7,10 @@ import { MasToken } from '../const/assets';
 import ScheduleHistory from '@/components/ScheduleHistory';
 import { getRecurrenceFromPeriods } from './Recurrence';
 import { useTokenStore } from '@/store/token';
-import { useSchedulerStore } from '@/store/scheduler';
+import { ScheduleInstance, useSchedulerStore } from '@/store/scheduler';
 
 interface ScheduleTableProps {
-  schedules: Schedule[];
+  schedules: ScheduleInstance[];
 }
 
 const CopyableAddress: React.FC<{
@@ -57,18 +56,22 @@ const TableHeader: React.FC = () => {
 };
 
 interface TableRowProps {
-  schedule: Schedule;
+  scheduleInstance: ScheduleInstance;
   isSelected: boolean;
-  onCheckboxChange: (id: bigint, checked: boolean) => void;
+  onCheckboxChange: (
+    scheduleInstance: ScheduleInstance,
+    checked: boolean,
+  ) => void;
 }
 
 const TableRow: React.FC<TableRowProps> = ({
-  schedule,
+  scheduleInstance,
   isSelected,
   onCheckboxChange,
 }) => {
   const { tokens } = useTokenStore();
   const { showUserPayments } = useSchedulerStore();
+  const { schedule } = scheduleInstance;
   const asset =
     tokens.find((token) => token.address === schedule.tokenAddress) || MasToken;
   const formattedAmount = formatAmount(schedule.amount, asset.decimals);
@@ -80,7 +83,9 @@ const TableRow: React.FC<TableRowProps> = ({
         {showUserPayments && (
           <CheckBox
             isSelected={isSelected}
-            onChange={onCheckboxChange}
+            onChange={(checked: boolean) =>
+              onCheckboxChange(scheduleInstance, checked)
+            }
             id={schedule.id}
           />
         )}
@@ -131,7 +136,7 @@ const TableRow: React.FC<TableRowProps> = ({
       </td>
       <td className="text-center px-6 py-6">{schedule.remaining.toString()}</td>
       <td className="text-center hidden lg:table-cell py-4">
-        <ScheduleHistory schedule={schedule} />
+        <ScheduleHistory {...scheduleInstance} />
       </td>
     </tr>
   );
@@ -153,14 +158,29 @@ const SelectedInfo: React.FC<{ count: number; onCancel: () => void }> = ({
 );
 
 const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules }) => {
-  const [selected, setSelected] = useState<bigint[]>([]);
+  const [selected, setSelected] = useState<
+    { contractAddress: string; id: bigint }[]
+  >([]);
   const { cancelSchedules } = useSchedule();
 
-  const handleCheckbox = (id: bigint, checked: boolean) => {
+  const handleCheckbox = (
+    scheduleInstance: ScheduleInstance,
+    checked: boolean,
+  ) => {
+    const scheduleKey = {
+      contractAddress: scheduleInstance.contract,
+      id: scheduleInstance.schedule.id,
+    };
     setSelected((prevSelected) =>
       checked
-        ? [...prevSelected, id]
-        : prevSelected.filter((item) => item !== id),
+        ? [...prevSelected, scheduleKey]
+        : prevSelected.filter(
+            (item) =>
+              !(
+                item.contractAddress === scheduleKey.contractAddress &&
+                item.id === scheduleKey.id
+              ),
+          ),
     );
   };
 
@@ -184,9 +204,13 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules }) => {
         <tbody className="text-sm divide-y divide-zinc-300">
           {schedules.map((schedule) => (
             <TableRow
-              key={schedule.id.toString()}
-              schedule={schedule}
-              isSelected={selected.includes(schedule.id)}
+              key={`${schedule.contract}-${schedule.schedule.id.toString()}`}
+              scheduleInstance={schedule}
+              isSelected={selected.some(
+                (item) =>
+                  item.contractAddress === schedule.contract &&
+                  item.id === schedule.schedule.id,
+              )}
               onCheckboxChange={handleCheckbox}
             />
           ))}
