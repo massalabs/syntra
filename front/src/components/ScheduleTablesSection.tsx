@@ -2,10 +2,12 @@ import { useSchedulerStore } from '@/store/scheduler';
 import { redButton } from '@/styles/buttons';
 import { Button } from '@massalabs/react-ui-kit';
 import ScheduleTable from './ScheduleTable';
+import { useState } from 'react';
 
 export function ScheduleTablesSection() {
-  const { userPayments, userReceive, showUserPayments, setShowUserPayments } =
-    useSchedulerStore();
+  const { userPayments, userReceive } = useSchedulerStore();
+
+  const [showUserPayments, setShowUserPayments] = useState(true);
 
   const schedules = showUserPayments ? userPayments : userReceive;
 
@@ -27,7 +29,10 @@ export function ScheduleTablesSection() {
       </div>
 
       <div className={`min-w-full `}>
-        <ScheduleTable schedules={schedules} />
+        <ScheduleTable
+          schedules={schedules}
+          showUserPayments={showUserPayments}
+        />
       </div>
     </div>
   );

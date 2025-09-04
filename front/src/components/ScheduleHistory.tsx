@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Schedule } from '../serializable/Schedule';
 import { useAccountStore } from '@massalabs/react-ui-kit';
 import useSchedule from '../hooks/useSchedule';
-import { ScheduleInstance, useSchedulerStore } from '@/store/scheduler';
+import { ScheduleInstance } from '@/store/scheduler';
 
 type HistoryItem = {
   period?: bigint;
@@ -12,11 +12,18 @@ type HistoryItem = {
   isReady: boolean;
 };
 
-const ScheduleHistory: React.FC<ScheduleInstance> = (scheduleInstance) => {
+interface ScheduleHistoryProps {
+  scheduleInstance: ScheduleInstance;
+  showUserPayments: boolean;
+}
+
+const ScheduleHistory: React.FC<ScheduleHistoryProps> = ({
+  scheduleInstance,
+  showUserPayments,
+}) => {
   const { schedule } = scheduleInstance;
   const { connectedAccount } = useAccountStore();
   const { manualTrigger } = useSchedule();
-  const { showUserPayments } = useSchedulerStore();
 
   const [items, setItems] = useState<HistoryItem[]>([]);
 
@@ -104,7 +111,7 @@ const HistoryItemComponent: React.FC<HistoryItemComponentProps> = ({
     );
   }
 
-  if (showUserPayments) {
+  if (schedule.isVesting || showUserPayments) {
     return (
       <p>
         {`${item.index + 1}: `}
