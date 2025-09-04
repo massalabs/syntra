@@ -28,7 +28,6 @@ interface SchedulerStoreState {
   scheduleInfo: ScheduleInfo;
   userPayments: ScheduleInstance[];
   userReceive: ScheduleInstance[];
-  showUserPayments: boolean;
   setScheduleInfo: (
     key: keyof ScheduleInfo,
     value: bigint | string | Asset | boolean,
@@ -43,7 +42,6 @@ interface SchedulerStoreState {
   setEventPollerStopOld: (timeout: NodeJS.Timeout) => void;
   lastEventSlotOld: rpcTypes.Slot | undefined;
   setLastEventSlotOld: (slot: rpcTypes.Slot) => void;
-  setShowUserPayments: (showUserPayments: boolean) => void;
 
   // New multi-contract methods
   getAllUserPayments: (spender: string) => Promise<ScheduleInstance[]>;
@@ -73,7 +71,6 @@ export const useSchedulerStore = create<SchedulerStoreState>((set, get) => ({
   eventPollerStop: () => {},
   eventPollerStopOld: setTimeout(() => {}, 0),
   lastEventSlotOld: undefined,
-  showUserPayments: true,
 
   setLastEventSlotOld: (slot) => {
     set({ lastEventSlotOld: slot });
@@ -97,10 +94,6 @@ export const useSchedulerStore = create<SchedulerStoreState>((set, get) => ({
 
   setEventPollerStop: (stop: () => void) => {
     set({ eventPollerStop: stop });
-  },
-
-  setShowUserPayments: (show: boolean) => {
-    set({ showUserPayments: show });
   },
 
   // New multi-contract methods

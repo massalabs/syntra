@@ -7,10 +7,11 @@ import { MasToken } from '../const/assets';
 import ScheduleHistory from '@/components/ScheduleHistory';
 import { getRecurrenceFromPeriods } from './Recurrence';
 import { useTokenStore } from '@/store/token';
-import { ScheduleInstance, useSchedulerStore } from '@/store/scheduler';
+import { ScheduleInstance } from '@/store/scheduler';
 
 interface ScheduleTableProps {
   schedules: ScheduleInstance[];
+  showUserPayments: boolean;
 }
 
 const CopyableAddress: React.FC<{
@@ -58,6 +59,7 @@ const TableHeader: React.FC = () => {
 interface TableRowProps {
   scheduleInstance: ScheduleInstance;
   isSelected: boolean;
+  showUserPayments: boolean;
   onCheckboxChange: (
     scheduleInstance: ScheduleInstance,
     checked: boolean,
@@ -67,10 +69,10 @@ interface TableRowProps {
 const TableRow: React.FC<TableRowProps> = ({
   scheduleInstance,
   isSelected,
+  showUserPayments,
   onCheckboxChange,
 }) => {
   const { tokens } = useTokenStore();
-  const { showUserPayments } = useSchedulerStore();
   const { schedule } = scheduleInstance;
   const asset =
     tokens.find((token) => token.address === schedule.tokenAddress) || MasToken;
@@ -136,7 +138,10 @@ const TableRow: React.FC<TableRowProps> = ({
       </td>
       <td className="text-center px-6 py-6">{schedule.remaining.toString()}</td>
       <td className="text-center hidden lg:table-cell py-4">
-        <ScheduleHistory {...scheduleInstance} />
+        <ScheduleHistory
+          scheduleInstance={scheduleInstance}
+          showUserPayments={showUserPayments}
+        />
       </td>
     </tr>
   );
@@ -157,7 +162,10 @@ const SelectedInfo: React.FC<{ count: number; onCancel: () => void }> = ({
   </div>
 );
 
-const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules }) => {
+const ScheduleTable: React.FC<ScheduleTableProps> = ({
+  schedules,
+  showUserPayments,
+}) => {
   const [selected, setSelected] = useState<
     { contractAddress: string; id: bigint }[]
   >([]);
@@ -212,6 +220,7 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules }) => {
                   item.id === schedule.schedule.id,
               )}
               onCheckboxChange={handleCheckbox}
+              showUserPayments={showUserPayments}
             />
           ))}
         </tbody>
