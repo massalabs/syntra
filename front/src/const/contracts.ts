@@ -8,6 +8,10 @@ export const CONTRACT_VERSIONS = {
     },
     {
       address: 'AS1aZX1vFSDcHDCiPKLBYdaxF8kTT4XdU375yScqZNNVKa69ofyi',
+      active: false,
+    },
+    {
+      address: 'AS12e1VY2bMntw56oCRg7Qa8DkavePebUeDqW7DUmhqxMsGWHh29J',
       active: true,
     },
   ],
@@ -18,6 +22,10 @@ export const CONTRACT_VERSIONS = {
     },
     {
       address: 'AS1gsVowdonH3iuYYJVGVSdStUd3J9WyA9Mk6QUJQCUHykHdFDK3',
+      active: false,
+    },
+    {
+      address: 'AS146gNUJHux5hb7crg6WHRMRjjgu7HjgaYZiLnesdQNr94vfE3U',
       active: true,
     },
   ],
@@ -39,3 +47,5 @@ export const getAllContractAddresses = (network: NetworkName) => {
     CONTRACT_VERSIONS[network as keyof typeof CONTRACT_VERSIONS];
   return networkContracts.map((contract) => contract.address);
 };
+
+export const MAX_OCCURRENCES = 4000;

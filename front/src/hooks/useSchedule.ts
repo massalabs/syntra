@@ -8,6 +8,8 @@ import {
 import { getActiveContract } from '@/const/contracts';
 import { useDappNetworkStore } from '../store/network';
 
+const HISTORY_ITEM_STORAGE_COST = 2_500_000n;
+
 export default function useSchedule() {
   const { connectedAccount } = useAccountStore();
   const { scheduleInfo, getAllUserPayments } = useSchedulerStore();
@@ -41,9 +43,15 @@ export default function useSchedule() {
     }
 
     const totalAmount = amount * occurrences;
+    const updatesCost = HISTORY_ITEM_STORAGE_COST * occurrences;
 
     // Use the active contract for creating new schedules
     const activeContract = getActiveContract(network);
+
+    const coins =
+      Mas.fromString('1') +
+      (scheduleInfo.isVesting ? totalAmount : 0n) +
+      updatesCost;
 
     await callSmartContract(
       'startScheduleSend',
@@ -56,7 +64,7 @@ export default function useSchedule() {
         pending: 'Creating new schedule...',
         error: 'Failed to create schedule',
       },
-      Mas.fromString('1') + (scheduleInfo.isVesting ? totalAmount : 0n),
+      coins,
     );
 
     getAllUserPayments(connectedAccount.address);
