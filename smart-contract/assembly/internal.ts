@@ -17,7 +17,6 @@ import {
   u64ToBytes,
 } from '@massalabs/as-types';
 
-const MAX_GAS_ASYNC_FT = 10_000_000;
 export const ASC_FEE = 1_000_000;
 
 // Token helpers
@@ -86,6 +85,9 @@ export function scheduleAllSend(schedule: Schedule): void {
       schedule.tolerance +
       1; // +1 because validity-end is exclusive
 
+    // spent gas increase with task index
+    const gas = 3_000_000 + taskIndex * 1_000_000;
+
     sendMessage(
       Context.callee(),
       'selfTrigger',
@@ -93,7 +95,7 @@ export function scheduleAllSend(schedule: Schedule): void {
       0,
       validityEndPeriod,
       31,
-      MAX_GAS_ASYNC_FT,
+      gas,
       ASC_FEE,
       // no need to transfer coins, as function is on the same contract
       0,
