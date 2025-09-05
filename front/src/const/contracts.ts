@@ -11,7 +11,7 @@ export const CONTRACT_VERSIONS = {
       active: false,
     },
     {
-      address: 'AS12e1VY2bMntw56oCRg7Qa8DkavePebUeDqW7DUmhqxMsGWHh29J',
+      address: 'AS12w7zCvcCusNwanSUiRr4z3MhWvVW6m9J92VY8s5tGoUwuv2Hk4',
       active: true,
     },
   ],
@@ -25,7 +25,7 @@ export const CONTRACT_VERSIONS = {
       active: false,
     },
     {
-      address: 'AS146gNUJHux5hb7crg6WHRMRjjgu7HjgaYZiLnesdQNr94vfE3U',
+      address: 'AS12JJZgpWpgv5E3jEtRABLdzQ3RjN1WQHbrSY6eHdLhoFr2KwdKn',
       active: true,
     },
   ],

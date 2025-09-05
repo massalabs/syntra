@@ -86,7 +86,7 @@ export function scheduleAllSend(schedule: Schedule): void {
       1; // +1 because validity-end is exclusive
 
     // spent gas increase with task index
-    const gas = 3_000_000 + taskIndex * 1_000_000;
+    const gas = 10_000_000 + taskIndex * 1_000_000;
 
     sendMessage(
       Context.callee(),

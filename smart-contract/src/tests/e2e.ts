@@ -134,7 +134,7 @@ export async function run(isMas: boolean) {
   const onData = async (events: t.OutputEvents) => {
     allEvents.push(...events);
 
-    // regex to match the event and extract the remaining occurrences (2 group)
+    // regex to match the event and extract the occurrences index
     const transferRegex = /Transfer:(\d+),(\d+),(\d+),(\d+),(\d+)/;
 
     events.forEach((e) => {
@@ -143,6 +143,7 @@ export async function run(isMas: boolean) {
         taskIndex = BigInt(match[2]);
       }
     });
+
     if (!taskIndex) {
       return;
     }
