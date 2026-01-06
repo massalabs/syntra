@@ -12,7 +12,12 @@ const HISTORY_ITEM_STORAGE_COST = 2_500_000n;
 
 export default function useSchedule() {
   const { connectedAccount } = useAccountStore();
-  const { scheduleInfo, getAllUserPayments } = useSchedulerStore();
+  const {
+    scheduleInfo,
+    getAllUserPayments,
+    setIsCreatingSchedule,
+    resetScheduleInfo,
+  } = useSchedulerStore();
   const { network } = useDappNetworkStore();
   const { callSmartContract } = useWriteSmartContract(connectedAccount!);
 
@@ -53,21 +58,31 @@ export default function useSchedule() {
       (scheduleInfo.isVesting ? totalAmount : 0n) +
       updatesCost;
 
-    await callSmartContract(
-      'startScheduleSend',
-      activeContract,
-      new Args()
-        .addSerializable(Schedule.fromScheduleInfo(scheduleInfo))
-        .serialize(),
-      {
-        success: 'Schedule successfully created',
-        pending: 'Creating new schedule...',
-        error: 'Failed to create schedule',
-      },
-      coins,
-    );
+    setIsCreatingSchedule(true);
 
-    getAllUserPayments(connectedAccount.address);
+    try {
+      await callSmartContract(
+        'startScheduleSend',
+        activeContract,
+        new Args()
+          .addSerializable(Schedule.fromScheduleInfo(scheduleInfo))
+          .serialize(),
+        {
+          success: 'Schedule successfully created',
+          pending: 'Creating new schedule...',
+          error: 'Failed to create schedule',
+        },
+        coins,
+      );
+
+      // Reset form on success
+      resetScheduleInfo();
+
+      // Refresh schedules list
+      getAllUserPayments(connectedAccount.address);
+    } finally {
+      setIsCreatingSchedule(false);
+    }
   }
 
   async function cancelSchedules(

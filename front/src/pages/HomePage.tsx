@@ -27,19 +27,38 @@ export default function HomePage() {
   };
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="main flex flex-col w-full h-screen">
+    <div className="flex flex-col items-center min-h-screen">
+      {/* Hero Section */}
+      <section className="main relative flex flex-col w-full min-h-screen">
         <NavBar />
+        
         {showIntro && <Intro onClose={() => setShowIntro(false)} />}
-        <div className="flex flex-col justify-center items-center gap-10 h-full">
+        
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col justify-center items-center gap-8 py-8 px-4">
           <ScheduleForm />
-          <ArrowButton onClick={scrollToList} />
+          
+          {/* Scroll Indicator */}
+          <div className="mt-4">
+            <ArrowButton onClick={scrollToList} />
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div ref={scheduleTableRef} className="h-screen bg-white w-full my-6 ">
+      {/* Schedules Section */}
+      <section 
+        ref={scheduleTableRef} 
+        className="min-h-screen w-full"
+      >
         <ScheduleTablesSection />
-      </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="w-full py-6 bg-gray-50 border-t border-gray-100">
+        <div className="text-center text-sm text-gray-400">
+          Powered by Massa Autonomous Smart Contracts
+        </div>
+      </footer>
     </div>
   );
 }

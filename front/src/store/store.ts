@@ -41,7 +41,7 @@ export async function initSchedules(
   connectedAccount: Provider,
   walletNetwork: NetworkName,
 ) {
-  const { getAllUserPayments, getAllUserReceive } =
+  const { getAllUserPayments, getAllUserReceive, setIsLoadingSchedules } =
     useSchedulerStore.getState();
   const { network: dappNetwork } = useDappNetworkStore.getState();
 
@@ -50,8 +50,15 @@ export async function initSchedules(
     return;
   }
 
-  await getAllUserPayments(connectedAccount.address);
-  await getAllUserReceive(connectedAccount.address);
+  setIsLoadingSchedules(true);
+  try {
+    await Promise.all([
+      getAllUserPayments(connectedAccount.address),
+      getAllUserReceive(connectedAccount.address),
+    ]);
+  } finally {
+    setIsLoadingSchedules(false);
+  }
 }
 
 async function initPollEvent(connectedAccount: Provider) {

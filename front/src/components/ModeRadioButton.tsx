@@ -1,7 +1,5 @@
-import React from 'react';
-
-import { Tooltip } from '@massalabs/react-ui-kit';
-import { FiInfo } from 'react-icons/fi';
+import React, { useState } from 'react';
+import { FiInfo, FiGift, FiClock } from 'react-icons/fi';
 
 interface ModeRadioButtonProps {
   isVesting: boolean;
@@ -11,6 +9,56 @@ interface ModeRadioButtonProps {
   disabled?: boolean;
 }
 
+// Custom wide tooltip component
+const WideTooltip: React.FC<{ content: string; children: React.ReactNode }> = ({ 
+  content, 
+  children 
+}) => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  return (
+    <div className="relative inline-flex">
+      <div
+        onMouseEnter={() => setIsVisible(true)}
+        onMouseLeave={() => setIsVisible(false)}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsVisible(!isVisible);
+        }}
+        className="cursor-help"
+      >
+        {children}
+      </div>
+      
+      {isVisible && (
+        <div 
+          className="
+            absolute z-50 
+            bottom-full left-1/2 -translate-x-1/2 mb-2
+            w-72 sm:w-80
+            p-3
+            bg-gray-900 text-white text-sm
+            rounded-lg shadow-xl
+            leading-relaxed
+            animate-fade-in
+          "
+        >
+          {/* Arrow */}
+          <div 
+            className="
+              absolute -bottom-1.5 left-1/2 -translate-x-1/2
+              w-3 h-3 bg-gray-900 
+              rotate-45
+            " 
+          />
+          <p className="relative z-10">{content}</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const ModeRadioButton: React.FC<ModeRadioButtonProps> = ({
   isVesting,
   handleModeChange,
@@ -18,23 +66,79 @@ const ModeRadioButton: React.FC<ModeRadioButtonProps> = ({
   modeDesc,
   disabled,
 }) => {
+  const isTips = mode === 'tips';
+  const Icon = isTips ? FiGift : FiClock;
+
   return (
-    <label className="flex items-center gap-2">
+    <label 
+      className={`
+        relative flex items-center gap-3 
+        px-4 py-3 rounded-xl
+        border-2 cursor-pointer
+        transition-all duration-200
+        ${disabled 
+          ? 'opacity-50 cursor-not-allowed' 
+          : 'hover:border-primary/50'
+        }
+        ${isVesting 
+          ? 'border-primary bg-primary/5 shadow-sm' 
+          : 'border-gray-200 bg-white hover:bg-gray-50'
+        }
+      `}
+    >
       <input
         disabled={disabled}
         type="radio"
         value={mode}
-        className="w-4 h-4 text-primary bg-gray-100 border-gray-300 
-            focus:ring-primary dark:focus:ring-primary 
-            dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 
-            dark:border-gray-600 disabled:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+        className="sr-only"
         checked={isVesting}
         onChange={handleModeChange}
       />
-      <p className="text-sm text-gray-700">{mode}</p>
-      <Tooltip customClass="py-2" body={modeDesc}>
-        <FiInfo className="mr-1" size={12} />
-      </Tooltip>
+      
+      {/* Custom Radio Indicator */}
+      <span 
+        className={`
+          w-5 h-5 rounded-full border-2 
+          flex items-center justify-center
+          transition-all duration-200
+          ${isVesting 
+            ? 'border-primary' 
+            : 'border-gray-300'
+          }
+        `}
+      >
+        {isVesting && (
+          <span className="w-2.5 h-2.5 rounded-full bg-primary" />
+        )}
+      </span>
+
+      {/* Icon */}
+      <Icon 
+        size={18} 
+        className={`transition-colors duration-200 ${isVesting ? 'text-primary' : 'text-gray-400'}`} 
+      />
+
+      {/* Label */}
+      <span 
+        className={`
+          text-sm font-medium capitalize
+          transition-colors duration-200
+          ${isVesting ? 'text-primary' : 'text-gray-600'}
+        `}
+      >
+        {mode}
+      </span>
+
+      {/* Info Tooltip - Custom wide version */}
+      <WideTooltip content={modeDesc}>
+        <FiInfo 
+          size={14} 
+          className={`
+            transition-colors duration-200 
+            ${isVesting ? 'text-primary/60 hover:text-primary' : 'text-gray-400 hover:text-gray-600'}
+          `}
+        />
+      </WideTooltip>
     </label>
   );
 };

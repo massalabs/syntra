@@ -1,7 +1,7 @@
 import useToken from '@/hooks/useToken';
 import { ScheduleInfo } from '@/store/scheduler';
-import { commonButton } from '@/styles/buttons';
-import { Button, formatAmount } from '@massalabs/react-ui-kit';
+import { formatAmount } from '@massalabs/react-ui-kit';
+import { FiUnlock } from 'react-icons/fi';
 
 export function AllowanceButton({
   scheduleInfo,
@@ -13,23 +13,41 @@ export function AllowanceButton({
   const { increaseAllowance } = useToken();
 
   if (disabled) {
-    return;
+    return null;
   }
 
   return (
-    <Button
-      variant="secondary"
+    <button
       onClick={() =>
         increaseAllowance(scheduleInfo.amount * scheduleInfo.occurrences)
       }
-      customClass={['border-primary text-primary ', ...commonButton].join(' ')}
+      className="
+        w-full py-3.5 px-6
+        flex items-center justify-center gap-2
+        bg-white
+        border-2 border-primary
+        text-primary font-medium
+        rounded-xl
+        transition-all duration-200 ease-out
+        hover:bg-primary/5 hover:shadow-md
+        active:scale-[0.98]
+        group
+      "
     >
-      {`Allow spending ${
-        formatAmount(
-          scheduleInfo.amount * scheduleInfo.occurrences,
-          scheduleInfo.asset.decimals,
-        ).preview
-      } ${scheduleInfo.asset.name}`}
-    </Button>
+      <FiUnlock 
+        size={18} 
+        className="transition-transform duration-200 group-hover:scale-110" 
+      />
+      <span>
+        Allow spending{' '}
+        <span className="font-semibold">
+          {formatAmount(
+            scheduleInfo.amount * scheduleInfo.occurrences,
+            scheduleInfo.asset.decimals,
+          ).preview}
+        </span>{' '}
+        {scheduleInfo.asset.name}
+      </span>
+    </button>
   );
 }

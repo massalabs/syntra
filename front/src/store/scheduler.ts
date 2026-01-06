@@ -28,13 +28,18 @@ interface SchedulerStoreState {
   scheduleInfo: ScheduleInfo;
   userPayments: ScheduleInstance[];
   userReceive: ScheduleInstance[];
+  isLoadingSchedules: boolean;
+  isCreatingSchedule: boolean;
   setScheduleInfo: (
     key: keyof ScheduleInfo,
     value: bigint | string | Asset | boolean,
   ) => void;
+  resetScheduleInfo: () => void;
 
   setUserPayments: (payments: ScheduleInstance[]) => void;
   setUserReceive: (payments: ScheduleInstance[]) => void;
+  setIsLoadingSchedules: (loading: boolean) => void;
+  setIsCreatingSchedule: (creating: boolean) => void;
   eventPollerStop: () => void;
   setEventPollerStop: (stop: () => void) => void;
 
@@ -68,6 +73,8 @@ export const useSchedulerStore = create<SchedulerStoreState>((set, get) => ({
   scheduleInfo: defaultScheduleInfo,
   userPayments: [],
   userReceive: [],
+  isLoadingSchedules: false,
+  isCreatingSchedule: false,
   eventPollerStop: () => {},
   eventPollerStopOld: setTimeout(() => {}, 0),
   lastEventSlotOld: undefined,
@@ -84,12 +91,24 @@ export const useSchedulerStore = create<SchedulerStoreState>((set, get) => ({
       scheduleInfo: { ...state.scheduleInfo, [key]: value },
     })),
 
+  resetScheduleInfo: () => {
+    set({ scheduleInfo: defaultScheduleInfo });
+  },
+
   setUserPayments: (payments: ScheduleInstance[]) => {
     set({ userPayments: payments });
   },
 
   setUserReceive: (payments: ScheduleInstance[]) => {
     set({ userReceive: payments });
+  },
+
+  setIsLoadingSchedules: (loading: boolean) => {
+    set({ isLoadingSchedules: loading });
+  },
+
+  setIsCreatingSchedule: (creating: boolean) => {
+    set({ isCreatingSchedule: creating });
   },
 
   setEventPollerStop: (stop: () => void) => {

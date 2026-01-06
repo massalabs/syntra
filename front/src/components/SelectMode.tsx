@@ -15,9 +15,9 @@ export function SelectMode({
   disabled?: boolean;
 }) {
   return (
-    <div className="flex justify-left items-center gap-4">
-      <InputLabel label="Mode:" />
-      <div className="flex items-center gap-10 mb-2 mx-4">
+    <div className="space-y-3">
+      <InputLabel label="Select Mode" />
+      <div className="flex items-center gap-4">
         <ModeRadioButton
           disabled={disabled}
           isVesting={!isVesting}
