@@ -19,16 +19,17 @@ const CheckBox: React.FC<CheckBoxProps> = ({
         type="checkbox"
         className="sr-only peer"
       />
-      <div 
+      <div
         className={`
           w-5 h-5 rounded-md
           border-2 
           flex items-center justify-center
           transition-all duration-200
-          ${isSelected 
-            ? 'bg-primary border-primary' 
-            : 'bg-white border-gray-300 group-hover:border-primary/50'
-          }
+          ${
+            isSelected
+              ? 'bg-primary border-primary'
+              : 'bg-white border-gray-300 group-hover:border-primary/50'
+    }
         `}
       >
         {isSelected && (

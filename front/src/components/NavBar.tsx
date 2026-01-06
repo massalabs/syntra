@@ -1,7 +1,6 @@
 import { ConnectButton } from './ConnectWalletPopup';
 import LogoSyntra from '../assets/logo-syntra.svg';
 import { useDappNetworkStore } from '@/store/network';
-import { Button } from '@massalabs/react-ui-kit';
 import { useState } from 'react';
 import { FiSettings } from 'react-icons/fi';
 
@@ -12,22 +11,24 @@ export function NavBar() {
   return (
     <nav className="flex justify-between items-center px-6 sm:px-10 py-4 sm:py-5 w-full">
       <div className="flex items-center gap-3">
-        <img 
-          src={LogoSyntra} 
-          alt="Syntra" 
+        <img
+          src={LogoSyntra}
+          alt="Syntra"
           className="w-32 sm:w-40 h-auto transition-transform duration-200 hover:scale-[1.02]"
           style={{
-            filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.15)) drop-shadow(0 0 1px rgba(0,0,0,0.1))'
+            filter:
+              'drop-shadow(0 1px 2px rgba(0,0,0,0.15)) drop-shadow(0 0 1px rgba(0,0,0,0.1))',
           }}
         />
-        <span 
+        <span
           className={`
             px-2.5 py-1 text-xs font-medium rounded-full
             transition-colors duration-200
-            ${network === 'mainnet' 
-              ? 'bg-green-100 text-green-700' 
-              : 'bg-amber-100 text-amber-700'
-            }
+            ${
+              network === 'mainnet'
+                ? 'bg-green-100 text-green-700'
+                : 'bg-amber-100 text-amber-700'
+    }
           `}
         >
           {network === 'mainnet' ? 'Mainnet' : 'Buildnet'}
@@ -60,9 +61,9 @@ export function SettingsButton({ onClick }: SettingsButtonProps) {
       onClick={onClick}
       aria-label="Settings"
     >
-      <FiSettings 
-        size={18} 
-        className="text-gray-600 group-hover:text-primary group-hover:rotate-90 transition-all duration-300" 
+      <FiSettings
+        size={18}
+        className="text-gray-600 group-hover:text-primary group-hover:rotate-90 transition-all duration-300"
       />
     </button>
   );

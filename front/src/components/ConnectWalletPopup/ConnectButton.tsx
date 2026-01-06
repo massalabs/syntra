@@ -40,9 +40,9 @@ export function ConnectButton() {
           </>
         ) : (
           <>
-            <FiLogIn 
-              size={18} 
-              className="text-primary transition-transform duration-200 group-hover:translate-x-0.5" 
+            <FiLogIn
+              size={18}
+              className="text-primary transition-transform duration-200 group-hover:translate-x-0.5"
             />
             <span className="font-medium text-primary">
               {Intl.t('connect-wallet.title')}

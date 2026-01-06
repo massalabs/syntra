@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import React, { useState } from 'react';
 import { truncateAddress } from '@/utils/address';
 import { formatAmount, toast } from '@massalabs/react-ui-kit';
@@ -48,17 +49,24 @@ const EmptyState: React.FC<{ message: string; description: string }> = ({
 }) => (
   <div className="flex flex-col items-center justify-center py-20 text-gray-400">
     <div className="w-20 h-20 mb-5 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center shadow-inner">
-      <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path 
-          strokeLinecap="round" 
-          strokeLinejoin="round" 
-          strokeWidth={1.5} 
-          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" 
+      <svg
+        className="w-10 h-10 text-gray-300"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+          d={`M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2`}
         />
       </svg>
     </div>
     <p className="text-lg font-medium text-gray-600">{message}</p>
-    <p className="text-sm mt-1 text-gray-400 max-w-xs text-center">{description}</p>
+    <p className="text-sm mt-1 text-gray-400 max-w-xs text-center">
+      {description}
+    </p>
   </div>
 );
 
@@ -77,11 +85,13 @@ const TableHeader: React.FC<{ showCheckbox: boolean }> = ({ showCheckbox }) => {
         <th className="font-medium px-4 py-4">To</th>
         <th className="font-medium px-4 py-4">Amount</th>
         <th className="font-medium hidden md:table-cell px-4 py-4">Interval</th>
-        <th className="font-medium hidden md:table-cell px-4 py-4">
-          Total
-        </th>
+        <th className="font-medium hidden md:table-cell px-4 py-4">Total</th>
         <th className="font-medium px-4 py-4">Left</th>
-        <th className={`font-medium hidden px-4 py-4 lg:table-cell ${!showCheckbox ? 'last:rounded-tr-xl' : ''}`}>
+        <th
+          className={`font-medium hidden px-4 py-4 lg:table-cell ${
+            !showCheckbox ? 'last:rounded-tr-xl' : ''
+          }`}
+        >
           History
         </th>
         {showCheckbox && (
@@ -119,7 +129,7 @@ const TableRow: React.FC<TableRowProps> = ({
   const isActive = Number(schedule.remaining) > 0;
 
   return (
-    <tr 
+    <tr
       className={`
         transition-colors duration-150 group
         ${isEven ? 'bg-gray-50/30' : 'bg-white'}
@@ -146,13 +156,14 @@ const TableRow: React.FC<TableRowProps> = ({
         />
       </td>
       <td className="text-center px-4 py-4 hidden lg:table-cell">
-        <span 
+        <span
           className={`
             inline-flex px-2.5 py-1 rounded-full text-xs font-medium
-            ${schedule.isVesting 
-              ? 'bg-purple-100 text-purple-700' 
-              : 'bg-blue-100 text-blue-700'
-            }
+            ${
+              schedule.isVesting
+                ? 'bg-purple-100 text-purple-700'
+                : 'bg-blue-100 text-blue-700'
+    }
           `}
         >
           {schedule.isVesting ? 'Vesting' : 'Tips'}
@@ -174,7 +185,7 @@ const TableRow: React.FC<TableRowProps> = ({
       </td>
       <td className="text-center px-4 py-4">
         <div className="flex items-center justify-center gap-1.5">
-          <span 
+          <span
             title={formattedAmount.full}
             className="font-semibold text-gray-800"
           >
@@ -201,14 +212,15 @@ const TableRow: React.FC<TableRowProps> = ({
       </td>
       <td className="text-center px-4 py-4">
         <div className="flex items-center justify-center gap-1.5">
-          <span 
+          <span
             className={`
               inline-flex items-center justify-center
               min-w-[2rem] px-2 py-1 rounded-full text-xs font-semibold
-              ${isActive 
-                ? 'bg-green-100 text-green-700' 
-                : 'bg-gray-100 text-gray-500'
-              }
+              ${
+                isActive
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-gray-100 text-gray-500'
+    }
             `}
           >
             {schedule.remaining.toString()}
@@ -233,7 +245,7 @@ const SelectedInfo: React.FC<{ count: number; onCancel: () => void }> = ({
   count,
   onCancel,
 }) => (
-  <div 
+  <div
     className="
       flex justify-between items-center mb-4 
       p-4 bg-primary/5 border border-primary/20 
@@ -304,7 +316,9 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({
   };
 
   // Count active schedules
-  const activeCount = schedules.filter(s => Number(s.schedule.remaining) > 0).length;
+  const activeCount = schedules.filter(
+    (s) => Number(s.schedule.remaining) > 0,
+  ).length;
   const completedCount = schedules.length - activeCount;
 
   return (
@@ -331,7 +345,8 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({
               </span>
             </div>
             <span className="text-gray-400">
-              {schedules.length} total schedule{schedules.length !== 1 ? 's' : ''}
+              {schedules.length} total schedule
+              {schedules.length !== 1 ? 's' : ''}
             </span>
           </div>
 
@@ -342,7 +357,9 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({
               <tbody className="text-sm divide-y divide-gray-100">
                 {schedules.map((schedule, index) => (
                   <TableRow
-                    key={`${schedule.contract}-${schedule.schedule.id.toString()}`}
+                    key={`${
+                      schedule.contract
+                    }-${schedule.schedule.id.toString()}`}
                     scheduleInstance={schedule}
                     isSelected={selected.some(
                       (item) =>

@@ -32,10 +32,11 @@ export function CreateScheduleButton({ disabled }: { disabled: boolean }) {
         shadow-md shadow-primary/20
         transition-all duration-200 ease-out
         group
-        ${isDisabled
-          ? 'opacity-70 cursor-not-allowed'
-          : 'hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5'
-        }
+        ${
+          isDisabled
+            ? 'opacity-70 cursor-not-allowed'
+            : 'hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5'
+    }
         ${isDisabled ? '' : 'active:translate-y-0 active:shadow-md'}
       `}
     >

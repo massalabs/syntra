@@ -18,9 +18,9 @@ export function ArrowButton({ onClick }: { onClick: () => void }) {
       onClick={onClick}
       aria-label="Scroll to schedules"
     >
-      <FiChevronDown 
-        size={24} 
-        className="transition-transform duration-300 group-hover:translate-y-0.5" 
+      <FiChevronDown
+        size={24}
+        className="transition-transform duration-300 group-hover:translate-y-0.5"
       />
     </button>
   );

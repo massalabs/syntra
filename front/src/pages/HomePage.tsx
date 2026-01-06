@@ -31,13 +31,13 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="main relative flex flex-col w-full min-h-screen">
         <NavBar />
-        
+
         {showIntro && <Intro onClose={() => setShowIntro(false)} />}
-        
+
         {/* Main Content */}
         <div className="flex-1 flex flex-col justify-center items-center gap-8 py-8 px-4">
           <ScheduleForm />
-          
+
           {/* Scroll Indicator */}
           <div className="mt-4">
             <ArrowButton onClick={scrollToList} />
@@ -46,10 +46,7 @@ export default function HomePage() {
       </section>
 
       {/* Schedules Section */}
-      <section 
-        ref={scheduleTableRef} 
-        className="min-h-screen w-full"
-      >
+      <section ref={scheduleTableRef} className="min-h-screen w-full">
         <ScheduleTablesSection />
       </section>
 

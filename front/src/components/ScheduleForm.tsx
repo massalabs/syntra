@@ -59,7 +59,8 @@ export function ScheduleForm() {
   ].some(Boolean);
 
   const isRightNetwork = dappNetwork === walletNetwork?.name;
-  const formDisabled = !connectedAccount || !isRightNetwork || isCreatingSchedule;
+  const formDisabled =
+    !connectedAccount || !isRightNetwork || isCreatingSchedule;
 
   const handleModeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const isChecked = e.target.checked;
@@ -96,7 +97,7 @@ export function ScheduleForm() {
     }
   }
   return (
-    <section 
+    <section
       className="
         max-w-2xl w-full mx-4 sm:mx-auto 
         rounded-2xl shadow-xl 

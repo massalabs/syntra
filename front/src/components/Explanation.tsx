@@ -7,7 +7,7 @@ type IntroProps = {
 
 export const Intro = ({ onClose }: IntroProps) => {
   return (
-    <div 
+    <div
       className="
         relative mx-4 sm:mx-auto max-w-2xl mt-4
         bg-white/90 backdrop-blur-md 
@@ -19,7 +19,7 @@ export const Intro = ({ onClose }: IntroProps) => {
     >
       {/* Accent bar */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary/80 to-primary" />
-      
+
       <div className="p-6">
         {/* Close button */}
         <button
@@ -41,22 +41,22 @@ export const Intro = ({ onClose }: IntroProps) => {
             Welcome to Syntra
           </h2>
           <p className="text-gray-600 leading-relaxed mb-4">
-            A cutting-edge dApp powered by Massa's autonomous smart contracts, 
+            A cutting-edge dApp powered by Massa's autonomous smart contracts,
             designed to simplify token scheduling like never before.
           </p>
         </div>
 
         {/* Features */}
         <div className="grid grid-cols-3 gap-4 mt-5 pt-5 border-t border-gray-100">
-          <FeatureItem 
+          <FeatureItem
             icon={<FiZap className="text-primary" size={18} />}
             label="Automated"
           />
-          <FeatureItem 
+          <FeatureItem
             icon={<FiClock className="text-primary" size={18} />}
             label="Scheduled"
           />
-          <FeatureItem 
+          <FeatureItem
             icon={<FiShield className="text-primary" size={18} />}
             label="Secure"
           />
@@ -66,12 +66,16 @@ export const Intro = ({ onClose }: IntroProps) => {
   );
 };
 
-function FeatureItem({ icon, label }: { icon: React.ReactNode; label: string }) {
+function FeatureItem({
+  icon,
+  label,
+}: {
+  icon: React.ReactNode;
+  label: string;
+}) {
   return (
     <div className="flex flex-col items-center gap-2 text-gray-600">
-      <div className="p-2 bg-primary/10 rounded-lg">
-        {icon}
-      </div>
+      <div className="p-2 bg-primary/10 rounded-lg">{icon}</div>
       <span className="text-xs font-medium">{label}</span>
     </div>
   );

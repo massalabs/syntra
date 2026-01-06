@@ -10,9 +10,9 @@ interface ModeRadioButtonProps {
 }
 
 // Custom wide tooltip component
-const WideTooltip: React.FC<{ content: string; children: React.ReactNode }> = ({ 
-  content, 
-  children 
+const WideTooltip: React.FC<{ content: string; children: React.ReactNode }> = ({
+  content,
+  children,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -30,9 +30,9 @@ const WideTooltip: React.FC<{ content: string; children: React.ReactNode }> = ({
       >
         {children}
       </div>
-      
+
       {isVisible && (
-        <div 
+        <div
           className="
             absolute z-50 
             bottom-full left-1/2 -translate-x-1/2 mb-2
@@ -45,12 +45,12 @@ const WideTooltip: React.FC<{ content: string; children: React.ReactNode }> = ({
           "
         >
           {/* Arrow */}
-          <div 
+          <div
             className="
               absolute -bottom-1.5 left-1/2 -translate-x-1/2
               w-3 h-3 bg-gray-900 
               rotate-45
-            " 
+            "
           />
           <p className="relative z-10">{content}</p>
         </div>
@@ -70,20 +70,20 @@ const ModeRadioButton: React.FC<ModeRadioButtonProps> = ({
   const Icon = isTips ? FiGift : FiClock;
 
   return (
-    <label 
+    <label
       className={`
         relative flex items-center gap-3 
         px-4 py-3 rounded-xl
         border-2 cursor-pointer
         transition-all duration-200
-        ${disabled 
-          ? 'opacity-50 cursor-not-allowed' 
-          : 'hover:border-primary/50'
-        }
-        ${isVesting 
-          ? 'border-primary bg-primary/5 shadow-sm' 
-          : 'border-gray-200 bg-white hover:bg-gray-50'
-        }
+        ${
+          disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-primary/50'
+    }
+        ${
+          isVesting
+            ? 'border-primary bg-primary/5 shadow-sm'
+            : 'border-gray-200 bg-white hover:bg-gray-50'
+    }
       `}
     >
       <input
@@ -94,32 +94,29 @@ const ModeRadioButton: React.FC<ModeRadioButtonProps> = ({
         checked={isVesting}
         onChange={handleModeChange}
       />
-      
+
       {/* Custom Radio Indicator */}
-      <span 
+      <span
         className={`
           w-5 h-5 rounded-full border-2 
           flex items-center justify-center
           transition-all duration-200
-          ${isVesting 
-            ? 'border-primary' 
-            : 'border-gray-300'
-          }
+          ${isVesting ? 'border-primary' : 'border-gray-300'}
         `}
       >
-        {isVesting && (
-          <span className="w-2.5 h-2.5 rounded-full bg-primary" />
-        )}
+        {isVesting && <span className="w-2.5 h-2.5 rounded-full bg-primary" />}
       </span>
 
       {/* Icon */}
-      <Icon 
-        size={18} 
-        className={`transition-colors duration-200 ${isVesting ? 'text-primary' : 'text-gray-400'}`} 
+      <Icon
+        size={18}
+        className={`transition-colors duration-200 ${
+          isVesting ? 'text-primary' : 'text-gray-400'
+        }`}
       />
 
       {/* Label */}
-      <span 
+      <span
         className={`
           text-sm font-medium capitalize
           transition-colors duration-200
@@ -131,11 +128,15 @@ const ModeRadioButton: React.FC<ModeRadioButtonProps> = ({
 
       {/* Info Tooltip - Custom wide version */}
       <WideTooltip content={modeDesc}>
-        <FiInfo 
-          size={14} 
+        <FiInfo
+          size={14}
           className={`
             transition-colors duration-200 
-            ${isVesting ? 'text-primary/60 hover:text-primary' : 'text-gray-400 hover:text-gray-600'}
+            ${
+              isVesting
+                ? 'text-primary/60 hover:text-primary'
+                : 'text-gray-400 hover:text-gray-600'
+    }
           `}
         />
       </WideTooltip>

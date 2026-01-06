@@ -34,17 +34,19 @@ export function AllowanceButton({
         group
       "
     >
-      <FiUnlock 
-        size={18} 
-        className="transition-transform duration-200 group-hover:scale-110" 
+      <FiUnlock
+        size={18}
+        className="transition-transform duration-200 group-hover:scale-110"
       />
       <span>
         Allow spending{' '}
         <span className="font-semibold">
-          {formatAmount(
-            scheduleInfo.amount * scheduleInfo.occurrences,
-            scheduleInfo.asset.decimals,
-          ).preview}
+          {
+            formatAmount(
+              scheduleInfo.amount * scheduleInfo.occurrences,
+              scheduleInfo.asset.decimals,
+            ).preview
+          }
         </span>{' '}
         {scheduleInfo.asset.name}
       </span>
