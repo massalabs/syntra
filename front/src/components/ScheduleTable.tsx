@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { truncateAddress } from '@/utils/address';
-import { formatAmount, toast } from '@massalabs/react-ui-kit';
+import { formatAmount, toast, useAccountStore } from '@massalabs/react-ui-kit';
 import CheckBox from './CheckBox';
 import useSchedule from '@/hooks/useSchedule';
 import { MasToken } from '../const/assets';
@@ -9,6 +9,7 @@ import ScheduleHistory from '@/components/ScheduleHistory';
 import { getRecurrenceFromPeriods } from './Recurrence';
 import { useTokenStore } from '@/store/token';
 import { ScheduleInstance } from '@/store/scheduler';
+import { computeHistoryItems, countPendingTasks } from '@/utils/schedule';
 
 interface ScheduleTableProps {
   schedules: ScheduleInstance[];
@@ -157,14 +158,11 @@ const TableRow: React.FC<TableRowProps> = ({
       </td>
       <td className="text-center px-4 py-4 hidden lg:table-cell">
         <span
-          className={`
-            inline-flex px-2.5 py-1 rounded-full text-xs font-medium
-            ${
-              schedule.isVesting
-                ? 'bg-purple-100 text-purple-700'
-                : 'bg-blue-100 text-blue-700'
-    }
-          `}
+          className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${
+            schedule.isVesting
+              ? 'bg-purple-100 text-purple-700'
+              : 'bg-blue-100 text-blue-700'
+          }`}
         >
           {schedule.isVesting ? 'Vesting' : 'Tips'}
         </span>
@@ -213,21 +211,14 @@ const TableRow: React.FC<TableRowProps> = ({
       <td className="text-center px-4 py-4">
         <div className="flex items-center justify-center gap-1.5">
           <span
-            className={`
-              inline-flex items-center justify-center
-              min-w-[2rem] px-2 py-1 rounded-full text-xs font-semibold
-              ${
-                isActive
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-gray-100 text-gray-500'
-    }
-            `}
+            className={`inline-flex items-center justify-center min-w-[2rem] px-2 py-1 rounded-full text-xs font-semibold ${
+              isActive
+                ? 'bg-green-100 text-green-700'
+                : 'bg-gray-100 text-gray-500'
+            }`}
           >
             {schedule.remaining.toString()}
           </span>
-          {isActive && (
-            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-          )}
         </div>
       </td>
       <td className="text-center hidden lg:table-cell px-4 py-4">
@@ -284,6 +275,8 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({
     { contractAddress: string; id: bigint }[]
   >([]);
   const { cancelSchedules } = useSchedule();
+  const { connectedAccount } = useAccountStore();
+  const [currentPeriod, setCurrentPeriod] = useState<bigint | null>(null);
 
   const handleCheckbox = (
     scheduleInstance: ScheduleInstance,
@@ -315,11 +308,37 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({
     }
   };
 
+  // Fetch current period for calculating ready items
+  useEffect(() => {
+    if (!connectedAccount) return;
+
+    const fetchCurrentPeriod = async () => {
+      try {
+        const nodeInfos = await connectedAccount.getNodeStatus();
+        setCurrentPeriod(BigInt(nodeInfos.lastSlot.period));
+      } catch (error) {
+        console.error('Failed to fetch current period:', error);
+      }
+    };
+
+    fetchCurrentPeriod();
+  }, [connectedAccount]);
+
   // Count active schedules
   const activeCount = schedules.filter(
     (s) => Number(s.schedule.remaining) > 0,
   ).length;
   const completedCount = schedules.length - activeCount;
+
+  // Calculate occurrences that failed and can be resent manually
+  const manualResendCount = useMemo(() => {
+    if (!currentPeriod) return 0;
+
+    return schedules.reduce((acc, { schedule }) => {
+      const items = computeHistoryItems(schedule, currentPeriod);
+      return acc + countPendingTasks(items);
+    }, 0);
+  }, [schedules, currentPeriod]);
 
   return (
     <div className="p-6 sm:p-10 max-w-7xl mx-auto">
@@ -344,10 +363,18 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({
                 {completedCount} completed
               </span>
             </div>
-            <span className="text-gray-400">
-              {schedules.length} total schedule
-              {schedules.length !== 1 ? 's' : ''}
-            </span>
+            <div className="flex flex-col items-end gap-0.5 text-right">
+              <span className="text-gray-400">
+                {schedules.length} total schedule
+                {schedules.length !== 1 ? 's' : ''}
+              </span>
+              {manualResendCount > 0 && (
+                <span className="text-xs text-amber-600 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                  {manualResendCount} occurrences to resend manually
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Table */}
