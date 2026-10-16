@@ -59,8 +59,9 @@ const ScheduleHistory: React.FC<ScheduleHistoryProps> = ({
     if (!connectedAccount) return;
 
     const fetchHistoryItems = async () => {
-      const nodeInfos = await connectedAccount.getNodeStatus();
-      const currentPeriod = BigInt(nodeInfos.lastSlot.period);
+      const { lastSlot } = await connectedAccount.getNodeStatus();
+      if (!lastSlot) return;
+      const currentPeriod = BigInt(lastSlot.period);
       const newItems = computeHistoryItems(schedule, currentPeriod);
       setItems(newItems);
     };

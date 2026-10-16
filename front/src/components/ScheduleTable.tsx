@@ -314,8 +314,8 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({
 
     const fetchCurrentPeriod = async () => {
       try {
-        const nodeInfos = await connectedAccount.getNodeStatus();
-        setCurrentPeriod(BigInt(nodeInfos.lastSlot.period));
+        const { lastSlot } = await connectedAccount.getNodeStatus();
+        if (lastSlot) setCurrentPeriod(BigInt(lastSlot.period));
       } catch (error) {
         console.error('Failed to fetch current period:', error);
       }

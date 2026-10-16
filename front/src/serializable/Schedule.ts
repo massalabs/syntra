@@ -1,11 +1,7 @@
 import { ScheduleInfo } from '@/store/scheduler';
-import {
-  Args,
-  ISerializable,
-  IDeserializedResult,
-} from '@massalabs/massa-web3';
+import { Args, Serializable, DeserializedResult } from '@massalabs/massa-web3';
 
-export class Schedule implements ISerializable<Schedule> {
+export class Schedule implements Serializable<Schedule> {
   public id: bigint = 0n;
   public operationId = '';
   public history: Transfer[] = [];
@@ -54,7 +50,7 @@ export class Schedule implements ISerializable<Schedule> {
     return new Uint8Array(args.serialize());
   }
 
-  deserialize(data: Uint8Array, offset: number): IDeserializedResult<Schedule> {
+  deserialize(data: Uint8Array, offset: number): DeserializedResult<Schedule> {
     const args = new Args(data, offset);
 
     this.id = args.nextU64();
@@ -87,7 +83,7 @@ export class Schedule implements ISerializable<Schedule> {
   }
 }
 
-export class Transfer implements ISerializable<Transfer> {
+export class Transfer implements Serializable<Transfer> {
   constructor(
     public period: bigint = 0n,
     public thread: number = 0,
@@ -102,7 +98,7 @@ export class Transfer implements ISerializable<Transfer> {
     return new Uint8Array(args.serialize());
   }
 
-  deserialize(data: Uint8Array, offset: number): IDeserializedResult<Transfer> {
+  deserialize(data: Uint8Array, offset: number): DeserializedResult<Transfer> {
     const args = new Args(data, offset);
 
     this.period = args.nextU64();
